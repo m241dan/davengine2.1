@@ -7,8 +7,8 @@ O_FILES = socket.o io.o strings.o utils.o interpret.o help.o  \
 	  list.o stack.o
 
 all: $(O_FILES)
-	rm -f SocketMud
-	$(CC) -o SocketMud $(O_FILES) $(L_FLAGS)
+	rm -f DavEngine
+	$(CC) -o DavEngine $(O_FILES) $(L_FLAGS)
 
 .c.o: all
 	@echo [`date +%T`] Compiling $< ...
@@ -17,5 +17,5 @@ all: $(O_FILES)
 clean:
 	@echo Cleaning code $< ...
 	@rm -f *.o
-	@rm -f SocketMud
+	@rm -f DavEngine
 	@rm -f *.*~
