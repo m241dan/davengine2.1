@@ -47,7 +47,7 @@ const struct typCmd tabCmd [] =
   { "compress",      cmd_compress,   LEVEL_GUEST  },
   { "copyover",      cmd_copyover,   LEVEL_GOD    },
   { "help",          cmd_help,       LEVEL_GUEST  },
-  { "linkdead",      cmd_linkdead,   LEVEL_ADMIN  },
+  { "linkdead",      cmd_linkdead,   LEVEL_ADMIN_OLD  },
   { "say",           cmd_say,        LEVEL_GUEST  },
   { "save",          cmd_save,       LEVEL_GUEST  },
   { "shutdown",      cmd_shutdown,   LEVEL_GOD    },

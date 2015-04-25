@@ -1,6 +1,5 @@
 /* Davengine Lua C API utilities written by Davenge */
 
-#include <stdlib.h>
 #include "mud.h"
 
 /* creator */

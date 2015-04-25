@@ -8,6 +8,8 @@
 #include <zlib.h>
 #include <pthread.h>
 #include <arpa/telnet.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "list.h"
 #include "stack.h"
@@ -58,7 +60,7 @@
 /* player levels */
 #define LEVEL_GUEST            1  /* Dead players and actual guests  */
 #define LEVEL_PLAYER           2  /* Almost everyone is this level   */
-#define LEVEL_ADMIN            3  /* Any admin without shell access  */
+#define LEVEL_ADMIN_OLD            3  /* Any admin without shell access  */
 #define LEVEL_GOD              4  /* Any admin with shell access     */
 
 /* Communication Ranges */
@@ -99,6 +101,16 @@ typedef  short int         sh_int;
     break;                            \
   }                                   \
 }
+#define FREE(point)                      \
+do                                          \
+{                                           \
+   if( (point) )                            \
+   {                                        \
+      free( (void*) (point) );              \
+      (point) = NULL;                       \
+   }                                        \
+} while(0)
+
 
 /***********************
  * End of Macros       *
@@ -114,10 +126,12 @@ typedef struct  dMobile       D_MOBILE;
 typedef struct  help_data     HELP_DATA;
 typedef struct  lookup_data   LOOKUP_DATA;
 typedef struct  event_data    EVENT_DATA;
+typedef struct  game_account  ACCOUNT_DATA;
 
 /* the actual structures */
 struct dSocket
 {
+   ACCOUNT_DATA *account;
   D_MOBILE      * player;
   LLIST          * events;
   char          * hostname;
@@ -173,6 +187,7 @@ typedef struct buffer_type
 /* here we include external structure headers */
 #include "event.h"
 #include "lua_utils.h"
+#include "account.h"
 
 /******************************
  * End of new structures      *
