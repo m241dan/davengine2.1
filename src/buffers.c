@@ -14,7 +14,7 @@ D_BUFFER *new_buffer( int width )
    buf          = malloc( size );
    buf->width   = width;
    buf->favor   = BOT_FAVOR;
-   buf->lines   = new_list();
+   buf->lines   = AllocList()
    return buf;
 }
 

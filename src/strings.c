@@ -45,6 +45,12 @@ char *new_string( const char *fmt, ... )
    return ptr;
 }
 
+char *str_alloc( size_t size )
+{
+   char *ptr = calloc( sizeof( char ), size );
+   ptr[0] = '\0';
+   return ptr;
+}
 
 /*
  * Checks if aStr is a prefix of bStr.
