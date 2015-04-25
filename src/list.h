@@ -25,7 +25,7 @@ typedef struct List
 
 typedef struct Iterator
 {
-  LIST  *_pList;
+  LLIST  *_pList;
   CELL  *_pCell;
 } ITERATOR;
 

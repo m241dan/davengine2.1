@@ -8,13 +8,13 @@
 #include "list.h"
 
 /* local procedures */
-void  FreeCell        ( CELL *pCell, LIST *pList );
+void  FreeCell        ( CELL *pCell, LLIST *pList );
 CELL *AllocCell       ( void );
 void  InvalidateCell  ( CELL *pCell );
 
-LIST *AllocList()
+LLIST *AllocList()
 {
-  LIST *pList;
+  LLIST *pList;
 
   pList = malloc(sizeof(*pList));
   pList->_pFirstCell = NULL;
@@ -26,7 +26,7 @@ LIST *AllocList()
   return pList;
 }
 
-void AttachIterator(ITERATOR *pIter, LIST *pList)
+void AttachIterator(ITERATOR *pIter, LLIST *pList)
 {
   pIter->_pList = pList;
 
@@ -52,7 +52,7 @@ CELL *AllocCell()
   return pCell;
 }
 
-void AttachToList(void *pContent, LIST *pList)
+void AttachToList(void *pContent, LLIST *pList)
 {
   CELL *pCell;
   int found = 0;
@@ -87,7 +87,7 @@ void AttachToList(void *pContent, LIST *pList)
   pList->_size++;
 }
 
-void DetachFromList(void *pContent, LIST *pList)
+void DetachFromList(void *pContent, LLIST *pList)
 {
   CELL *pCell;
 
@@ -107,7 +107,7 @@ void DetachFromList(void *pContent, LIST *pList)
 
 void DetachIterator(ITERATOR *pIter)
 {
-  LIST *pList = pIter->_pList;
+  LLIST *pList = pIter->_pList;
 
   if (pList != NULL)
   {
@@ -132,7 +132,7 @@ void DetachIterator(ITERATOR *pIter)
   }
 }
 
-void FreeList(LIST *pList)
+void FreeList(LLIST *pList)
 {
   CELL *pCell, *pNextCell;
 
@@ -153,7 +153,7 @@ void FreeList(LIST *pList)
   free(pList);
 }
 
-void FreeCell(CELL *pCell, LIST *pList)
+void FreeCell(CELL *pCell, LLIST *pList)
 {
   if (pList->_pFirstCell == pCell)
     pList->_pFirstCell = pCell->_pNextCell;
@@ -194,7 +194,7 @@ void *NextInList(ITERATOR *pIter)
   return pContent;
 }
 
-int SizeOfList(LIST *pList)
+int SizeOfList(LLIST *pList)
 {
   return pList->_size;
 }
