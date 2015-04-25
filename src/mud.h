@@ -188,6 +188,7 @@ typedef struct buffer_type
 #include "event.h"
 #include "lua_utils.h"
 #include "account.h"
+#include "lua_account.h"
 
 /******************************
  * End of new structures      *

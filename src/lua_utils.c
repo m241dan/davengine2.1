@@ -54,3 +54,27 @@ void load_lua_database_config_scripts( void )
 
 */
 
+void lua_pushaccount( lua_State *L, ACCOUNT_DATA *account )
+{
+   ACCOUNT_DATA **box;
+
+   if( !account )
+   {
+      bug( "%s: attempting to push NULL account; pushed a nil instead.", __FUNCTION__ );
+      lua_pushnil( L );
+      return;
+   }
+
+   box = (ACCOUNT_DATA **)lua_newuserdata( L, sizeof( ACCOUNT_DATA * ) );
+   luaL_getmetatable( L, "Account.meta" );
+   if( lua_isnil( L, -1 ) )
+   {
+      bug( "%s: Account.meta is missing.", __FUNCTION__ );
+      lua_pop( L, 2 );
+      lua_pushnil( L );
+      return;
+   }
+   lua_setmetatable( L, -2 );
+   *box = account;
+   return;
+}
