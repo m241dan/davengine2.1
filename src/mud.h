@@ -258,6 +258,8 @@ int     fread_number          ( FILE *fp );                 /* just an integer *
 /* 
  * strings.c
  */
+#define STRING_PADDING 101
+char   *new_string	      ( const char *fmt, ... );
 char   *one_arg               ( char *fStr, char *bStr );
 char   *strdup                ( const char *s );
 int     strcasecmp            ( const char *s1, const char *s2 );

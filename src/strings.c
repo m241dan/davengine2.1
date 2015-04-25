@@ -11,6 +11,41 @@
 /* include main header file */
 #include "mud.h"
 
+char *new_string( const char *fmt, ... )
+{
+   char *ptr;
+   va_list va;
+   size_t size;
+   int length;
+
+   if( !fmt || fmt[0] == '\0' )
+   {
+      ptr = malloc( sizeof( char ) * 4 );
+      ptr[0] = 'n';
+      ptr[1] = 'i';
+      ptr[2] = 'l';
+      ptr[3] = '\0';
+      return ptr;
+   }
+
+   ptr = malloc( sizeof( char ) );
+   va_start( va, fmt );
+   length = vsnprintf( ptr, 2, fmt, va );
+   va_end( va );
+   free( ptr );
+
+   /* plus 1 for NULL terminator */
+   size = length + STRING_PADDING;
+
+   ptr = malloc( sizeof( char ) * ( length + 1 ) );
+   va_start( va, fmt );
+   length = vsnprintf( ptr, size , fmt, va );
+   va_end( va );
+
+   return ptr;
+}
+
+
 /*
  * Checks if aStr is a prefix of bStr.
  */
