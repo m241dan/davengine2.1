@@ -45,6 +45,7 @@ void log_string(const char *txt, ...)
   }
 
   fprintf(fp, "%s: %s\n", strtime, buf);
+  printf( "%s: %s\r\n", __FUNCTION__, buf );
   fclose(fp);
 
   communicate(NULL, buf, COMM_LOG);
@@ -75,6 +76,7 @@ void bug(const char *txt, ...)
   }
 
   fprintf(fp, "%s: %s\n", strtime, buf);
+  printf( "%s: %s\r\n", __FUNCTION__, buf );
   fclose(fp);
 
   communicate(NULL, buf, COMM_LOG);

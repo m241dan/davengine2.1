@@ -229,6 +229,9 @@ char  *crypt                  ( const char *key, const char *salt );
 /*
  * socket.c
  */
+#define SERVER_SCRIPT "../scripts/config/server.lua"
+extern int	 MUD_PORT;
+extern char	*MUD_NAME;
 int   init_socket             ( void );
 bool  new_socket              ( int sock );
 void  close_socket            ( D_S *dsock, bool reconnect );

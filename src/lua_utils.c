@@ -12,11 +12,11 @@ void init_lua_handle( void )
       bug( "Could not initialize the Lua handle." );
       exit(1);
    }
-   log_string( "Loading Lua Libs" );
+   log_string( "Loading Default Lua Libs" );
    luaL_openlibs( lua_handle );
 }
 
-void load_lua_config_scripts( void )
+void load_lua_server_config_scripts( void )
 {
    int ret, top = lua_gettop( lua_handle );
 
@@ -28,21 +28,28 @@ void load_lua_config_scripts( void )
    /* server configs */
    lua_getglobal( lua_handle, "mudport" );
    MUD_PORT = lua_tonumber( lua_handle, -1 ) ;
-   lua_getglobal( lua_handle, "tick" );
-   PULSES_PER_SECOND = lua_tonumber( lua_handle, -1 );
    lua_getglobal( lua_handle, "mud_name" );
    MUD_NAME = new_string( "%s", lua_tostring( lua_handle, -1 ) );
+}
 
-   /* database configs */
+
+/*
+void load_lua_database_config_scripts( void )
+{
+   int ret, top = lua_gettop( lua_handle );
+
+   if( luaL_loadfile( lua_handle, 
    lua_getglobal( lua_handle, "db_name" );
    DB_NAME =  new_string( "%s", lua_tostring( lua_handle, -1 ) );
    lua_getglobal( lua_handle, "db_addr" );
    DB_ADDR = new_string( "%s", lua_tostring( lua_handle, -1 ) );
    lua_getglobal( lua_handle, "db_login" );
-   assign( DB_LOGIN, new_string( "%s", lua_tostring( lua_handle, -1 ) ) );
+   DB_LOGIN = new_string( "%s", lua_tostring( lua_handle, -1 ) );
    lua_getglobal( lua_handle, "db_pass" );
-   assign( DB_PASSWORD, new_string( "%s", lua_tostring( lua_handle, -1 ) ) );
+   DB_PASSWORD = new_string( "%s", lua_tostring( lua_handle, -1 ) );
 
    lua_settop( lua_handle, top );
 }
+
+*/
 
