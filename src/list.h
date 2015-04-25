@@ -21,7 +21,7 @@ typedef struct List
   int    _iterators;
   int    _size;
   int    _valid;
-} LIST;
+} LLIST;
 
 typedef struct Iterator
 {
@@ -29,13 +29,13 @@ typedef struct Iterator
   CELL  *_pCell;
 } ITERATOR;
 
-LIST *AllocList          ( void );
-void  AttachIterator     ( ITERATOR *pIter, LIST *pList);
+LLIST *AllocList         ( void );
+void  AttachIterator     ( ITERATOR *pIter, LLIST *pList);
 void *NextInList         ( ITERATOR *pIter );
-void  AttachToList       ( void *pContent, LIST *pList );
-void  DetachFromList     ( void *pContent, LIST *pList );
+void  AttachToList       ( void *pContent, LLIST *pList );
+void  DetachFromList     ( void *pContent, LLIST *pList );
 void  DetachIterator     ( ITERATOR *pIter );
-void  FreeList           ( LIST *pList );
-int   SizeOfList         ( LIST *pList );
+void  FreeList           ( LLIST *pList );
+int   SizeOfList         ( LLIST *pList );
 
 #endif

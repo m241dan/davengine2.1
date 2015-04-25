@@ -4,7 +4,7 @@ L_FLAGS = -lz -lpthread -lcrypt
 
 O_FILES = socket.o io.o strings.o utils.o interpret.o help.o  \
 	  action_safe.o mccp.o save.o event.o event-handler.o \
-	  list.o stack.o
+	  list.o stack.o buffers.o
 
 all: $(O_FILES)
 	rm -f DavEngine

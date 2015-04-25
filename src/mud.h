@@ -11,6 +11,11 @@
 
 #include "list.h"
 #include "stack.h"
+#include "buffers.h"
+#include "../lua-5.3.0/src/lua.h"
+#include "../lua-5.3.0/src/lualib.h"
+#include "../lua-5.3.0/src/lauxlib.h"
+
 
 /************************
  * Standard definitions *
