@@ -7,9 +7,9 @@
 /* include main header file */
 #include "mud.h"
 
-LIST  *eventqueue[MAX_EVENT_HASH];
+LLIST  *eventqueue[MAX_EVENT_HASH];
 STACK *event_free = NULL;
-LIST  *global_events = NULL;
+LLIST  *global_events = NULL;
 int    current_bucket = 0;
 
 

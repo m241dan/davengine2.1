@@ -276,6 +276,9 @@ void    __buffer_strcat       ( BUFFER *buffer, const char *text );
 void    buffer_free           ( BUFFER *buffer );
 void    buffer_clear          ( BUFFER *buffer );
 int     bprintf               ( BUFFER *buffer, char *fmt, ... );
+int     find_real_length      ( const char *str, int goal );
+char   *copy_string_fl	      ( const char *orig, int length );
+char   *create_pattern	      ( const char *pattern, int width );
 
 /*
  * help.c

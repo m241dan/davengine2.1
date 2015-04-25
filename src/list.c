@@ -114,10 +114,7 @@ void AttachToEnd( void *pContent, LLIST *pList )
    }
 
    pCell = AllocCell();
-   if( is_reachable( pList ) && is_reached( pList ) )
-      assign( pCell->_pContent, pContent );
-   else
-      pCell->_pContent = pContent;
+   pCell->_pContent = pContent;
    pCell->_pPrevCell = pList->_pLastCell;
 
    if( pList->_pLastCell != NULL )
@@ -154,12 +151,7 @@ void InsertBefore( void *pContent, LLIST *pList, void *bContent )
       return;
 
    pCell = AllocCell();
-   if( is_reachable( pList ) && is_reached( pList ) )
-   {
-      assign( pCell->_pContent, pContent );
-   }
-   else
-      pCell->_pContent = pContent;
+   pCell->_pContent = pContent;
    pCell->_pNextCell = bCell;
    if( bCell->_pPrevCell )
    {
@@ -197,12 +189,7 @@ void InsertAfter( void *pContent, LLIST *pList, void *aContent )
       return;
 
    pCell = AllocCell();
-   if( is_reachable( pList ) && is_reached( pList ) )
-   {
-      assign( pCell->_pContent, pContent );
-   }
-   else
-      pCell->_pContent = pContent;
+   pCell->_pContent = pContent;
    pCell->_pPrevCell = aCell;
    if( aCell->_pNextCell )
    {

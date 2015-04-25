@@ -253,3 +253,86 @@ int strcasecmp(const char *s1, const char *s2)
   /* s2 is less than s1 */
   return 1;
 }
+
+int find_real_length( const char *str, int goal )
+{
+   int x, real;
+
+   for( x = 0, real = 0; str[x] != '\0' && real < goal; )
+   {
+      if( str[x] == '#' )
+      {
+         /* hash at the end of a line */
+         if( str[x+1] == '\0' )
+            break;
+         /* valid color tag */
+         if( str[x+1] != '#' )
+         {
+            x += 2;
+            continue;
+         }
+         else /* double hash */
+         {
+            x += 2;
+            real++;
+         }
+      }
+      x++;
+      real++;
+   }
+   return x;
+}
+
+char *copy_string_fl( const char *orig, int length )
+{
+   char *new_str, *ptr;
+
+   new_str = str_alloc( length + STRING_PADDING );
+   ptr = new_str;
+   for( int x = 0; x < length && *orig != '\0'; x++ )
+      *ptr++ = *orig++;
+   *ptr = '\0';
+   return new_str;
+}
+
+char *create_pattern( const char *pattern, int width )
+{
+   char *buf;
+   const char *pat_ptr;
+   char *buf_ptr;
+   int x;
+
+   if( !pattern || pattern[0] == '\0' )
+   {
+      bug( "%s: passed a NULL pattern.", __FUNCTION__ );
+      return NULL;
+   }
+
+   buf = str_alloc( ( width * strlen( pattern ) ) + STRING_PADDING );
+
+   buf_ptr = buf;
+   pat_ptr = pattern;
+
+   for( x = 0; x < width; )
+   {
+      if( *pat_ptr == '\0' )
+         pat_ptr = pattern;
+
+      if( *pat_ptr == '#' )
+      {
+         *buf_ptr++ = *pat_ptr++;
+         if( *pat_ptr == '\0' )
+         {
+            x++;
+            continue;
+         }
+         *buf_ptr++ = *pat_ptr++;
+         continue;
+      }
+      *buf_ptr++ = *pat_ptr++;
+      x++;
+   }
+   buf[width * strlen( pattern )] = '\0';
+   return buf;
+}
+
