@@ -1,4 +1,4 @@
-CC      = gcc
+CC      = gcc -std=c99
 C_FLAGS = -Wall -g -pedantic
 L_FLAGS = -lz -lpthread -lcrypt
 
