@@ -16,7 +16,7 @@ void init_lua_handle( void )
    luaL_openlibs( lua_handle );
 }
 
-void load_lua_server_config_scripts( void )
+void load_lua_server_config_script( void )
 {
    int ret, top = lua_gettop( lua_handle );
 
@@ -30,6 +30,8 @@ void load_lua_server_config_scripts( void )
    MUD_PORT = lua_tonumber( lua_handle, -1 ) ;
    lua_getglobal( lua_handle, "mud_name" );
    MUD_NAME = new_string( "%s", lua_tostring( lua_handle, -1 ) );
+
+   lua_settop( lua_handle, top );
 }
 
 

@@ -27,6 +27,11 @@ STACK    * dsock_free = NULL;     /* the socket free list              */
 LLIST     * dsock_list = NULL;     /* the linked list of active sockets */
 STACK    * dmobile_free = NULL;   /* the mobile free list              */
 LLIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
+int       MUD_PORT = 9009;
+char     *MUD_NAME = NULL;
+
+/* api handles */
+lua_State *lua_handle = NULL;
 
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };
@@ -59,6 +64,13 @@ int main(int argc, char **argv)
 
   /* note that we are booting up */
   log_string("Program starting.");
+
+   log_string( "Connecting to Lua" );
+   init_lua_handle();
+
+
+   log_string( "Loading Server Config Script" );
+   load_lua_server_config_script();
 
   /* initialize the event queue - part 1 */
   init_event_queue(1);
@@ -255,7 +267,7 @@ int init_socket()
   /* setting the correct values */
   my_addr.sin_family = AF_INET;
   my_addr.sin_addr.s_addr = INADDR_ANY;
-  my_addr.sin_port = htons(MUDPORT);
+  my_addr.sin_port = htons(MUD_PORT);
 
   /* this actually fixes any problems with threads */
   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int)) == -1)

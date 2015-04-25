@@ -37,7 +37,6 @@
 #define MAX_BUFFER         1024                   /* seems like a decent amount         */
 #define MAX_OUTPUT         2048                   /* well shoot me if it isn't enough   */
 #define MAX_HELP_ENTRY     4096                   /* roughly 40 lines of blocktext      */
-#define MUDPORT            9009                   /* just set whatever port you want    */
 #define FILE_TERMINATOR    "EOF"                  /* end of file marker                 */
 #define COPYOVER_FILE      "../txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
@@ -173,6 +172,7 @@ typedef struct buffer_type
 
 /* here we include external structure headers */
 #include "event.h"
+#include "lua_utils.h"
 
 /******************************
  * End of new structures      *
