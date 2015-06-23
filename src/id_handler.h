@@ -4,7 +4,7 @@ struct id_tag
 {
    unsigned char type;
    int id;
-   unsigned char can_recycle;
+   bool can_recycle;
    char *created_by;
    char *created_on;
    char *modified_by;
@@ -22,6 +22,7 @@ int update_tag( ID_TAG *tag, const char *effector, ... );
 int get_top_id( int type );
 int get_new_id( int type );
 int get_potential_id( int type );
-int can_tag_be_recycled( int type );
+bool can_tag_be_recycled( int type );
+int get_recycled_id( int type );
 ID_TAG *copy_tag( ID_TAG *tag );
 

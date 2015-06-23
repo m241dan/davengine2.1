@@ -6,8 +6,8 @@ ID_TAG *init_tag( void )
 {
    ID_TAG *tag;
 
-   CREATE( tag, ID_TAG, 1 );
-   if( clear_tag( tag ) != RET_SUCCESS )
+   tag = malloc( sizeof(  ID_TAG ) );
+   if( !clear_tag( tag ) )
    {
       free_tag( tag );
       return NULL;
@@ -17,50 +17,41 @@ ID_TAG *init_tag( void )
 
 int clear_tag( ID_TAG *tag )
 {
-   int ret = RET_SUCCESS;
-
    if( !tag )
-   {
-      BAD_POINTER( "tag" );
-      return ret;
-   }
+      return 0;
 
    tag->type = -1;
    tag->id = -1;
-   tag->can_recycle = 0;
+   tag->can_recycle = FALSE;
    FREE( tag->created_by );
    FREE( tag->created_on );
    FREE( tag->modified_by );
    FREE( tag->modified_on );
-   tag->created_by = strdup( "null" );
-   tag->created_on = strdup( strip_nl( ctime( &current_time ) ) );
-   tag->modified_by = strdup( "null" );
-   tag->modified_on = strdup( strip_nl( ctime( &current_time ) ) );
+   tag->created_by = new_string( NULL );
+   tag->created_on = new_string( strip_nl( ctime( &current_time ) ) );
+   tag->modified_by = new_string( NULL );
+   tag->modified_on = new_string( strip_nl( ctime( &current_time ) ) );
 
-   return ret;
+   return 1;
 }
 
 int free_tag( ID_TAG *tag )
 {
-   int ret = RET_SUCCESS;
-
    FREE( tag->created_on );
    FREE( tag->created_by );
    FREE( tag->modified_by );
    FREE( tag->modified_on);
    FREE( tag );
-   return ret;
+   return 1;
 }
 
 int delete_tag( ID_TAG *tag )
 {
-   int ret = RET_SUCCESS;
-
    if( tag->can_recycle )
-      if( !quick_query( "INSERT INTO `id-recycled` VALUES( '%d', '%d' );", tag->type, tag->id ) )
+      if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%d' );", tag->type, tag->id ) )
          bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, tag->id, tag->type );
    free_tag( tag );
-   return ret;
+   return 1;
 }
 
 int new_tag( ID_TAG *tag, const char *creator )
@@ -86,6 +77,7 @@ int db_load_tag( ID_TAG *tag, MYSQL_ROW *row )
 
    tag->id = atoi( (*row)[counter++] );
    tag->type = atoi( (*row)[counter++] );
+   tag->can_recycle = atoi( (*row)[counter++] );
    tag->created_by = strdup( (*row)[counter++] );
    tag->created_on = strdup( (*row)[counter++] );
    tag->modified_by = strdup( (*row)[counter++] );
@@ -97,12 +89,11 @@ int db_load_tag( ID_TAG *tag, MYSQL_ROW *row )
 int update_tag( ID_TAG *tag, const char *effector, ... )
 {
    char buf[50];
-   int ret = RET_SUCCESS;
    va_list va;
    int res;
 
    if( !strcmp( tag->created_by, "null" ) )
-      return RET_FAILED_OTHER;
+      return 0;
 
    va_start( va, effector );
    res = vsnprintf( buf, 50, effector, va );
@@ -111,165 +102,88 @@ int update_tag( ID_TAG *tag, const char *effector, ... )
    if( res >= 50 - 1 )
    {
       bug( "%s: effector name too long. Length produced = %d", __FUNCTION__, res );
-      return RET_FAILED_OTHER;
+      return 0;
    }
 
-   tag->modified_by = strdup( buf );
-   tag->modified_on = strdup( strip_nl( ctime( &current_time ) ) );
+   tag->modified_by = new_string( buf );
+   tag->modified_on = new_string( strip_nl( ctime( &current_time ) ) );
 
-   if( !quick_query( "UPDATE `%s` SET modified_by='%s', modified_on='%s' WHERE %s='%d';", 
-      tag_table_strings[tag->type], tag->modified_by, tag->modified_on, tag_table_whereID[tag->type], tag->id ) )
+   if( !quick_query( "UPDATE `id_tags` SET modified_by='%s', modified_on='%s' WHERE type=%d and id=%d;", 
+      tag->modified_by, tag->modified_on, tag->type, tag->id ) )
       bug( "%s: could not save the update to the database.", __FUNCTION__ );
 
-   return ret;
-}
-
-
-int load_id_handlers( void )
-{
-   MYSQL_RES *result;
-   MYSQL_ROW row;
-   ID_HANDLER *handler;
-   int ret = RET_SUCCESS;
-
-   if( !quick_query( "SELECT * FROM `id-handlers`;" ) )
-      return RET_FAILED_OTHER;
-
-   if( ( result = mysql_store_result( sql_handle ) ) == NULL )
-   {
-      report_sql_error( sql_handle );
-      return RET_DB_NO_ENTRY;
-   }
-
-   while( ( row = mysql_fetch_row( result ) ) != NULL )
-   {
-      if( ( handler = init_handler() ) == NULL )
-      {
-         BAD_POINTER( "handler" );
-         return ret;
-      }
-
-      handler->type = atoi( row[0] );
-      handler->name = strdup( row[1] );
-      handler->top_id = atoi( row[2] );
-      handler->can_recycle = (bool)atoi( row[3] );
-      if( handlers[handler->type] != NULL )
-      {
-         bug( "%s: two handlers have identitical IDs", __FUNCTION__ );
-         free_handler( handler );
-         return RET_FAILED_OTHER;
-      }
-      handlers[handler->type] = handler;
-   }
-
-   mysql_free_result( result );
-   return ret;
-}
-
-int load_recycled_ids( void )
-{
-   MYSQL_RES *result;
-   MYSQL_ROW row;
-   int ret = RET_SUCCESS;
-
-   if( !quick_query( "SELECT * FROM `id-recycled`;" ) )
-      return RET_FAILED_OTHER;
-
-   if( ( result = mysql_store_result( sql_handle ) ) == NULL )
-   {
-      report_sql_error( sql_handle );
-      return RET_DB_NO_ENTRY;
-   }
-
-   while( ( row = mysql_fetch_row( result ) ) != NULL )
-   {
-      int type;
-      int *id;
-      CREATE( id, int, 1 );
-      type = atoi( row[0] );
-      *id = atoi( row[1] );
-      AttachToList( id, handlers[type]->recycled_ids );
-   }
-
-   mysql_free_result( result );
-   return ret;
+   return 1;
 }
 
 int get_new_id( int type )
 {
-   ID_HANDLER *handler;
-   int *id;     /* have to use a pointer to remove from list, cannot use locally allocated memory */
-   int rec_id; /* must use this integer as storage because the recycled id memory will need to be deleted before return */
+   int new_id = -1;
 
-
-   if( ( handler = handlers[type] ) == NULL )
+   if( can_tag_be_recycled( type ) && ( new_id = get_recycled_id( type ) ) != -1 )
    {
-      bug( "%s: %d is a bad handler type.", __FUNCTION__, type );
-      return -1;
+      if( !quick_query( "DELETE FROM `id_recycled` WHERE rec_id=%d and type=%d;", new_id, type ) )
+         bug( "%s: could not delete recycled ID from id_recycled table", __FUNCTION__ );
    }
-
-   if( handler->can_recycle && SizeOfList( handler->recycled_ids ) > 0 )
+   else if( ( new_id = get_potential_id( type ) ) != -1 )
    {
-      ITERATOR Iter;
-
-      AttachIterator( &Iter, handler->recycled_ids );
-      if( ( id = (int *)NextInList( &Iter ) ) == NULL )
-      {
-         bug( "%s: could not get id from recycled list of handler %s.", __FUNCTION__, handler->name);
-         return -1;
-      }
-      DetachFromList( id, handler->recycled_ids );
-      rec_id = *id;
-      FREE( id );
-      DetachIterator( &Iter );
-
-      if( !quick_query( "DELETE FROM `id-recycled` WHERE type='%d' AND rec_id='%d';", type, rec_id ) )
-         bug( "%s: ID %d of type %d was not properly deleted from database of recycled ids.", rec_id, type );
-
-      return rec_id;
+      if( !quick_query( "UPDATE `id_handlers` SET top_id=%d WHERE type=%d;", ( new_id + 1 ), type ) )
+         bug( "%s: could not update database with new Top ID", __FUNCTION__ );
    }
-
-   if( !quick_query( "UPDATE `id-handlers` SET top_id='%d' WHERE type='%d';", ( handler->top_id + 1 ), handler->type ) )
-      bug( "%s: handler of type %d was not incremented in database properly.", __FUNCTION__, type );
-
-   return handler->top_id++;
+   else
+   {
+      new_id = -1;
+      bug( "%s: could not get proper new ID", __FUNCTION__ );
+   }
+   return new_id;
 }
 
 int get_potential_id( int type )
 {
-   ID_HANDLER *handler;
-   int *id;     /* have to use a pointer to remove from list, cannot use locally allocated memory */
-   int rec_id; 
+   MYSQL_ROW row;
+   char query[MAX_BUFFER];
+   int potential;
 
-
-   if( ( handler = handlers[type] ) == NULL )
+   snprintf( query, MAX_BUFFER, "SELECT top_id FROM `id_handlers` WHERE type=%d;", type );
+   if( ( row = db_query_single_row( query ) ) == NULL )
    {
-      bug( "%s: %d is a bad handler type.", __FUNCTION__, type );
+      bug( "%s: db_query_single_row returned NULL.", __FUNCTION__ );
       return -1;
    }
-
-   if( handler->can_recycle && SizeOfList( handler->recycled_ids ) > 0 )
-   {
-      ITERATOR Iter;
-
-      AttachIterator( &Iter, handler->recycled_ids );
-      if( ( id = (int *)NextInList( &Iter ) ) == NULL )
-      {
-         bug( "%s: could not get id from recycled list of handler %s.", __FUNCTION__, handler->name );
-         return -1;
-      }
-      rec_id = *id;
-      id = NULL;
-      DetachIterator( &Iter );
-
-      return rec_id;
-   }
-   return handler->top_id;
+   potential = atoi( row[0] );
+   free( row );
+   return potential;
 }
 
-int can_tag_be_recycled( int type )
+bool can_tag_be_recycled( int type )
 {
-   
+   MYSQL_ROW row;
+   char query[MAX_BUFFER];
+   bool recycle;
+
+   snprintf( query, MAX_BUFFER, "SELECT can_recycle FROM `id_handlers` WHERE type=%d;", type );
+   if( ( row = db_query_single_row( query ) ) == NULL )
+   {
+      bug( "%s: db_query_single_row returned NULL.", __FUNCTION__ );
+      return 0;
+   }
+   recycle = (bool)atoi( row[0] );
+   free( row );
+   return recycle;
+}
+
+int get_recycled_id( int type )
+{
+   MYSQL_ROW row;
+   char query[MAX_BUFFER];
+   int rec_id;
+
+   snprintf( query, MAX_BUFFER, "SELECT rec_id FROM `id_recycled` WHERE type=%d LIMIT 1;", type );
+   if( ( row = db_query_single_row( query ) ) == NULL )
+      return -1;
+
+   rec_id = atoi( row[0] );
+   free( row );
+   return rec_id;
 }
 
 ID_TAG *copy_tag( ID_TAG *tag )
@@ -285,6 +199,7 @@ ID_TAG *copy_tag( ID_TAG *tag )
    tag_copy = init_tag();
    tag_copy->type = tag->type;
    tag_copy->id = tag->id;
+   tag_copy->can_recycle = tag->can_recycle;
    tag_copy->created_by = strdup( tag->created_by );
    tag_copy->created_on = strdup( tag->created_on );
    tag_copy->modified_by = strdup( tag->modified_by );

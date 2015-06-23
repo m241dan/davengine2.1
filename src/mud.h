@@ -128,6 +128,7 @@ typedef struct  help_data     HELP_DATA;
 typedef struct  lookup_data   LOOKUP_DATA;
 typedef struct  event_data    EVENT_DATA;
 typedef struct  game_account  ACCOUNT_DATA;
+typedef struct  id_tag	      ID_TAG;
 
 /* the actual structures */
 struct dSocket
@@ -189,6 +190,7 @@ typedef struct buffer_type
 #include "event.h"
 #include "lua_utils.h"
 #include "muddb.h"
+#include "id_handler.h"
 #include "account.h"
 #include "lua_account.h"
 
@@ -300,7 +302,7 @@ int     bprintf               ( BUFFER *buffer, char *fmt, ... );
 int     find_real_length      ( const char *str, int goal );
 char   *copy_string_fl	      ( const char *orig, int length );
 char   *create_pattern	      ( const char *pattern, int width );
-
+char   *strip_nl	      ( const char *str );
 /*
  * help.c
  */
