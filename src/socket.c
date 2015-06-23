@@ -30,10 +30,10 @@ LLIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
 int       MUD_PORT = 9009;
 char     *MUD_NAME = NULL;
 
-const char *DB_NAME = NULL;
-const char *DB_ADDR = NULL;
-const char *DB_LOGIN = NULL;
-const char *DB_PSSWORD = NULL;
+char *DB_NAME = NULL;
+char *DB_ADDR = NULL;
+char *DB_LOGIN = NULL;
+char *DB_PASSWORD = NULL;
 
 /* api handles */
 lua_State *lua_handle = NULL;
@@ -74,9 +74,21 @@ int main(int argc, char **argv)
    log_string( "Connecting to Lua" );
    init_lua_handle();
 
-
    log_string( "Loading Server Config Script" );
    load_lua_server_config_script();
+
+   if( ( sql_handle = mysql_init(NULL) ) == NULL )
+   {
+      bug( "Could not initialize mysql connection: %s", mysql_error( sql_handle ) );
+      exit(1);
+   }
+
+   if( mysql_real_connect( sql_handle, DB_ADDR, DB_LOGIN, DB_PASSWORD, DB_NAME, 0, NULL, 0 ) == NULL )
+   {
+      bug( "Could not connect to database: %s", mysql_error( sql_handle ) );
+      mysql_close( sql_handle );
+      exit(1);
+   }
 
   /* initialize the event queue - part 1 */
   init_event_queue(1);

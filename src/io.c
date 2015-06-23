@@ -35,7 +35,7 @@ void log_string(const char *txt, ...)
   va_end(args);
 
   /* point to the correct logfile */
-  snprintf(logfile, MAX_BUFFER, "../log/%6.6s.log", strtime);
+  snprintf(logfile, MAX_BUFFER, "log/%6.6s.log", strtime);
 
   /* try to open logfile */
   if ((fp = fopen(logfile, "a")) == NULL)
@@ -69,7 +69,7 @@ void bug(const char *txt, ...)
   va_end(args);
 
   /* try to open logfile */
-  if ((fp = fopen("../log/bugs.txt", "a")) == NULL)
+  if ((fp = fopen("log/bugs.txt", "a")) == NULL)
   {
     communicate(NULL, "bug: cannot open bugfile", COMM_LOG);
     return;
@@ -92,7 +92,7 @@ time_t last_modified(char *helpfile)
   struct stat sBuf;
   time_t mTime = 0;
 
-  snprintf(fHelp, MAX_BUFFER, "../help/%s", helpfile);
+  snprintf(fHelp, MAX_BUFFER, "help/%s", helpfile);
   if (stat(fHelp, &sBuf) >= 0)
     mTime = sBuf.st_mtime;
 
@@ -107,7 +107,7 @@ char *read_help_entry(const char *helpfile)
   int c, ptr = 0;
 
   /* location of the help file */
-  snprintf(fHelp, MAX_BUFFER, "../help/%s", helpfile);
+  snprintf(fHelp, MAX_BUFFER, "%s", helpfile);
 
   /* if there is no help file, return NULL */
   if ((fp = fopen(fHelp, "r")) == NULL)

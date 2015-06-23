@@ -30,6 +30,15 @@ void load_lua_server_config_script( void )
    lua_getglobal( lua_handle, "mud_name" );
    MUD_NAME = new_string( "%s", lua_tostring( lua_handle, -1 ) );
 
+   lua_getglobal( lua_handle, "db_name" );
+   DB_NAME = new_string( "%s", lua_tostring( lua_handle, -1 ) );
+   lua_getglobal( lua_handle, "db_login" );
+   DB_LOGIN = new_string( "%s", lua_tostring( lua_handle, -1 ) );
+   lua_getglobal( lua_handle, "db_pass" );
+   DB_PASSWORD = new_string( "%s", lua_tostring( lua_handle, -1 ) );
+   lua_getglobal( lua_handle, "db_addr" );
+   DB_ADDR = new_string( "%s", lua_tostring( lua_handle, -1 ) );
+
    lua_settop( lua_handle, top );
 }
 

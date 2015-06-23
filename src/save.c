@@ -32,7 +32,7 @@ void save_pfile(D_MOBILE *dMob)
   pName[i] = '\0';
 
   /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../players/%s.pfile", pName);
+  snprintf(pfile, MAX_BUFFER, "players/%s.pfile", pName);
   if ((fp = fopen(pfile, "w")) == NULL)
   {
     bug("Unable to write to %s's pfile", dMob->name);
@@ -66,7 +66,7 @@ D_MOBILE *load_player(char *player)
   pName[i] = '\0';
 
   /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../players/%s.pfile", pName);     
+  snprintf(pfile, MAX_BUFFER, "players/%s.pfile", pName);     
   if ((fp = fopen(pfile, "r")) == NULL)
     return NULL;
 
@@ -142,7 +142,7 @@ D_MOBILE *load_profile(char *player)
   pName[i] = '\0';
 
   /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../players/%s.profile", pName);
+  snprintf(pfile, MAX_BUFFER, "players/%s.profile", pName);
   if ((fp = fopen(pfile, "r")) == NULL)
     return NULL;
 
@@ -213,7 +213,7 @@ void save_profile(D_MOBILE *dMob)
   pName[i] = '\0';
   
   /* open the pfile so we can write to it */
-  snprintf(pfile, MAX_BUFFER, "../players/%s.profile", pName);
+  snprintf(pfile, MAX_BUFFER, "players/%s.profile", pName);
   if ((fp = fopen(pfile, "w")) == NULL)
   {
     bug("Unable to write to %s's pfile", dMob->name);

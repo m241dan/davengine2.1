@@ -41,8 +41,8 @@
 #define MAX_OUTPUT         2048                   /* well shoot me if it isn't enough   */
 #define MAX_HELP_ENTRY     4096                   /* roughly 40 lines of blocktext      */
 #define FILE_TERMINATOR    "EOF"                  /* end of file marker                 */
-#define COPYOVER_FILE      "../txt/copyover.dat"  /* tempfile to store copyover data    */
-#define EXE_FILE           "../src/SocketMud"     /* the name of the mud binary         */
+#define COPYOVER_FILE      "txt/copyover.dat"  /* tempfile to store copyover data    */
+#define EXE_FILE           "src/DavEngine"     /* the name of the mud binary         */
 
 /* Connection states */
 #define STATE_NEW_NAME         0
@@ -247,7 +247,7 @@ char  *crypt                  ( const char *key, const char *salt );
 /*
  * socket.c
  */
-#define SERVER_SCRIPT "../scripts/config/server.lua"
+#define SERVER_SCRIPT "scripts/config/server.lua"
 extern int	 MUD_PORT;
 extern char	*MUD_NAME;
 int   init_socket             ( void );

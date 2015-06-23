@@ -106,13 +106,13 @@ void load_helps()
 
   help_list = AllocList();
 
-  directory = opendir("../help/");
+  directory = opendir("help/");
   for (entry = readdir(directory); entry; entry = readdir(directory))
   {
     if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
       continue;
 
-    snprintf(buf, MAX_BUFFER, "../help/%s", entry->d_name);
+    snprintf(buf, MAX_BUFFER, "help/%s", entry->d_name);
     s = read_help_entry(buf);
 
     if (s == NULL)
