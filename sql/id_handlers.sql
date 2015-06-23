@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS=0;
 
-DROP TABLE IF EXISTS `id-handlers`;
-CREATE TABLE IF NOT EXISTS `id-handlers` (
+DROP TABLE IF EXISTS `id_handlers`;
+CREATE TABLE IF NOT EXISTS `id_handlers` (
    `type` smallint NOT NULL DEFAULT '-1',
    `name` varchar(40) NOT NULL DEFAULT 'unknown',
    `top_id` int NOT NULL DEFAULT '-1',
@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS `id-handlers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
-INSERT INTO `id-handlers` VALUES ( '0', 'Account Handler', '1', '0' );
+INSERT INTO `id_handlers` VALUES ( '0', 'Account Handler', '1', '0' );

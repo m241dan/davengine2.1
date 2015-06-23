@@ -30,8 +30,14 @@ LLIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
 int       MUD_PORT = 9009;
 char     *MUD_NAME = NULL;
 
+const char *DB_NAME = NULL;
+const char *DB_ADDR = NULL;
+const char *DB_LOGIN = NULL;
+const char *DB_PSSWORD = NULL;
+
 /* api handles */
 lua_State *lua_handle = NULL;
+MYSQL	  *sql_handle = NULL;
 
 /* mccp support */
 const unsigned char compress_will   [] = { IAC, WILL, TELOPT_COMPRESS,  '\0' };

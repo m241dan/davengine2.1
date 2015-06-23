@@ -2,62 +2,6 @@
 
 #include "mud.h"
 
-ID_HANDLER *handlers[MAX_ID_HANDLER];
-
-ID_HANDLER *init_handler( void )
-{
-   ID_HANDLER *handler;
-
-   CREATE( handler, ID_HANDLER, 1 );
-   handler->recycled_ids = AllocList();
-   if( clear_handler( handler ) != RET_SUCCESS )
-   {
-      free_handler( handler );
-      return NULL;
-   }
-   return handler;
-}
-
-int clear_handler( ID_HANDLER *handler )
-{
-   ITERATOR Iter;
-   int *rec_id;
-   int ret = RET_SUCCESS;
-
-   if( !handler )
-   {
-      BAD_POINTER( "handler" );
-      return ret;
-   }
-
-   handler->type = -1;
-   FREE( handler->name );
-   handler->name = strdup( "new handler" );
-   handler->top_id = 0;
-   handler->can_recycle = FALSE;
-
-   if( SizeOfList( handler->recycled_ids ) > 0 )
-   {
-      AttachIterator( &Iter, handler->recycled_ids );
-      while( ( rec_id = (int *)NextInList( &Iter ) ) != NULL )
-         FREE( rec_id );
-      DetachIterator( &Iter );
-   }
-   return ret;
-}
-
-int free_handler( ID_HANDLER *handler )
-{
-   int ret = RET_SUCCESS;
-   FREE( handler->name );
-   if( SizeOfList( handler->recycled_ids ) > 0 )
-      clear_handler( handler );
-   FreeList( handler->recycled_ids );
-   handler->recycled_ids = NULL;
-   FREE( handler );
-   return ret;
-}
-
 ID_TAG *init_tag( void )
 {
    ID_TAG *tag;
@@ -83,6 +27,7 @@ int clear_tag( ID_TAG *tag )
 
    tag->type = -1;
    tag->id = -1;
+   tag->can_recycle = 0;
    FREE( tag->created_by );
    FREE( tag->created_on );
    FREE( tag->modified_by );
@@ -111,38 +56,28 @@ int delete_tag( ID_TAG *tag )
 {
    int ret = RET_SUCCESS;
 
-   if( handlers[tag->type]->can_recycle )
-   {
-      int *to_recycle;
-
-      CREATE( to_recycle, int, 1 );
-      *to_recycle = tag->id;
-      AttachToList( to_recycle, handlers[tag->type]->recycled_ids );
-
+   if( tag->can_recycle )
       if( !quick_query( "INSERT INTO `id-recycled` VALUES( '%d', '%d' );", tag->type, tag->id ) )
          bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, tag->id, tag->type );
-   }
    free_tag( tag );
    return ret;
 }
 
 int new_tag( ID_TAG *tag, const char *creator )
 {
-   int ret = RET_SUCCESS;
-
    if( tag->type < 0 )
    {
       bug( "%s: tag has bad type: %d", __FUNCTION__, tag->type );
-      return RET_FAILED_OTHER;
+      return 0;
    }
 
    tag->id = get_new_id( tag->type );
+   tag->can_recycle = can_tag_be_recycled( tag->type );
    tag->created_by = strdup( creator );
    tag->modified_by = strdup( creator );
    tag->created_on = strdup( strip_nl( ctime( &current_time ) ) );
    tag->modified_on = strdup( strip_nl( ctime( &current_time ) ) );
-
-   return ret;
+   return 1;
 }
 
 int db_load_tag( ID_TAG *tag, MYSQL_ROW *row )
@@ -330,6 +265,11 @@ int get_potential_id( int type )
       return rec_id;
    }
    return handler->top_id;
+}
+
+int can_tag_be_recycled( int type )
+{
+   
 }
 
 ID_TAG *copy_tag( ID_TAG *tag )

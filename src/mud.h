@@ -10,6 +10,7 @@
 #include <arpa/telnet.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mysql.h>
 
 #include "list.h"
 #include "stack.h"
@@ -187,6 +188,7 @@ typedef struct buffer_type
 /* here we include external structure headers */
 #include "event.h"
 #include "lua_utils.h"
+#include "muddb.h"
 #include "account.h"
 #include "lua_account.h"
 
