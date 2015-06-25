@@ -23,10 +23,11 @@
 
 /* global variables */
 fd_set     fSet;                  /* the socket list for polling       */
-STACK    * dsock_free = NULL;     /* the socket free list              */
-LLIST     * dsock_list = NULL;     /* the linked list of active sockets */
-STACK    * dmobile_free = NULL;   /* the mobile free list              */
-LLIST     * dmobile_list = NULL;   /* the mobile list of active mobiles */
+STACK    *dsock_free = NULL;     /* the socket free list              */
+LLIST    *dsock_list = NULL;     /* the linked list of active sockets */
+STACK    *dmobile_free = NULL;   /* the mobile free list              */
+LLIST    *dmobile_list = NULL;   /* the mobile list of active mobiles */
+LLIST	 *active_accounts = NULL;
 int       MUD_PORT = 9009;
 char     *MUD_NAME = NULL;
 
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
   dsock_list = AllocList();
   dmobile_free = AllocStack();
   dmobile_list = AllocList();
-
+   active_accounts = AllocList();
   /* note that we are booting up */
   log_string("Program starting.");
 

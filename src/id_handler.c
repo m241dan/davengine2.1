@@ -20,7 +20,7 @@ int clear_tag( ID_TAG *tag )
    if( !tag )
       return 0;
 
-   tag->type = -1;
+   tag->type = TAG_UNSET;
    tag->id = -1;
    tag->can_recycle = FALSE;
    FREE( tag->created_by );
@@ -50,13 +50,15 @@ int delete_tag( ID_TAG *tag )
    if( tag->can_recycle )
       if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%d' );", tag->type, tag->id ) )
          bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, tag->id, tag->type );
+   if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d and id=%d;", tag->type, tag->id ) )
+      bug( "%s: could not delete tag %d from the master tag table.", __FUNCTION__, tag->id );
    free_tag( tag );
    return 1;
 }
 
 int new_tag( ID_TAG *tag, const char *creator )
 {
-   if( tag->type < 0 )
+   if( tag->type <= TAG_UNSET )
    {
       bug( "%s: tag has bad type: %d", __FUNCTION__, tag->type );
       return 0;
@@ -115,7 +117,7 @@ int update_tag( ID_TAG *tag, const char *effector, ... )
    return 1;
 }
 
-int get_new_id( int type )
+int get_new_id( TAG_TYPE type )
 {
    int new_id = -1;
 
@@ -137,7 +139,7 @@ int get_new_id( int type )
    return new_id;
 }
 
-int get_potential_id( int type )
+int get_potential_id( TAG_TYPE type )
 {
    MYSQL_ROW row;
    char query[MAX_BUFFER];
@@ -154,7 +156,7 @@ int get_potential_id( int type )
    return potential;
 }
 
-bool can_tag_be_recycled( int type )
+bool can_tag_be_recycled( TAG_TYPE type )
 {
    MYSQL_ROW row;
    char query[MAX_BUFFER];
@@ -171,7 +173,7 @@ bool can_tag_be_recycled( int type )
    return recycle;
 }
 
-int get_recycled_id( int type )
+int get_recycled_id( TAG_TYPE type )
 {
    MYSQL_ROW row;
    char query[MAX_BUFFER];

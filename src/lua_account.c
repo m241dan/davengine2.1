@@ -41,3 +41,8 @@ inline int newAccount( lua_State *L )
    lua_pushaccount( L, account );
    return 1;
 }
+
+inline int getAccount( lua_State *L )
+{
+   return 1;
+}

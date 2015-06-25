@@ -202,17 +202,18 @@ typedef struct buffer_type
  * Global Variables        *
  ***************************/
 
-extern  STACK       *   dsock_free;       /* the socket free list               */
-extern  LLIST        *   dsock_list;       /* the linked list of active sockets  */
-extern  STACK       *   dmobile_free;     /* the mobile free list               */
-extern  LLIST        *   dmobile_list;     /* the mobile list of active mobiles  */
-extern  LLIST        *   help_list;        /* the linked list of help files      */
-extern  const struct    typCmd tabCmd[];  /* the command table                  */
-extern  bool            shut_down;        /* used for shutdown                  */
-extern  char        *   greeting;         /* the welcome greeting               */
-extern  char        *   motd;             /* the MOTD help file                 */
-extern  int             control;          /* boot control socket thingy         */
-extern  time_t          current_time;     /* let's cut down on calls to time()  */
+extern  STACK        *dsock_free;       /* the socket free list               */
+extern  LLIST        *dsock_list;       /* the linked list of active sockets  */
+extern  STACK        *dmobile_free;     /* the mobile free list               */
+extern  LLIST        *dmobile_list;     /* the mobile list of active mobiles  */
+extern  LLIST        *help_list;        /* the linked list of help files      */
+extern  LLIST	     *active_accounts;  /* a list of active accounts	      */
+extern  const struct  typCmd tabCmd[];  /* the command table                  */
+extern  bool          shut_down;        /* used for shutdown                  */
+extern  char         *greeting;         /* the welcome greeting               */
+extern  char         *motd;             /* the MOTD help file                 */
+extern  int           control;          /* boot control socket thingy         */
+extern  time_t        current_time;     /* let's cut down on calls to time()  */
 
 /*************************** 
  * End of Global Variables *

@@ -8,8 +8,10 @@ CREATE TABLE IF NOT EXISTS `id_tags` (
    `created_by` varchar(256) NOT NULL DEFAULT 'system',
    `created_on` varchar(256) NOT NULL DEFAULT ' ',
    `modified_by` varchar(256) NOT NULL DEFAULT 'system',
-   `modified_on` varchar(256) NOT NULLD DEFAULT ' ',
-   PRIMARY KEY (`type`)
+   `modified_on` varchar(256) NOT NULL DEFAULT ' '
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `id_tags` ADD UNIQUE `unique_index` ( `type`, `id` );
+
+INSERT INTO `id_tags` VALUES ( '0', '1', '0', 'init_script', ' ', 'init_script', ' ' );
+INSERT INTO `id_tags` VALUES ( '0', '2', '0', 'init_script', ' ', 'init_script', ' ' );

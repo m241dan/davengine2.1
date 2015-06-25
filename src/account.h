@@ -6,6 +6,7 @@ typedef enum {
 struct game_account
 {
    D_SOCKET 	*socket;
+   ID_TAG	*tag;
    char		*name;
    char		*passwd;
    ACCT_LEVEL	 level;
@@ -13,9 +14,13 @@ struct game_account
 
 /* creation */
 ACCOUNT_DATA	*init_account( void );
+ACCOUNT_DATA 	*load_accountByID( int id );
+ACCOUNT_DATA	*load_accountByName( const char *name );
+int		 db_load_account( ACCOUNT_DATA *account, MYSQL_ROW *row );
 
 /* deletion */
 void		 free_account( ACCOUNT_DATA *account );
+bool		 delete_account( ACCOUNT_DATA *account );
 
 /* setters */
 int 		 set_aSocket( ACCOUNT_DATA *account, D_SOCKET *socket );
@@ -24,10 +29,9 @@ int		 set_aPasswd( ACCOUNT_DATA *account, const char *passwd );
 int		 set_aLevel( ACCOUNT_DATA *account, ACCT_LEVEL level );
 
 /* getters */
+ACCOUNT_DATA	*get_accountByID( int id ); /* load and attach if not already active */
+ACCOUNT_DATA	*get_accountByName( const char *name ); /* ibid */
 D_SOCKET	*get_aSocket( ACCOUNT_DATA *account );
-char		*get_aName( ACCOUNT_DATA *account );
-char		*get_aPasswd( ACCOUNT_DATA *account );
+const char	*get_aName( ACCOUNT_DATA *account );
+const char	*get_aPasswd( ACCOUNT_DATA *account );
 ACCT_LEVEL	 get_aLevel( ACCOUNT_DATA *account );
-
-/* utility */
-bool		 verify_account_password( const char *entered_pass, ACCOUNT_DATA *account );

@@ -1,8 +1,16 @@
 /* id-handlers.h written by Davenge */
 
+typedef enum
+{
+   TAG_UNSET = -1, ACCOUNT_TAG, MAX_TAG_TYPE
+} TAG_TYPE;
+
+#define GET_ID( obj )	(obj)->tag->id
+#define GET_TYPE( obj )	(obj)->tag->type
+
 struct id_tag
 {
-   unsigned char type;
+   TAG_TYPE type;
    int id;
    bool can_recycle;
    char *created_by;
@@ -19,10 +27,10 @@ int new_tag( ID_TAG *tag, const char *creator );
 int db_load_tag( ID_TAG *tag, MYSQL_ROW *row );
 int update_tag( ID_TAG *tag, const char *effector, ... );
 
-int get_top_id( int type );
-int get_new_id( int type );
-int get_potential_id( int type );
-bool can_tag_be_recycled( int type );
-int get_recycled_id( int type );
+int get_top_id( TAG_TYPE type );
+int get_new_id( TAG_TYPE type );
+int get_potential_id( TAG_TYPE type );
+bool can_tag_be_recycled( TAG_TYPE type );
+int get_recycled_id( TAG_TYPE type );
 ID_TAG *copy_tag( ID_TAG *tag );
 
