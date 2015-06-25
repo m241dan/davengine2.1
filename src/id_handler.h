@@ -7,6 +7,7 @@ typedef enum
 
 #define GET_ID( obj )	(obj)->tag->id
 #define GET_TYPE( obj )	(obj)->tag->type
+#define SET_TYPE( obj, val ) (obj)->tag->type = (val)
 
 struct id_tag
 {

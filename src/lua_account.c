@@ -6,6 +6,8 @@ const struct luaL_Reg AccountLib_m[] = {
 
 const struct luaL_Reg AccountLib_f[] = {
    { "new", newAccount },
+   { "get", getAccount },
+   { "delete", delAccount },
    { NULL, NULL }
 };
 
@@ -37,7 +39,29 @@ inline int newAccount( lua_State *L )
 {
    ACCOUNT_DATA *account;
 
+   if( lua_gettop( L ) > 2 )
+   {
+      bug( "%s: bad number of arguments passed.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   if( lua_type( L, 1 ) != LUA_TSTRING )
+   {
+      bug( "%s: arg 1 should be a string.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   if( lua_type( L, 2 ) != LUA_TSTRING )
+   {
+      bug( "%s: arg 2 should be a string.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+
    account = init_account();
+   set_aName( account, lua_tostring( L, 1 ) );
+   set_aPasswd( account, NULL, lua_tostring( L, 2 ) );
+   new_account( account );
    lua_pushaccount( L, account );
    return 1;
 }
@@ -72,17 +96,7 @@ inline int delAccount( lua_State *L )
 {
    ACCOUNT_DATA *account;
 
-   if( lua_type( L, -1 ) != LUA_TUSERDATA )
-   {
-      bug( "%s: bad parameter passed: account userdata only.", __FUNCTION__ );
-      return 0;
-   }
-
-   if( ( account = *(ACCOUNT_DATA **)luaL_checkudata( L, -1, "Account.meta") ) == NULL )
-   {
-      bug( "%s: bad parameter passed: non-account userdata passed.", __FUNCTION__ );
-      return 0;
-   }
+   DAVLUACM_ACCOUNT_NONE( account, L );
    delete_account( account );
    return 0;
 }

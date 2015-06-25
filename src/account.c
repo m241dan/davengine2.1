@@ -72,6 +72,23 @@ int db_load_account( ACCOUNT_DATA *account, MYSQL_ROW *row )
    return counter;
 }
 
+int new_account( ACCOUNT_DATA *account )
+{
+   if( GET_TYPE( account ) == ACCOUNT_TAG && GET_ID( account ) > 0 )
+   {
+      SET_TYPE( account, ACCOUNT_TAG );
+      if( !new_tag( account->tag, "system" ) )
+         return 0;
+      if( !quick_query( "INSERT INTO `accounts` VALUES( %d, %s, %s, %d );",
+         GET_ID( account ), get_aName( account ), get_aPasswd( account ), get_aLevel( account ) ) )
+      {
+         bug( "%s: could not add new account to databse.", __FUNCTION__ );
+         return 0;
+      }
+   }
+   return 1;
+}
+
 /* deletion */
 void free_account( ACCOUNT_DATA *account )
 {
@@ -113,17 +130,22 @@ int set_aSocket( ACCOUNT_DATA *account, D_SOCKET *socket )
 int set_aName( ACCOUNT_DATA *account, const char *name )
 {
    FREE( account->name );
-   account->name = strdup( name );
+   account->name = new_string( name );
    if( GET_TYPE( account ) != TAG_UNSET && GET_ID( account ) > 0 )
       if( !quick_query( "UPDATE `accounts` SET name='%s' WHERE accountID=%d;", account->name, GET_ID( account ) ) )
          bug( "%s: unable to update db with the new name.", __FUNCTION__ );
    return 1;
 }
 
-int set_aPasswd( ACCOUNT_DATA *account, const char *passwd )
+int set_aPasswd( ACCOUNT_DATA *account, const char *oldpw, const char *passwd )
 {
+   if( account->passwd && !verify_account_password( oldpw, account ) )
+   {
+      bug( "%s: attempting to change pw, but bad oldpw passed.", __FUNCTION__ );
+      return 0;
+   }
    FREE( account->passwd );
-   account->passwd = strdup( crypt( passwd, account->name ) );
+   account->passwd = new_string( crypt( passwd, account->name ) );
    if( GET_TYPE( account ) != TAG_UNSET && GET_ID( account ) > 0 )
       if( !quick_query( "UPDATE `accounts` SET password='%s' WHERE accountID=%d;", account->passwd, GET_ID( account ) ) )
          bug( "%s: unable to update db with the new name.", __FUNCTION__ );

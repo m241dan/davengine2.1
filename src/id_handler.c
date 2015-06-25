@@ -63,7 +63,6 @@ int new_tag( ID_TAG *tag, const char *creator )
       bug( "%s: tag has bad type: %d", __FUNCTION__, tag->type );
       return 0;
    }
-
    tag->id = get_new_id( tag->type );
    tag->can_recycle = can_tag_be_recycled( tag->type );
    tag->created_by = strdup( creator );

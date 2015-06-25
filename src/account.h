@@ -17,6 +17,7 @@ ACCOUNT_DATA	*init_account( void );
 ACCOUNT_DATA 	*load_accountByID( int id );
 ACCOUNT_DATA	*load_accountByName( const char *name );
 int		 db_load_account( ACCOUNT_DATA *account, MYSQL_ROW *row );
+int		 new_account( ACCOUNT_DATA *account );
 
 /* deletion */
 void		 free_account( ACCOUNT_DATA *account );
@@ -25,7 +26,7 @@ bool		 delete_account( ACCOUNT_DATA *account );
 /* setters */
 int 		 set_aSocket( ACCOUNT_DATA *account, D_SOCKET *socket );
 int		 set_aName( ACCOUNT_DATA *account, const char *name );
-int		 set_aPasswd( ACCOUNT_DATA *account, const char *passwd );
+int		 set_aPasswd( ACCOUNT_DATA *account, const char *oldpw, const char *passwd );
 int		 set_aLevel( ACCOUNT_DATA *account, ACCT_LEVEL level );
 
 /* getters */
@@ -35,3 +36,7 @@ D_SOCKET	*get_aSocket( ACCOUNT_DATA *account );
 const char	*get_aName( ACCOUNT_DATA *account );
 const char	*get_aPasswd( ACCOUNT_DATA *account );
 ACCT_LEVEL	 get_aLevel( ACCOUNT_DATA *account );
+
+/* utility */
+bool verify_account_password( const char *entered_pass, ACCOUNT_DATA *account );
+
