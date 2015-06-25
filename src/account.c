@@ -76,7 +76,7 @@ int db_load_account( ACCOUNT_DATA *account, MYSQL_ROW *row )
 void free_account( ACCOUNT_DATA *account )
 {
    DetachFromList( account, active_accounts ); /* if we're going to free this data, make sure it's not attached to the active list */
-   account->socket = NULL;
+   set_aSocket( account, NULL );
    free_tag( account->tag );
    FREE( account->name );
    FREE( account->passwd );
@@ -101,8 +101,12 @@ bool delete_account( ACCOUNT_DATA *account )
 /* setters */
 int set_aSocket( ACCOUNT_DATA *account, D_SOCKET *socket )
 {
+   if( account->socket )
+      account->socket->account = NULL;
    account->socket = socket;
-   socket->account = account;
+
+   if( socket )
+      socket->account = account;
    return 1;
 }
 

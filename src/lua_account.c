@@ -44,5 +44,46 @@ inline int newAccount( lua_State *L )
 
 inline int getAccount( lua_State *L )
 {
+   ACCOUNT_DATA *account;
+
+   switch( lua_type( L, -1 ) )
+   {
+      default:
+         bug( "%s: bad arguments passed.", __FUNCTION__ );
+         lua_pushnil( L );
+         break;
+      case LUA_TSTRING:
+         if( ( account = get_accountByName( lua_tostring( L, -1 ) ) ) == NULL )
+            lua_pushnil( L );
+         else
+            lua_pushaccount( L, account );
+         break;
+      case LUA_TNUMBER:
+         if( ( account = get_accountByID( lua_tonumber( L, -1 ) ) ) == NULL )
+            lua_pushnil( L );
+         else
+            lua_pushaccount( L, account );
+         break;
+   }
    return 1;
 }
+
+inline int delAccount( lua_State *L )
+{
+   ACCOUNT_DATA *account;
+
+   if( lua_type( L, -1 ) != LUA_TUSERDATA )
+   {
+      bug( "%s: bad parameter passed: account userdata only.", __FUNCTION__ );
+      return 0;
+   }
+
+   if( ( account = *(ACCOUNT_DATA **)luaL_checkudata( L, -1, "Account.meta") ) == NULL )
+   {
+      bug( "%s: bad parameter passed: non-account userdata passed.", __FUNCTION__ );
+      return 0;
+   }
+   delete_account( account );
+   return 0;
+}
+
