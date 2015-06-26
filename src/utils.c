@@ -21,7 +21,7 @@ bool check_name(const char *name)
 {
   int size, i;
 
-  if ((size = strlen(name)) < 3 || size > 12)
+  if ((size = strlen(name)) < 3 || size > 18)
     return FALSE;
 
   for (i = 0 ;i < size; i++)

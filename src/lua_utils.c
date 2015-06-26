@@ -13,6 +13,10 @@ void init_lua_handle( void )
    }
    log_string( "Loading Default Lua Libs" );
    luaL_openlibs( lua_handle );
+
+   log_string( "Loading Account Lua Lub" );
+   luaL_requiref( lua_handle, "Account", luaopen_AccountLib, 1 );
+   lua_pop( lua_handle, -1 );
 }
 
 void load_lua_server_config_script( void )
