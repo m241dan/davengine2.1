@@ -72,7 +72,7 @@ int newAccount( lua_State *L )
    set_aName( account, lua_tostring( L, 2 ) );
    set_aPasswd( account, NULL, lua_tostring( L, 3 ) );
    new_account( account );
-   lua_pushaccount( L, account );
+   lua_pushobj( L, account, ACCOUNT_DATA );
    return 1;
 }
 
@@ -90,13 +90,13 @@ int getAccount( lua_State *L )
          if( ( account = get_accountByName( lua_tostring( L, -1 ) ) ) == NULL )
             lua_pushnil( L );
          else
-            lua_pushaccount( L, account );
+            lua_pushobj( L, account, ACCOUNT_DATA );
          break;
       case LUA_TNUMBER:
          if( ( account = get_accountByID( lua_tonumber( L, -1 ) ) ) == NULL )
             lua_pushnil( L );
          else
-            lua_pushaccount( L, account );
+            lua_pushobj( L, account, ACCOUNT_DATA );
          break;
    }
    return 1;

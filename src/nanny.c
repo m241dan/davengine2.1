@@ -28,10 +28,10 @@ bool load_nanny( NANNY_DATA *nanny ) /* nanny must have a set path, then it will
       bug( "%s: could not prep stack function call.", __FUNCTION__ );
       return FALSE;
    }
-   push_nanny( entity, lua_handle );
+   lua_pushobj( lua_handle, nanny, NANNY_DATA );
    if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
    {
-      bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, nanny->lua_path, lua_tostring( lua_hnadle, -1 ) );
+      bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, nanny->lua_path, lua_tostring( lua_handle, -1 ) );
       return FALSE;
    }
    return TRUE;
@@ -70,14 +70,14 @@ bool set_nState( NANNY_DATA *nanny, int state )
    return TRUE;
 }
 
-bool nanny_stateNext( NANNY_DATA *nanny )
+bool state_nNext( NANNY_DATA *nanny )
 {
    nanny->state++;
    /* maybe put a state change lua call in here */
    return TRUE;
 }
 
-bool nanny_statePrev( NANNY_DATA *nanny )
+bool state_nPrev( NANNY_DATA *nanny )
 {
    nanny->state--;
    /* maybe put a state change lua call in here */

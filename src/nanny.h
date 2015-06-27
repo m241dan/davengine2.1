@@ -22,7 +22,7 @@ void free_nanny( NANNY_DATA *nanny ); /* nannys are not persistant or saved but 
 bool set_nPath( NANNY_DATA *nanny, const char *path );
 bool set_nSocket( NANNY_DATA *nanny, D_SOCKET *socket );
 bool set_nState( NANNY_DATA *nanny, int state );
-bool nanny_stateNext( NANNY_DATA *nanny );
-bool nanny_statePrev( NANNY_DATA *nanny );
+bool state_nNext( NANNY_DATA *nanny );
+bool state_nPrev( NANNY_DATA *nanny );
 bool onNannyInterp( NANNY_DATA *nanny, const char *input );
 bool onNannyPrompt( NANNY_DATA *nanny );

@@ -190,12 +190,13 @@ typedef struct buffer_type
 
 /* here we include external structure headers */
 #include "event.h"
-#include "lua_utils.h"
 #include "muddb.h"
 #include "id_handler.h"
+#include "lua_utils.h"
 #include "account.h"
 #include "lua_account.h"
 #include "nanny.h"
+#include "lua_nanny.h"
 
 /******************************
  * End of new structures      *

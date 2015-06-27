@@ -2,6 +2,10 @@
 
 #include "mud.h"
 
+const char *const meta_types[MAX_TAG_TYPE+1] = {
+   "Account.meta", "Nanny.meta", '\0'
+};
+
 /* creator */
 
 void init_lua_handle( void )
@@ -14,8 +18,12 @@ void init_lua_handle( void )
    log_string( "Loading Default Lua Libs" );
    luaL_openlibs( lua_handle );
 
-   log_string( "Loading Account Lua Lub" );
+   log_string( "Loading Account Lua Lib" );
    luaL_requiref( lua_handle, "Account", luaopen_AccountLib, 1 );
+   lua_pop( lua_handle, -1 );
+
+   log_string( "Loading Nanny Lua Lib" );
+   luaL_requiref( lua_handle, "Nanny", luaopen_NannyLib, 1 );
    lua_pop( lua_handle, -1 );
 }
 
@@ -46,26 +54,6 @@ void load_lua_server_config_script( void )
    lua_settop( lua_handle, top );
 }
 
-
-/*
-void load_lua_database_config_scripts( void )
-{
-   int ret, top = lua_gettop( lua_handle );
-
-   if( luaL_loadfile( lua_handle, 
-   lua_getglobal( lua_handle, "db_name" );
-   DB_NAME =  new_string( "%s", lua_tostring( lua_handle, -1 ) );
-   lua_getglobal( lua_handle, "db_addr" );
-   DB_ADDR = new_string( "%s", lua_tostring( lua_handle, -1 ) );
-   lua_getglobal( lua_handle, "db_login" );
-   DB_LOGIN = new_string( "%s", lua_tostring( lua_handle, -1 ) );
-   lua_getglobal( lua_handle, "db_pass" );
-   DB_PASSWORD = new_string( "%s", lua_tostring( lua_handle, -1 ) );
-
-   lua_settop( lua_handle, top );
-}
-
-*/
 
 bool prep_stack_handle( lua_State *handle, const char *file, const char *function )
 {
@@ -108,29 +96,4 @@ bool prep_stack_handle( lua_State *handle, const char *file, const char *functio
       return FALSE;
    }
    return TRUE;
-}
-
-void lua_pushaccount( lua_State *L, ACCOUNT_DATA *account )
-{
-   ACCOUNT_DATA **box;
-
-   if( !account )
-   {
-      bug( "%s: attempting to push NULL account; pushed a nil instead.", __FUNCTION__ );
-      lua_pushnil( L );
-      return;
-   }
-
-   box = (ACCOUNT_DATA **)lua_newuserdata( L, sizeof( ACCOUNT_DATA * ) );
-   luaL_getmetatable( L, "Account.meta" );
-   if( lua_isnil( L, -1 ) )
-   {
-      bug( "%s: Account.meta is missing.", __FUNCTION__ );
-      lua_pop( L, 2 );
-      lua_pushnil( L );
-      return;
-   }
-   lua_setmetatable( L, -2 );
-   *box = account;
-   return;
 }
