@@ -570,7 +570,7 @@ bool text_to_socket(D_SOCKET *dsock, const char *txt)
  *
  * Will also parse ANSI colors and other tags.
  */
-void text_to_buffer(D_SOCKET *dsock, const char *txt)
+void __text_to_buffer(D_SOCKET *dsock, const char *txt, int buffer)
 {
   static char output[8 * MAX_BUFFER];
   bool underline = FALSE, bold = FALSE;
@@ -613,14 +613,6 @@ void text_to_buffer(D_SOCKET *dsock, const char *txt)
   {
     log_string("text_to_buffer: buffer overflow.");
     return;
-  }
-
-  /* always start with a leading space */
-  if (dsock->top_output == 0)
-  {
-    dsock->outbuf[0] = '\n';
-    dsock->outbuf[1] = '\r';
-    dsock->top_output = 2;
   }
 
   while (*txt != '\0')
@@ -779,8 +771,8 @@ void text_to_buffer(D_SOCKET *dsock, const char *txt)
   }
 
   /* add data to buffer */
-  strcpy(dsock->outbuf + dsock->top_output, output);
-  dsock->top_output += iPtr;
+   parse_into_buffer( dsock->outbuf[buffer], output );
+   dsock->top_output += iPtr;
 }
 
 /*
@@ -894,8 +886,11 @@ bool flush_output(D_SOCKET *dsock)
    * Send the buffer, and return FALSE
    * if the write fails.
    */
-  if (!text_to_socket(dsock, dsock->outbuf))
+  if (!text_to_socket(dsock, buffers_to_string( dsock->outbuf, OUT_BUFS ) ) )
     return FALSE;
+
+   for( int x =0; x < OUT_BUFS; x++ )
+      clear_buffer( dsock->outbuf[x] );
 
   /* Success */
   return TRUE;
@@ -946,7 +941,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         p_new->name = strdup(arg);
 
         /* prepare for next step */
-        text_to_buffer(dsock, "Please enter a new password: ");
+        text_to_buffer(dsock, "Please enter a new password. ");
         dsock->state = STATE_NEW_PASSWORD;
       }
       else /* old player */
@@ -955,7 +950,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
         text_to_buffer(dsock, "What is your password? ");
         dsock->state = STATE_ASK_PASSWORD;
       }
-      text_to_buffer(dsock, (char *) dont_echo);
+      text_to_socket(dsock, (char *) dont_echo);
 
       /* socket <-> player */
       p_new->socket = dsock;
@@ -964,7 +959,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
     case STATE_NEW_PASSWORD:
       if (strlen(arg) < 5 || strlen(arg) > 12)
       {
-        text_to_buffer(dsock, "Between 5 and 12 chars please!\n\rPlease enter a new password: ");
+        text_to_buffer(dsock, "Between 5 and 12 chars please!\n\rPlease enter a new password. ");
         return;
       }
 
@@ -975,18 +970,18 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       {
 	if (dsock->player->password[i] == '~')
 	{
-	  text_to_buffer(dsock, "Illegal password!\n\rPlease enter a new password: ");
+	  text_to_buffer(dsock, "Illegal password!\n\rPlease enter a new password. ");
 	  return;
 	}
       }
 
-      text_to_buffer(dsock, "Please verify the password: ");
+      text_to_buffer(dsock, "Please verify the password. ");
       dsock->state = STATE_VERIFY_PASSWORD;
       break;
     case STATE_VERIFY_PASSWORD:
       if (!strcmp(crypt(arg, dsock->player->name), dsock->player->password))
       {
-        text_to_buffer(dsock, (char *) do_echo);
+        text_to_socket(dsock, (char *) do_echo);
 
         /* put him in the list */
         AttachToList(dsock->player, dmobile_list);
@@ -1007,7 +1002,7 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
       {
         free(dsock->player->password);
         dsock->player->password = NULL;
-        text_to_buffer(dsock, "Password mismatch!\n\rPlease enter a new password: ");
+        text_to_buffer(dsock, "Password mismatch!\n\rPlease enter a new password. ");
         dsock->state = STATE_NEW_PASSWORD;
       }
       break;
@@ -1075,15 +1070,19 @@ void handle_new_connections(D_SOCKET *dsock, char *arg)
 
 void clear_socket(D_SOCKET *sock_new, int sock)
 {
-  memset(sock_new, 0, sizeof(*sock_new));
+   memset(sock_new, 0, sizeof(*sock_new));
 
-  sock_new->control        =  sock;
-  sock_new->state          =  STATE_NEW_NAME;
-  sock_new->lookup_status  =  TSTATE_LOOKUP;
-  sock_new->player         =  NULL;
-  sock_new->nanny	   =  NULL;
-  sock_new->top_output     =  0;
-  sock_new->events         =  AllocList();
+   sock_new->control        =  sock;
+   sock_new->state          =  STATE_NEW_NAME;
+   sock_new->lookup_status  =  TSTATE_LOOKUP;
+   sock_new->player         =  NULL;
+   sock_new->nanny	    =  NULL;
+   sock_new->account	    =  NULL;
+   sock_new->top_output     =  0;
+   sock_new->events         =  AllocList();
+   sock_new->outbuf[0] 	    = new_buffer( 70 );
+   for( int x = 1; x < OUT_BUFS; x++ )
+      sock_new->outbuf[x] = new_buffer( 0 );
 }
 
 /* does the lookup, changes the hostname, and dies */

@@ -22,6 +22,12 @@ struct mud_buffer
       bug( "%s: could not create a buffer", __FUNCTION__ );     \
 }
 
+/* creation */
+D_BUFFER *new_buffer( int width );
+
+/* deletion */
+int free_buffer( D_BUFFER *buf );
+
 /* setters */
 int              set_buffer_width       ( D_BUFFER *buf, int width );
 

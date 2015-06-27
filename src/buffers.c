@@ -131,7 +131,7 @@ char *buffers_to_string( D_BUFFER *buffers[], int size )
    ITERATOR Iter[size];
    char *string, *line;
    int print_start[size];
-   int width, max_lines, x, y, padding;
+   int width, max_lines, x, y, padding, terminator;
 
    /* find the raw length of all the buffers added together *
     * and find the max lines and attach iterators */
@@ -180,7 +180,8 @@ char *buffers_to_string( D_BUFFER *buffers[], int size )
    /* terminate, remove iterators and return */
    for( x = 0; x < size; x++ )
       DetachIterator( &Iter[x] );
-   string[( width + 2 ) * max_lines] = '\0';
+   terminator = ( width + 2 ) * max_lines;
+   string[terminator] = '\0';
    return string;
 }
 
