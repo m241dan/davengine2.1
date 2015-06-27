@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS `id_handlers` (
 
 
 INSERT INTO `id_handlers` VALUES ( '0', 'Account Handler', '1', '0' );
+INSERT INTO `id_handlers` VALUES ( '1', 'Nanny Handler', '2', '1' );

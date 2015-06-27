@@ -122,13 +122,14 @@ do                                          \
  ******************************/
 
 /* type defintions */
-typedef struct  dSocket       D_SOCKET;
-typedef struct  dMobile       D_MOBILE;
-typedef struct  help_data     HELP_DATA;
-typedef struct  lookup_data   LOOKUP_DATA;
-typedef struct  event_data    EVENT_DATA;
-typedef struct  game_account  ACCOUNT_DATA;
-typedef struct  id_tag	      ID_TAG;
+typedef struct  dSocket		D_SOCKET;
+typedef struct  dMobile		D_MOBILE;
+typedef struct  help_data	HELP_DATA;
+typedef struct  lookup_data	LOOKUP_DATA;
+typedef struct  event_data	EVENT_DATA;
+typedef struct  game_account	ACCOUNT_DATA;
+typedef struct  id_tag		ID_TAG;
+typedef struct	nanny_data	NANNY_DATA;
 
 /* the actual structures */
 struct dSocket

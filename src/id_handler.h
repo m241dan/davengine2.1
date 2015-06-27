@@ -2,7 +2,7 @@
 
 typedef enum
 {
-   TAG_UNSET = -1, ACCOUNT_TAG, MAX_TAG_TYPE
+   TAG_UNSET = -1, ACCOUNT_TAG, NANNY_TAG, MAX_TAG_TYPE
 } TAG_TYPE;
 
 #define GET_ID( obj )	(obj)->tag->id
