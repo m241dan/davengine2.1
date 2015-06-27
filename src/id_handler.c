@@ -6,7 +6,7 @@ ID_TAG *init_tag( void )
 {
    ID_TAG *tag;
 
-   tag = malloc( sizeof(  ID_TAG ) );
+   tag = calloc( sizeof( ID_TAG ), 1 );
    if( !clear_tag( tag ) )
    {
       free_tag( tag );
