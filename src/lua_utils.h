@@ -2,6 +2,7 @@
 
 extern lua_State *lua_handle;
 
+#define prep_stack( path, func ) prep_stack_handle( lua_handle, (path), (func) )
 #define DAVLUACM_ACCOUNT_NIL( account, L )                              \
 do                                                                      \
 {                                                                       \
@@ -38,4 +39,5 @@ do                                                                      \
 void init_lua_handle			( void );
 void load_lua_server_config_script	( void );
 
+bool prep_stack_handle( lua_State *handle, const char *file, const char *function );
 void lua_pushaccount( lua_State *L, ACCOUNT_DATA *account );

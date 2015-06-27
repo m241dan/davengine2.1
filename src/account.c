@@ -74,11 +74,11 @@ int db_load_account( ACCOUNT_DATA *account, MYSQL_ROW *row )
 
 int new_account( ACCOUNT_DATA *account )
 {
+   SET_TYPE( account, ACCOUNT_TAG );
+   if( !new_tag( account->tag, "system" ) )
+      return 0;
    if( GET_TYPE( account ) == ACCOUNT_TAG && GET_ID( account ) > 0 )
    {
-      SET_TYPE( account, ACCOUNT_TAG );
-      if( !new_tag( account->tag, "system" ) )
-         return 0;
       if( !quick_query( "INSERT INTO `accounts` VALUES( %d, %s, %s, %d );",
          GET_ID( account ), get_aName( account ), get_aPasswd( account ), get_aLevel( account ) ) )
       {

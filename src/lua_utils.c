@@ -67,6 +67,49 @@ void load_lua_database_config_scripts( void )
 
 */
 
+bool prep_stack_handle( lua_State *handle, const char *file, const char *function )
+{
+   int ret;
+
+   if( !handle )
+   {
+      bug( "%s: the lua stack isn't initialized", __FUNCTION__ );
+      return FALSE;
+   }
+
+   if( !file || !function )
+   {
+      bug( "%s: the file or function passed is NULL.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   lua_pushnil( handle );
+   lua_setglobal( handle, function );
+
+   if( ( ret = luaL_loadfile( handle, file ) ) != 0 )
+   {
+      if( ret != LUA_ERRFILE )
+         bug( "%s: %s: %s\n\r", __FUNCTION__, function, lua_tostring( handle, -1 ) );
+      lua_pop( handle, 1 );
+      return FALSE;
+   }
+
+   if( ( ret = lua_pcall( handle, 0, 0, 0 ) ) != 0 )
+   {
+      bug( "%s: ret %d: path: %s\r\n - error message: %s.", __FUNCTION__, ret, file, lua_tostring( handle, -1 ) );
+      lua_pop( handle, 1 );
+      return FALSE;
+   }
+
+   lua_getglobal( handle, function );
+   if( lua_isnil( handle, -1 ) )
+   {
+      lua_pop( handle, -1 );
+      return FALSE;
+   }
+   return TRUE;
+}
+
 void lua_pushaccount( lua_State *L, ACCOUNT_DATA *account )
 {
    ACCOUNT_DATA **box;

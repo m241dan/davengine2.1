@@ -3,7 +3,7 @@
 struct nanny_data
 {
    ID_TAG *tag;
-   D_SOCKET *sock;
+   D_SOCKET *socket;
    char *lua_path;
    int state;
    bool can_back;
@@ -12,6 +12,7 @@ struct nanny_data
 /* creation */
 
 NANNY_DATA *init_nanny( void );
+bool load_nanny( NANNY_DATA *nanny ); /* nanny must have a set path, then it will load any variables it needs ahead of time based on its lua script */
 
 /* deletion */
 

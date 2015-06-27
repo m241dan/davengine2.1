@@ -136,6 +136,7 @@ struct dSocket
 {
    ACCOUNT_DATA *account;
   D_MOBILE      * player;
+  NANNY_DATA	*nanny;
   LLIST          * events;
   char          * hostname;
   char            inbuf[MAX_BUFFER];
@@ -194,6 +195,7 @@ typedef struct buffer_type
 #include "id_handler.h"
 #include "account.h"
 #include "lua_account.h"
+#include "nanny.h"
 
 /******************************
  * End of new structures      *
