@@ -23,6 +23,7 @@
 
 /* global variables */
 fd_set     fSet;                  /* the socket list for polling       */
+LLIST	 *lua_vars = NULL;
 STACK    *dsock_free = NULL;     /* the socket free list              */
 LLIST    *dsock_list = NULL;     /* the linked list of active sockets */
 STACK    *dmobile_free = NULL;   /* the mobile free list              */
@@ -64,10 +65,11 @@ int main(int argc, char **argv)
   current_time = time(NULL);
 
   /* allocate memory for socket and mobile lists'n'stacks */
-  dsock_free = AllocStack();
-  dsock_list = AllocList();
-  dmobile_free = AllocStack();
-  dmobile_list = AllocList();
+   lua_vars = AllocList();
+   dsock_free = AllocStack();
+   dsock_list = AllocList();
+   dmobile_free = AllocStack();
+   dmobile_list = AllocList();
    active_accounts = AllocList();
   /* note that we are booting up */
   log_string("Program starting.");

@@ -131,7 +131,9 @@ typedef struct  event_data	EVENT_DATA;
 typedef struct  game_account	ACCOUNT_DATA;
 typedef struct  id_tag		ID_TAG;
 typedef struct	nanny_data	NANNY_DATA;
-
+typedef struct  lua_var		LUA_VAR;
+typedef struct  lua_index	LUA_INDEX;
+typedef struct	lua_data	LUA_DATA;
 /* the actual structures */
 struct dSocket
 {

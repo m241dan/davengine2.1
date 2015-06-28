@@ -58,7 +58,7 @@ int delete_tag( ID_TAG *tag )
 
 int new_tag( ID_TAG *tag, const char *creator )
 {
-   if( tag->type <= TAG_UNSET )
+   if( tag->type == TAG_UNSET )
    {
       bug( "%s: tag has bad type: %d", __FUNCTION__, tag->type );
       return 0;
