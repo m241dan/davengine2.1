@@ -3,7 +3,8 @@
 #include "mud.h"
 
 const char *const meta_types[MAX_TAG_TYPE+1] = {
-   "Account.meta", "Nanny.meta", '\0'
+   "Account.meta", "Nanny.meta", "Global.meta",
+   '\0'
 };
 
 /* creator */
@@ -115,4 +116,48 @@ void *check_meta( lua_State *L, int index, const char *meta_name )
    }
    else
       return NULL;
+}
+
+int get_meta_type_id( lua_State *L, int index )
+{
+  int x, metatype = -1;
+
+   for( x = 0; meta_types[x] != '\0'; x++ )
+      if( check_meta( L, index, meta_types[x] ) )
+         metatype = x;
+   return metatype;
+}
+
+int get_meta_id( lua_State *L, int index, const char *meta_name )
+{
+   int metatype;
+
+   if( lua_type( L, index ) != LUA_TUSERDATA )
+   {
+      bug( "%s: data at index must be of type userdata to get an id.", __FUNCTION__ );
+      return -1;
+   }
+
+   if( ( metatype = get_meta_type_id( L, index ) ) == -1 )
+   {
+      bug( "%s: cannot get metatype for data at this index.", __FUNCTION__ );
+      return -1;
+   }
+
+   switch( metatype )
+   {
+      default:
+         bug( "%s: unknown metatype for searching out meta data IDs.", __FUNCTION__ );
+         return -1;
+      case 0:
+      {
+         ACCOUNT_DATA *account = *(ACCOUNT_DATA **)lua_touserdata( L, index );
+         return GET_ID( account );
+      }
+      case 1:
+      {
+         NANNY_DATA *nanny = *(NANNY_DATA **)lua_touserdata( L, index );
+         return GET_ID( nanny );
+      }
+   }
 }

@@ -37,8 +37,8 @@ int VarGC( lua_State *L )
 int newVar( lua_State *L )
 {
    LUA_VAR *var;
-   LUA_INDEX *var;
-   LUA_DATA *var;
+   LUA_INDEX *index;
+   LUA_DATA *data;
    int top = lua_gettop( L );
    if( top < 1 )
    {
@@ -54,24 +54,66 @@ int newVar( lua_State *L )
       return 1;
    }
 
+   var = init_var();
+   var->name = new_string( lua_tostring( L, 1 ) );
+   index = standard_index( var );
+   data = init_vardata( var );
+
    if( top > 1 )
    {
       switch( lua_type( L, 2 ) )
       {
          default:
             bug( "%s: lua vars can only store numbers or strings.", __FUNCTION__ );
+            free_index( index );
+            free_data( data );
+            free_var( var );
             lua_pushnil( L );
             return 1;
          case LUA_TNUMBER:
-            
+            data->type = TAG_INT;
+            data->data = lua_tonumber( L, 2 );
+            break;
          case LUA_TSTRING:
+            data->type = TAG_STRING;
+            data->data = new_string( lua_tostring( L, 2 ) );
+            break;
          case LUA_TNIL:
-         
+            data->type = TAG_INT;
+            data->data = 0;
+            break;
       }
    }
 
    if( top( L ) > 2 )
-
+   {
+      if( lua_type( L, 3 ) != LUA_TUSERDATA )
+      {
+         bug( "%s: defaulting to global, cannot set var to non-userdata", __FUNCTION__ );
+         var->ownertype = GLOBAL_TAG;
+         var->ownerid = get_new_id( GLOBAL_TAG );
+      }
+      else
+      {
+         int metatype;
+         if( ( metatype = get_meta_type_id( L, 3 ) ) == -1 )
+         {
+            bug( "%s: unknown meta type, defaulting to global owner.", __FUNCTION__ );
+            var->ownertype = GLOBAL_TAG;
+            var->ownerid = get_new_id( GLOBAL_TAG );
+         }
+         else
+         {
+            var->ownertype = metatype;
+            var->ownerid = get_meta_id( L, 3 );
+         }
+      }
+   }
+   else
+   {
+      var->ownertype = GLOBAL_TAG;
+      var->ownerid = get_new_id( GLOBAL_TAG );
+   }
 
 }
 
@@ -81,6 +123,11 @@ int setVar( lua_State *L )
 }
 
 int getVar( lua_State *L )
+{
+
+}
+
+int delVar( lua_State *L )
 {
 
 }
@@ -137,6 +184,22 @@ bool free_var( LUA_VAR *var )
    return TRUE;
 }
 
-void    free_varindex   ( LUA_INDEX *index );
-void    free_vardata    ( LUA_DATA *data );
+void free_varindex( LUA_INDEX *index )
+{
+   index->owner = NULL;
+   if( index->type == TAG_STRING )
+      FREE( index->index );
+   FREE( index );
+}
+
+void free_vardata( LUA_DATA *data )
+{
+   data->owner = NULL;
+   if( data->type == TAG_STRING )
+      FREE( data->data );
+   FREE( data );
+}
+
+/* utility */
+
 
