@@ -44,6 +44,10 @@ void 	free_var	( LUA_VAR *var );
 void 	free_varindex	( LUA_INDEX *index );
 void 	free_vardata	( LUA_DATA *data );
 
+/* getters */
+
+LUA_VAR	*get_var_from_monitor	( TAG_TYPE ownertype, int id, const char *name );
+
 /* utility */
 bool check_exists( LUA_VAR *var, LUA_VAR *index );
-
+void lua_pushvar( lua_State *L, LUA_VAR *var );
