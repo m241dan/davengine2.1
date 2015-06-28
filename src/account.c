@@ -90,14 +90,19 @@ int new_account( ACCOUNT_DATA *account )
 }
 
 /* deletion */
-void free_account( ACCOUNT_DATA *account )
+bool free_account( ACCOUNT_DATA *account )
 {
-   DetachFromList( account, active_accounts ); /* if we're going to free this data, make sure it's not attached to the active list */
+   if( ListHas( active_accounts, account ) )
+   {
+      bug( "%s: account still apart of global monitor list, cannot free.", __FUNCTION__ );
+      return FALSE;
+   }
    set_aSocket( account, NULL );
    free_tag( account->tag );
    FREE( account->name );
    FREE( account->passwd );
    FREE( account );
+   return TRUE;
 }
 
 bool delete_account( ACCOUNT_DATA *account )

@@ -200,6 +200,7 @@ typedef struct buffer_type
 #include "lua_account.h"
 #include "nanny.h"
 #include "lua_nanny.h"
+#include "vars.h"
 
 /******************************
  * End of new structures      *

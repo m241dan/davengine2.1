@@ -20,7 +20,7 @@ int		 db_load_account( ACCOUNT_DATA *account, MYSQL_ROW *row );
 int		 new_account( ACCOUNT_DATA *account );
 
 /* deletion */
-void		 free_account( ACCOUNT_DATA *account );
+bool		 free_account( ACCOUNT_DATA *account );
 bool		 delete_account( ACCOUNT_DATA *account );
 
 /* setters */

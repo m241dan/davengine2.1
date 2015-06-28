@@ -345,3 +345,18 @@ int SizeOfList(LLIST *pList)
 {
   return pList->_size;
 }
+
+int ListHas( LLIST *pList, void *pContent )
+{
+   void *cContent;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, pList );
+   while( ( cContent = NextInList( &Iter ) ) != NULL )
+      if( cContent == pContent )
+         break;
+   DetachIterator( &Iter );
+   if( cContent )
+      return 1;
+   return 0;
+}

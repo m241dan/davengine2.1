@@ -64,3 +64,5 @@ void init_lua_handle			( void );
 void load_lua_server_config_script	( void );
 
 bool prep_stack_handle( lua_State *handle, const char *file, const char *function );
+void *check_meta( lua_State *L, int index, const char *meta_name );
+

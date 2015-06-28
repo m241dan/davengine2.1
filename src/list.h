@@ -43,5 +43,5 @@ void  DetachFromList     ( void *pContent, LLIST *pList );
 void  DetachIterator     ( ITERATOR *pIter );
 void  FreeList           ( LLIST *pList );
 int   SizeOfList         ( LLIST *pList );
-
+int   ListHas		 ( LLIST *pList, void *pContent );
 #endif

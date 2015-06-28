@@ -97,3 +97,22 @@ bool prep_stack_handle( lua_State *handle, const char *file, const char *functio
    }
    return TRUE;
 }
+
+void *check_meta( lua_State *L, int index, const char *meta_name )
+{
+   void *object = lua_touserdata( L, index );
+
+   if( !object )
+      return NULL;
+
+   if( lua_getmetatable( L, index ) )
+   {
+      luaL_getmetatable( L, meta_name );
+      if( !lua_rawequal( L, -1, -2 ) )
+         object = NULL;
+      lua_pop( L, 2 );
+      return object;
+   }
+   else
+      return NULL;
+}
