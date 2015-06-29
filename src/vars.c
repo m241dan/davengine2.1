@@ -10,6 +10,10 @@ const struct luaL_Reg VarLib_m[] = {
 };
 
 const struct luaL_Reg VarLib_f[] = {
+   { "new", newVar },
+   { "get", getVar },
+   { "set", setVar },
+   { "del", delVar },
    { NULL, NULL }
 };
 
@@ -23,6 +27,9 @@ int luaopen_VarLib( lua_State *L )
    lua_pushcfunction( L, VarGC );
    lua_setfield( L, -2, "__gc" );
 
+   lua_pushcfunction( L, newVarIndex );
+   lua_setfield( L, -2, "__newindex" );
+
    luaL_setfuncs( L, VarLib_m, 0 );
 
    luaL_newlib( L, VarLib_f );
@@ -31,7 +38,10 @@ int luaopen_VarLib( lua_State *L )
 
 int VarGC( lua_State *L )
 {
-   DetachFromList( 
+   LUA_VAR *var;
+
+   var = *(LUA_VAR **)lua_touserdata( L, -1 );
+   free_var( var );
    return 0;
 }
 
@@ -40,9 +50,8 @@ int newVar( lua_State *L )
    LUA_VAR *var;
    LUA_INDEX *index;
    LUA_DATA *data;
-   char ref[MAX_BUFFER];
-   int indextype, datatype, ownertype, ownerid;
-   long int indexindex, datadata;
+   int datatype, ownertype, ownerid;
+   long int datadata;
    int top = lua_gettop( L );
    if( top < 1 )
    {
@@ -51,7 +60,7 @@ int newVar( lua_State *L )
       return 1;
    }
 
-   if( lua_var( L, 1 ) != LUA_TSTRING || strlen( lua_tostring( L, 1 ) ) > 60 )
+   if( lua_type( L, 1 ) != LUA_TSTRING || strlen( lua_tostring( L, 1 ) ) > 60 )
    {
       bug( "%s: var name must be of type string or string is longer than 60 chars", __FUNCTION__ );
       lua_pushnil( L );
@@ -72,7 +81,7 @@ int newVar( lua_State *L )
             break;
          case LUA_TSTRING:
             datatype = TAG_STRING;
-            datadata = new_string( lua_tostring( L, 2 ) );
+            datadata = (long int)new_string( lua_tostring( L, 2 ) );
             break;
          case LUA_TNIL:
             datatype = TAG_INT;
@@ -81,7 +90,7 @@ int newVar( lua_State *L )
       }
    }
 
-   if( top( L ) > 2 )
+   if( top > 2 )
    {
       if( lua_type( L, 3 ) != LUA_TUSERDATA )
       {
@@ -101,7 +110,7 @@ int newVar( lua_State *L )
          else
          {
             ownertype = metatype;
-            ownerid = get_meta_id( L, 3 );
+            ownerid = get_meta_id( L, 3, meta_types[metatype] );
          }
       }
    }
@@ -110,39 +119,48 @@ int newVar( lua_State *L )
       ownertype = GLOBAL_TAG;
       ownerid = get_new_id( GLOBAL_TAG );
    }
+   var = init_var();
+   var->ownertype = ownertype;
+   var->ownerid = ownerid;
+   var->name = new_string( lua_tostring( L, 1 ) );
 
-   if( ( var = get_var_from_monitor( ownertype, ownerid, lua_tostring( L, 1 ) ) ) == NULL )
+   if( check_exists( var ) )
    {
-      var = (LUA_VAR *)lua_newuserdata( L, sizeof( LUA_VAR ) );
-      var->ownertype = ownertype;
-      var->ownerid = ownerid;
-      var->name = new_string( lua_tostring( L, 1 ) );
-      luaL_getmetatable( L, "Var.meta" );
-      lua_setmetatable( L, -2 );
-      snprintf( ref, MAX_BUFFER, "%d", (int)&var );
-      lua_setfield( L, LUA_REGISTRYINDEX, ref );
+      bug( "%s: trying to create a var that already exists.", __FUNCTION__ );
+      lua_pushnil( L );
+      free_var( var );
+      return 1;
    }
-   else
-   {
-      snprintf( ref, MAX_BUFFER, "%d", (int)&var );
-      lua_getfield( L, LUA_REGISTRYINDEX, ref );
-   }
+
+   index = standard_index( var );
+   data = init_vardata( var );
+   data->type = datatype;
+   data->data = datadata;
+   new_var( var, index, data );
+   free_varindex( index );
+   free_vardata( data );
+   lua_pushobj( L, var, LUA_VAR );
    return 1;
 }
 
 int setVar( lua_State *L )
 {
-
+   return 0;
 }
 
 int getVar( lua_State *L )
 {
-
+   return 0;
 }
 
 int delVar( lua_State *L )
 {
+   return 0;
+}
 
+int newVarIndex( lua_State *L )
+{
+   return 0;
 }
 
 /* creation */
@@ -150,6 +168,8 @@ LUA_VAR *init_var( void )
 {
    LUA_VAR *var;
    var 			= malloc( sizeof( LUA_VAR ) );
+   var->tag		= init_tag();
+   var->tag->type	= VAR_TAG;
    var->ownertype	= TAG_UNSET;
    var->ownerid		= 0;
    var->name		= NULL;
@@ -178,7 +198,7 @@ LUA_DATA *init_vardata( LUA_VAR *var )
 
 LUA_INDEX *standard_index( LUA_VAR *var )
 {
-   LUA_INDEX *index = init_varindex( var ) );
+   LUA_INDEX *index = init_varindex( var );
    index->type = TAG_INT;
    index->index = 0;
    return index;
@@ -192,14 +212,15 @@ bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
    if( index->type == TAG_STRING )
       snprintf( index_query, 60, "%s", (char *)index->index );
    else
-      snprintf( index_query, 60, "%d", index->index );
+      snprintf( index_query, 60, "%ld", index->index );
 
    if( data->type == TAG_STRING )
       data_query = new_string( (char *)data->data );
    else
-      data_query = new_string( "%d", data->data );
+      data_query = new_string( "%ld", data->data );
 
-   if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';", ) )
+   if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';",
+      var->ownertype, var->ownerid, var->name, index->type, index_query, data->type, data_query, data->type, data_query ) )
    {
       FREE( data_query );
       return FALSE;
@@ -209,88 +230,51 @@ bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 }
 
 /* deletion */
-bool free_var( LUA_VAR *var )
+void free_var( LUA_VAR *var )
 {
-   if( ListHas( lua_Vars, var ) )
-   {
-      bug( "%s: cannot free, still attached to global monitor list", __FUNCTION__ );
-      return FALSE;
-   } 
+   free_tag( var->tag );
    FREE( var->name );
    FREE( var );
-   return TRUE;
 }
 
 void free_varindex( LUA_INDEX *index )
 {
+   char *string;
    index->owner = NULL;
    if( index->type == TAG_STRING )
-      FREE( index->index );
+   {
+      string = (char *)index->index;
+      FREE( string );
+   }
    FREE( index );
 }
 
 void free_vardata( LUA_DATA *data )
 {
+   char *string;
    data->owner = NULL;
    if( data->type == TAG_STRING )
-      FREE( data->data );
+   {
+      string = (char *)data->data;
+      FREE( string );
+   }
    FREE( data );
 }
 
 /* getters */
-LUA_VAR *get_var_from_monitor( TAG_TYPE ownertype, int id, const char *name )
-{
-   LUA_VAR *var;
-   ITERATOR Iter;
-
-   AttachIterator( &Iter, lua_vars );
-   while( ( var = (LUA_VAR *)NextInList( &Iter ) ) != NULL )
-      if( var->ownertype == ownertype && var->ownerid == id && !strcmp( var->name, name ) )
-         break;
-   DetachIterator( &Iter );
-
-   return var;
-}
-
 
 /* utility */
-bool check_exists( LUA_VAR *var, LUA_INDEX *index )
+bool check_exists( LUA_VAR *var )
 {
    MYSQL_ROW row;
    char query[MAX_BUFFER];
    bool exists = FALSE;
 
-   snprintf( query, MAX_BUFFER, "SELECT ownertype FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND index='%s';",
-            var->ownertype, var->ownerid, var->name, index->type, index->index );
+   snprintf( query, MAX_BUFFER, "SELECT ownertype FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s';",
+            var->ownertype, var->ownerid, var->name );
    if( ( row = db_query_single_row( query ) ) != NULL )
       exists = TRUE;
 
    FREE( row );
    return exists;
-}
-
-void lua_pushvar( lua_State *L, LUA_VAR *var )
-{
-   if( !var )
-   {
-       bug( "%s: trying to push a NULL instance.", __FUNCTION__ );
-       lua_pushnil( L );
-       return;
-   }
-   box = (ENTITY_INSTANCE **)lua_newuserdata( L, sizeof( ENTITY_INSTANCE * ) );
-   
-   luaL_getmetatable( L, "EntityInstance.meta" );
-   if( lua_isnil( L, -1 ) )
-   {
-      bug( "%s: EntityInstance.meta is missing.", __FUNCTION__ );
-      lua_pop( L, -1 ); /* pop meta */
-      lua_pop( L, -1 ); /* pop box */
-      lua_pushnil( L );
-      return;
-   }
-   lua_setmetatable( L, -2 );
-
-   *box = instance;
-   return;
-
 }

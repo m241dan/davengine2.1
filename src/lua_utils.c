@@ -19,6 +19,10 @@ void init_lua_handle( void )
    log_string( "Loading Default Lua Libs" );
    luaL_openlibs( lua_handle );
 
+   log_string( "Loading Var Lua Lib" );
+   luaL_requiref( lua_handle, "Var", luaopen_VarLib, 1 );
+   lua_pop( lua_handle, -1 );
+
    log_string( "Loading Account Lua Lib" );
    luaL_requiref( lua_handle, "Account", luaopen_AccountLib, 1 );
    lua_pop( lua_handle, -1 );
@@ -26,6 +30,7 @@ void init_lua_handle( void )
    log_string( "Loading Nanny Lua Lib" );
    luaL_requiref( lua_handle, "Nanny", luaopen_NannyLib, 1 );
    lua_pop( lua_handle, -1 );
+
 }
 
 void load_lua_server_config_script( void )

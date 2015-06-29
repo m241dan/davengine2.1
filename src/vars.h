@@ -1,9 +1,8 @@
 /* vars.h written by Davenge */
 
-extern LLIST *lua_vars;
-
 struct lua_var
 {
+   ID_TAG *tag;
    TAG_TYPE ownertype;
    int ownerid;
    char *name;
@@ -30,7 +29,7 @@ int newVar( lua_State *L );
 int setVar( lua_State *L );
 int getVar( lua_State *L );
 int delVar( lua_State *L );
-
+int newVarIndex( lua_State *L );
 
 /* creation */
 LUA_VAR		*init_var	( void );
@@ -49,5 +48,4 @@ void 	free_vardata	( LUA_DATA *data );
 LUA_VAR	*get_var_from_monitor	( TAG_TYPE ownertype, int id, const char *name );
 
 /* utility */
-bool check_exists( LUA_VAR *var, LUA_VAR *index );
-void lua_pushvar( lua_State *L, LUA_VAR *var );
+bool check_exists( LUA_VAR *var );
