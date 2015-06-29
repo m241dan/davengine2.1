@@ -144,14 +144,17 @@ int get_potential_id( TAG_TYPE type )
    char query[MAX_BUFFER];
    int potential;
 
-   snprintf( query, MAX_BUFFER, "SELECT top_id FROM `id_handlers` WHERE type=%d;", type );
-   if( ( row = db_query_single_row( query ) ) == NULL )
+   if( !can_tag_be_recycled( type ) || ( potential = get_recycled_id( type ) ) == -1 )
    {
-      bug( "%s: db_query_single_row returned NULL.", __FUNCTION__ );
-      return -1;
+      snprintf( query, MAX_BUFFER, "SELECT top_id FROM `id_handlers` WHERE type=%d;", type );
+      if( ( row = db_query_single_row( query ) ) == NULL )
+      {
+         bug( "%s: db_query_single_row returned NULL.", __FUNCTION__ );
+         return -1;
+      }
+      potential = atoi( row[0] );
+      free( row );
    }
-   potential = atoi( row[0] );
-   free( row );
    return potential;
 }
 

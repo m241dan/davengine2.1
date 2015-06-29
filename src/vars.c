@@ -96,7 +96,7 @@ int newVar( lua_State *L )
       {
          bug( "%s: defaulting to global, cannot set var to non-userdata", __FUNCTION__ );
          ownertype = GLOBAL_TAG;
-         ownerid = get_new_id( GLOBAL_TAG );
+         ownerid = get_potential_id( GLOBAL_TAG );
       }
       else
       {
@@ -105,7 +105,7 @@ int newVar( lua_State *L )
          {
             bug( "%s: unknown meta type, defaulting to global owner.", __FUNCTION__ );
             ownertype = GLOBAL_TAG;
-            ownerid = get_new_id( GLOBAL_TAG );
+            ownerid = get_potential_id( GLOBAL_TAG );
          }
          else
          {
@@ -117,7 +117,7 @@ int newVar( lua_State *L )
    else
    {
       ownertype = GLOBAL_TAG;
-      ownerid = get_new_id( GLOBAL_TAG );
+      ownerid = get_potential_id( GLOBAL_TAG );
    }
    var = init_var();
    var->ownertype = ownertype;
@@ -131,7 +131,7 @@ int newVar( lua_State *L )
       free_var( var );
       return 1;
    }
-
+   var->ownerid = get_new_id( GLOBAL_TAG );
    index = standard_index( var );
    data = init_vardata( var );
    data->type = datatype;
@@ -233,6 +233,11 @@ bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 void free_var( LUA_VAR *var )
 {
    free_tag( var->tag );
+   if( var->ownertype == GLOBAL_TAG )
+   {
+      if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%d' );", var->ownertype, var->ownerid ) )
+         bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, var->ownerid, var->ownertype );
+   }
    FREE( var->name );
    FREE( var );
 }
@@ -269,9 +274,12 @@ bool check_exists( LUA_VAR *var )
    MYSQL_ROW row;
    char query[MAX_BUFFER];
    bool exists = FALSE;
-
-   snprintf( query, MAX_BUFFER, "SELECT ownertype FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s';",
-            var->ownertype, var->ownerid, var->name );
+   if( var->ownertype == GLOBAL_TAG )
+      snprintf( query, MAX_BUFFER, "SELECT ownertype FROM `vars` WHERE ownertype=%d AND name='%s';",
+               var->ownertype, var->name );
+   else
+      snprintf( query, MAX_BUFFER, "SELECT ownertype FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s';",
+               var->ownertype, var->ownerid, var->name );
    if( ( row = db_query_single_row( query ) ) != NULL )
       exists = TRUE;
 

@@ -91,6 +91,14 @@ int main(int argc, char **argv)
       exit(1);
    }
 
+   {
+      int ret, top = lua_gettop( lua_handle );
+      prep_stack( "scripts/onboottest.lua", "onCall" );
+      if( ( ret = lua_pcall( lua_handle, 0, LUA_MULTRET, 0 ) ) )
+         bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, "scripts/onboottest.lua", lua_tostring( lua_handle, -1 ) );
+      lua_settop( lua_handle, top );
+   }
+
   /* initialize the event queue - part 1 */
   init_event_queue(1);
 

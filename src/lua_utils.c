@@ -20,7 +20,7 @@ void init_lua_handle( void )
    luaL_openlibs( lua_handle );
 
    log_string( "Loading Var Lua Lib" );
-   luaL_requiref( lua_handle, "Var", luaopen_VarLib, 1 );
+   luaL_requiref( lua_handle, "var", luaopen_VarLib, 1 );
    lua_pop( lua_handle, -1 );
 
    log_string( "Loading Account Lua Lib" );
