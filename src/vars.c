@@ -131,7 +131,8 @@ int newVar( lua_State *L )
       free_var( var );
       return 1;
    }
-   var->ownerid = get_new_id( GLOBAL_TAG );
+   if( var->ownertype == GLOBAL_TAG )
+      var->ownerid = get_new_id( GLOBAL_TAG );
    index = standard_index( var );
    data = init_vardata( var );
    data->type = datatype;

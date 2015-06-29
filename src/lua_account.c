@@ -49,19 +49,19 @@ int newAccount( lua_State *L )
 {
    ACCOUNT_DATA *account;
 
-   if( lua_gettop( L ) > 3 )
+   if( lua_gettop( L ) > 2 )
    {
       bug( "%s: bad number of arguments passed.", __FUNCTION__ );
       lua_pushnil( L );
       return 1;
    }
-   if( lua_type( L, 2 ) != LUA_TSTRING )
+   if( lua_type( L, 1 ) != LUA_TSTRING )
    {
       bug( "%s: arg 1 should be a string.", __FUNCTION__ );
       lua_pushnil( L );
       return 1;
    }
-   if( lua_type( L, 3 ) != LUA_TSTRING )
+   if( lua_type( L, 2 ) != LUA_TSTRING )
    {
       bug( "%s: arg 2 should be a string.", __FUNCTION__ );
       lua_pushnil( L );
@@ -69,8 +69,8 @@ int newAccount( lua_State *L )
    }
 
    account = init_account();
-   set_aName( account, lua_tostring( L, 2 ) );
-   set_aPasswd( account, NULL, lua_tostring( L, 3 ) );
+   set_aName( account, lua_tostring( L, 1 ) );
+   set_aPasswd( account, NULL, lua_tostring( L, 2 ) );
    new_account( account );
    lua_pushobj( L, account, ACCOUNT_DATA );
    return 1;
@@ -99,6 +99,7 @@ int getAccount( lua_State *L )
             lua_pushobj( L, account, ACCOUNT_DATA );
          break;
    }
+   bug( "%s: account being pushed type = %d id = %d", __FUNCTION__, GET_TYPE( account ), GET_ID( account ) );
    return 1;
 }
 

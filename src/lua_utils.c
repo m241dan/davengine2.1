@@ -164,5 +164,11 @@ int get_meta_id( lua_State *L, int index, const char *meta_name )
          NANNY_DATA *nanny = *(NANNY_DATA **)lua_touserdata( L, index );
          return GET_ID( nanny );
       }
+      case 2:
+      case 3:
+      {
+         LUA_VAR *var = *(LUA_VAR **)lua_touserdata( L, index );
+         return var->ownerid;
+      }
    }
 }

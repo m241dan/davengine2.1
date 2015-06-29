@@ -79,7 +79,7 @@ int new_account( ACCOUNT_DATA *account )
       return 0;
    if( GET_TYPE( account ) == ACCOUNT_TAG && GET_ID( account ) > 0 )
    {
-      if( !quick_query( "INSERT INTO `accounts` VALUES( %d, %s, %s, %d );",
+      if( !quick_query( "INSERT INTO `accounts` VALUES ( %d, '%s', '%s', %d );",
          GET_ID( account ), get_aName( account ), get_aPasswd( account ), get_aLevel( account ) ) )
       {
          bug( "%s: could not add new account to databse.", __FUNCTION__ );

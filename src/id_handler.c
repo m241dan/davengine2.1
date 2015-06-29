@@ -69,6 +69,12 @@ int new_tag( ID_TAG *tag, const char *creator )
    tag->modified_by = strdup( creator );
    tag->created_on = strdup( strip_nl( ctime( &current_time ) ) );
    tag->modified_on = strdup( strip_nl( ctime( &current_time ) ) );
+   if( !quick_query( "INSERT INTO `id_tags` VALUES( %d, %d, %d, '%s', '%s', '%s', '%s' );",
+      tag->type, tag->id, (int)tag->can_recycle, tag->created_by, tag->created_on, tag->modified_by, tag->modified_on ) )
+   {
+      bug( "%s: tag could not be added to the DB.", __FUNCTION__ );
+      return 0;
+   }
    return 1;
 }
 
@@ -76,8 +82,8 @@ int db_load_tag( ID_TAG *tag, MYSQL_ROW *row )
 {
    int counter = 0;
 
-   tag->id = atoi( (*row)[counter++] );
    tag->type = atoi( (*row)[counter++] );
+   tag->id = atoi( (*row)[counter++] );
    tag->can_recycle = atoi( (*row)[counter++] );
    tag->created_by = strdup( (*row)[counter++] );
    tag->created_on = strdup( (*row)[counter++] );
