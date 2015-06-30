@@ -110,7 +110,7 @@ int newVar( lua_State *L )
          else
          {
             ownertype = metatype;
-            ownerid = get_meta_id( L, 3, meta_types[metatype] );
+            ownerid = get_meta_id( L, 3 );
          }
       }
    }
@@ -151,7 +151,48 @@ int setVar( lua_State *L )
 
 int getVar( lua_State *L )
 {
-   return 0;
+   LUA_VAR *var;
+   TAG_TYPE type;
+
+   if( lua_type( L, 1 ) != LUA_TSTRING )
+   {
+      bug( "%s: arg 1 expected name of var.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+
+   if( lua_gettop( L ) == 2 ) /* should be user data */
+   {
+      if( lua_type( L, 2 ) != LUA_TUSERDATA )
+      {
+         bug( "%s: attempting to get var from non-user data.", __FUNCTION__ );
+         lua_pushnil( L );
+         return 1;
+      }
+      type = get_meta_type_id( L, 2 );
+      if( type == -1 || type == 3 ) /* if its -1(not found) or 3(var.meta) */
+      {
+         bug( "%s: attempting to get var from invalid user data.", __FUNCTION__ );
+         lua_pushnil( L );
+         return 1;
+      }
+   }
+   else /* otherwise default to global */
+      type = GLOBAL_TAG;
+   var = init_var();
+   var->ownertype = type;
+   var->ownerid = get_meta_id( L, 2 );
+   var->name = new_string( lua_tostring( L, 1 ) );
+
+   if( check_exists( var ) )
+      lua_pushobj( L, var, LUA_VAR );
+   else
+   {
+      free_var( var );
+      lua_pushnil( L );
+   }
+
+   return 1;
 }
 
 int delVar( lua_State *L )

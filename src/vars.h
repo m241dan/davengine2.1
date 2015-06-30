@@ -37,6 +37,8 @@ LUA_INDEX	*init_varindex	( LUA_VAR *var );
 LUA_DATA	*init_vardata	( LUA_VAR *var );
 LUA_INDEX	*standard_index	( LUA_VAR *var );
 bool		 new_var	( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data );
+LUA_VAR		*load_var	( TAG_TYPE ownertype, int ownerid, const char *name );
+int		 db_load_var	( LUA_VAR *var, MYSQL_ROW *row );
 
 /* deletion */
 void 	free_var	( LUA_VAR *var );

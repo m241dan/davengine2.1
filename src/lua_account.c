@@ -99,7 +99,6 @@ int getAccount( lua_State *L )
             lua_pushobj( L, account, ACCOUNT_DATA );
          break;
    }
-   bug( "%s: account being pushed type = %d id = %d", __FUNCTION__, GET_TYPE( account ), GET_ID( account ) );
    return 1;
 }
 

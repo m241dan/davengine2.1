@@ -133,23 +133,15 @@ int get_meta_type_id( lua_State *L, int index )
    return metatype;
 }
 
-int get_meta_id( lua_State *L, int index, const char *meta_name )
+int get_meta_id( lua_State *L, int index )
 {
-   int metatype;
-
    if( lua_type( L, index ) != LUA_TUSERDATA )
    {
       bug( "%s: data at index must be of type userdata to get an id.", __FUNCTION__ );
       return -1;
    }
 
-   if( ( metatype = get_meta_type_id( L, index ) ) == -1 )
-   {
-      bug( "%s: cannot get metatype for data at this index.", __FUNCTION__ );
-      return -1;
-   }
-
-   switch( metatype )
+   switch( get_meta_type_id( L, index ) )
    {
       default:
          bug( "%s: unknown metatype for searching out meta data IDs.", __FUNCTION__ );
