@@ -155,7 +155,7 @@ int newVar( lua_State *L )
 int setVar( lua_State *L )
 {
    LUA_VAR *var;
-   int ownertype, ownerid, top = lua_gettop( L );
+   int new_ownertype, new_ownerid, top = lua_gettop( L );
 
    if( top != 2 )
    {
@@ -171,14 +171,37 @@ int setVar( lua_State *L )
       return 1;
    }
 
-   if( lua_type( L, 2 ) != LUA_TNIL || lua_type( L, 2 ) != LUA_TUSERDATA || !varsettable( L, 1 ) )
+   if( ( lua_type( L, 2 ) != LUA_TUSERDATA && lua_type( L, 2 ) != LUA_TNIL ) || !varsettable( L, 2 ) )
    {
-      bug( "%s: arg 2 needs to be a valid settable", __FUNCTION__ );
+      bug( "%s: arg 2 needs to be a valid var owner", __FUNCTION__ );
       lua_pushboolean( L, 0 );
       return 1;
    }
-
-   return 0;
+   var = *(LUA_VAR **)lua_touserdata( L, 1 );
+   if( lua_type( L, 2 ) != LUA_TNIL )
+   {
+      new_ownertype = get_meta_type_id( L, 2 );
+      new_ownerid = get_meta_id( L, 2 );
+   }
+   else
+   {
+      new_ownertype = GLOBAL_TAG;
+      new_ownerid = get_new_id( GLOBAL_TAG );
+   }
+   bug( "%s: newot %d newoi %d", __FUNCTION__, new_ownertype, new_ownerid );
+   bug( "%s: oldot %d oldoi %d", __FUNCTION__, var->ownertype, var->ownerid );
+   bug( "%s: varname %s length %d", __FUNCTION__, var->name, strlen( var->name ) );
+   if( !quick_query( "UPDATE `vars` SET ownertype=%d, ownerid=%d WHERE ownertype=%d AND ownerid=%d and name='%s';",
+      new_ownertype, new_ownerid, var->ownertype, var->ownerid, var->name ) )
+   {
+      bug( "%s: could not change the vars ownership in the database.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   var->ownertype = new_ownertype;
+   var->ownerid = new_ownerid;
+   lua_pushboolean( L, 1 );
+   return 1;
 }
 
 int getVar( lua_State *L )
@@ -213,7 +236,10 @@ int getVar( lua_State *L )
       type = GLOBAL_TAG;
    var = init_var();
    var->ownertype = type;
-   var->ownerid = get_meta_id( L, 2 );
+   if( type == GLOBAL_TAG )
+      var->ownerid = get_global_var_id( lua_tostring( L, 1 ) );
+   else
+      var->ownerid = get_meta_id( L, 2 );
    var->name = new_string( lua_tostring( L, 1 ) );
 
    if( check_exists( var ) )
@@ -295,6 +321,20 @@ void delete_index( LUA_VAR *var, LUA_INDEX *index )
 }
 
 /* getters */
+int get_global_var_id( const char *name )
+{
+   MYSQL_ROW row;
+   char query[MAX_BUFFER];
+   int id;
+
+   snprintf( query, MAX_BUFFER, "SELECT ownerid FROM `vars` WHERE ownertype=%d AND name='%s';", GLOBAL_TAG, name );
+   if( ( row = db_query_single_row( query ) ) == NULL )
+      return 0;
+
+   id = atoi( row[0] );
+   FREE( row );
+   return id;
+}
 
 /* utility */
 bool check_exists( LUA_VAR *var )
@@ -317,6 +357,8 @@ bool check_exists( LUA_VAR *var )
 
 bool varsettable( lua_State *L, int index )
 {
+   if( lua_type( L, index ) == LUA_TNIL )
+      return TRUE;
    int metatype = get_meta_type_id( L, index );
    for( int x = 0; settable_vars[x] != '\0'; x++ )
       if( !strcmp( settable_vars[x], meta_types[metatype] ) )

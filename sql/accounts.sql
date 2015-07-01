@@ -10,6 +10,6 @@ CREATE TABLE IF NOT EXISTS `accounts` (
    UNIQUE INDEX `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `accounts` VALUES ( '0', 'Davenge', 'DaPxnNCnzgTfs', '5' );
-INSERT INTO `accounts` VALUES ( '1', 'Pain',    'PavIfmXaIsKfQ', '5' );
+INSERT INTO `accounts` VALUES ( '1', 'Davenge', 'DaPxnNCnzgTfs', '5' );
+INSERT INTO `accounts` VALUES ( '2', 'Pain',    'PavIfmXaIsKfQ', '5' );
 

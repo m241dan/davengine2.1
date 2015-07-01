@@ -47,7 +47,7 @@ void	delete_var	( LUA_VAR *var );
 void	delete_index	( LUA_VAR *var, LUA_INDEX *index );
 
 /* getters */
-
+int	get_global_var_id	( const char *name );
 LUA_VAR	*get_var_from_monitor	( TAG_TYPE ownertype, int id, const char *name );
 
 /* utility */
