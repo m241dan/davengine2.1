@@ -2,6 +2,11 @@
 
 #include "mud.h"
 
+const char *const settable_vars[] = {
+   "Account.meta", "Nanny.meta",
+   '\0'
+};
+
 const struct luaL_Reg VarLib_m[] = {
    /* setters */
    /* getters */
@@ -48,11 +53,11 @@ int VarGC( lua_State *L )
 int newVar( lua_State *L )
 {
    LUA_VAR *var;
-   LUA_INDEX *index;
-   LUA_DATA *data;
-   int datatype, ownertype, ownerid;
-   long int datadata;
+   LUA_INDEX index;
+   LUA_DATA data;
+   int ownertype, ownerid;
    int top = lua_gettop( L );
+
    if( top < 1 )
    {
       bug( "%s: bad number of args passed, need at least 1.", __FUNCTION__ );
@@ -76,16 +81,16 @@ int newVar( lua_State *L )
             lua_pushnil( L );
             return 1;
          case LUA_TNUMBER:
-            datatype = TAG_INT;
-            datadata = lua_tonumber( L, 2 );
+            data.type = TAG_INT;
+            snprintf( data.data, MAX_BUFFER, "%d", (int)lua_tonumber( L, 2 ) );
             break;
          case LUA_TSTRING:
-            datatype = TAG_STRING;
-            datadata = (long int)new_string( lua_tostring( L, 2 ) );
+            data.type = TAG_STRING;
+            snprintf( data.data, MAX_BUFFER, "%s", lua_tostring( L, 2 ) );
             break;
          case LUA_TNIL:
-            datatype = TAG_INT;
-            datadata = 0;
+            data.type = TAG_INT;
+            snprintf( data.data, MAX_BUFFER, "%d", 0 );
             break;
       }
    }
@@ -119,6 +124,7 @@ int newVar( lua_State *L )
       ownertype = GLOBAL_TAG;
       ownerid = get_potential_id( GLOBAL_TAG );
    }
+
    var = init_var();
    var->ownertype = ownertype;
    var->ownerid = ownerid;
@@ -131,21 +137,47 @@ int newVar( lua_State *L )
       free_var( var );
       return 1;
    }
+   /* finish ownership and indexing */
    if( var->ownertype == GLOBAL_TAG )
       var->ownerid = get_new_id( GLOBAL_TAG );
-   index = standard_index( var );
-   data = init_vardata( var );
-   data->type = datatype;
-   data->data = datadata;
-   new_var( var, index, data );
-   free_varindex( index );
-   free_vardata( data );
+   standard_index( &index );
+
+   /* default script */
+   data.isscript = FALSE;
+   memset( &data.script[0], 0, sizeof( data.script ) );
+   /* update database */
+   new_var( var, &index, &data );
+
    lua_pushobj( L, var, LUA_VAR );
    return 1;
 }
 
 int setVar( lua_State *L )
 {
+   LUA_VAR *var;
+   int ownertype, ownerid, top = lua_gettop( L );
+
+   if( top != 2 )
+   {
+      bug( "%s: improper number of arguments passed", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( lua_type( L, 1 ) != LUA_TUSERDATA || !check_meta( L, 1, "Var.meta" ) )
+   {
+      bug( "%s: arg 1 needs to be a Var.meta", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( lua_type( L, 2 ) != LUA_TNIL || lua_type( L, 2 ) != LUA_TUSERDATA || !varsettable( L, 1 ) )
+   {
+      bug( "%s: arg 2 needs to be a valid settable", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
    return 0;
 }
 
@@ -218,56 +250,19 @@ LUA_VAR *init_var( void )
    return var;
 }
 
-LUA_INDEX *init_varindex( LUA_VAR *var )
+void standard_index( LUA_INDEX *index )
 {
-   LUA_INDEX *index;
-   index	= malloc( sizeof( LUA_INDEX ) );
-   index->owner	= var;
-   index->type	= TAG_UNSET;
-   index->index	= 0;
-   return index;
-}
-
-LUA_DATA *init_vardata( LUA_VAR *var )
-{
-   LUA_DATA *data;
-   data		= malloc( sizeof( LUA_DATA ) );
-   data->owner	= var;
-   data->type	= TAG_UNSET;
-   data->data	= 0;
-   return data;
-}
-
-LUA_INDEX *standard_index( LUA_VAR *var )
-{
-   LUA_INDEX *index = init_varindex( var );
    index->type = TAG_INT;
-   index->index = 0;
-   return index;
+   snprintf( index->index, 60, "%d", 0 );
 }
 
 bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 {
-   char index_query[60];
-   char *data_query;
-
-   if( index->type == TAG_STRING )
-      snprintf( index_query, 60, "%s", (char *)index->index );
-   else
-      snprintf( index_query, 60, "%ld", index->index );
-
-   if( data->type == TAG_STRING )
-      data_query = new_string( (char *)data->data );
-   else
-      data_query = new_string( "%ld", data->data );
-
-   if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';",
-      var->ownertype, var->ownerid, var->name, index->type, index_query, data->type, data_query, data->type, data_query ) )
+   if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s', '%s', '%d' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';",
+      var->ownertype, var->ownerid, var->name, index->type, index->index, data->type, data->data, data->script, data->isscript, data->type, data->data ) )
    {
-      FREE( data_query );
       return FALSE;
    }
-   FREE( data_query );
    return TRUE;
 }
 
@@ -275,37 +270,28 @@ bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 void free_var( LUA_VAR *var )
 {
    free_tag( var->tag );
+   var->tag = NULL;
+   FREE( var->name );
+   FREE( var );
+}
+
+void delete_var( LUA_VAR *var )
+{
    if( var->ownertype == GLOBAL_TAG )
    {
       if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%d' );", var->ownertype, var->ownerid ) )
          bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, var->ownerid, var->ownertype );
    }
-   FREE( var->name );
-   FREE( var );
+   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s';", var->ownertype, var->ownerid, var->name ) )
+      bug( "%s: could not delete the var and its indexs", __FUNCTION__ );
+   free_var( var );
 }
 
-void free_varindex( LUA_INDEX *index )
+void delete_index( LUA_VAR *var, LUA_INDEX *index )
 {
-   char *string;
-   index->owner = NULL;
-   if( index->type == TAG_STRING )
-   {
-      string = (char *)index->index;
-      FREE( string );
-   }
-   FREE( index );
-}
-
-void free_vardata( LUA_DATA *data )
-{
-   char *string;
-   data->owner = NULL;
-   if( data->type == TAG_STRING )
-   {
-      string = (char *)data->data;
-      FREE( string );
-   }
-   FREE( data );
+   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND index='%s';",
+      var->ownertype, var->ownerid, var->name, index->type, index->index ) )
+      bug( "%s: could not delete the index", __FUNCTION__ );
 }
 
 /* getters */
@@ -327,4 +313,13 @@ bool check_exists( LUA_VAR *var )
 
    FREE( row );
    return exists;
+}
+
+bool varsettable( lua_State *L, int index )
+{
+   int metatype = get_meta_type_id( L, index );
+   for( int x = 0; settable_vars[x] != '\0'; x++ )
+      if( !strcmp( settable_vars[x], meta_types[metatype] ) )
+         return TRUE;
+   return FALSE;
 }
