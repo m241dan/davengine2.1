@@ -28,6 +28,7 @@ LLIST    *dsock_list = NULL;     /* the linked list of active sockets */
 STACK    *dmobile_free = NULL;   /* the mobile free list              */
 LLIST    *dmobile_list = NULL;   /* the mobile list of active mobiles */
 LLIST	 *active_accounts = NULL;
+LLIST    *active_nannys = NULL;
 int       MUD_PORT = 9009;
 char     *MUD_NAME = NULL;
 
@@ -69,6 +70,8 @@ int main(int argc, char **argv)
    dmobile_free = AllocStack();
    dmobile_list = AllocList();
    active_accounts = AllocList();
+   active_nannys = AllocList();
+
   /* note that we are booting up */
   log_string("Program starting.");
 

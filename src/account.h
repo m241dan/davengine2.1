@@ -31,7 +31,9 @@ int		 set_aLevel( ACCOUNT_DATA *account, ACCT_LEVEL level );
 
 /* getters */
 ACCOUNT_DATA	*get_accountByID( int id ); /* load and attach if not already active */
+ACCOUNT_DATA	*get_accountByID_ifActive( int id );
 ACCOUNT_DATA	*get_accountByName( const char *name ); /* ibid */
+ACCOUNT_DATA	*get_accountByName_ifActive( const char *name );
 D_SOCKET	*get_aSocket( ACCOUNT_DATA *account );
 const char	*get_aName( ACCOUNT_DATA *account );
 const char	*get_aPasswd( ACCOUNT_DATA *account );

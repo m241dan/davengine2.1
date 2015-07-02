@@ -1,5 +1,7 @@
 /* nanny.h written by Davenge */
 
+extern LLIST *active_nannys;
+
 struct nanny_data
 {
    ID_TAG *tag;
@@ -17,6 +19,9 @@ bool load_nanny( NANNY_DATA *nanny ); /* nanny must have a set path, then it wil
 /* deletion */
 
 void free_nanny( NANNY_DATA *nanny ); /* nannys are not persistant or saved but do get ID tags to track active variables because I didn't want to write a seperate variable system just for nannys */
+
+/* getters */
+NANNY_DATA *get_nannyByID_ifActive( int id );
 
 /* utility */
 bool set_nPath( NANNY_DATA *nanny, const char *path );

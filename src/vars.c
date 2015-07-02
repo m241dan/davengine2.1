@@ -7,24 +7,18 @@ const char *const settable_vars[] = {
    '\0'
 };
 
-const struct luaL_Reg VarLib_m[] = {
-   /* setters */
-   /* getters */
-   /* utility */
-   { NULL, NULL }
-};
-
 const struct luaL_Reg VarLib_f[] = {
    { "new", newVar },
    { "get", getVar },
    { "set", setVar },
    { "del", delVar },
+   { "getOwner", getVarOwner },
    { NULL, NULL }
 };
 
 int luaopen_VarLib( lua_State *L )
 {
-   lua_newmetatable( L, "Account.meta" );
+   luaL_newmetatable( L, "Var.meta" );
 
    lua_pushcfunction( L, getVarIndex );
    lua_setfield( L, -2, "__index" );
@@ -34,8 +28,6 @@ int luaopen_VarLib( lua_State *L )
 
    lua_pushcfunction( L, newVarIndex );
    lua_setfield( L, -2, "__newindex" );
-
-   luaL_setfuncs( L, VarLib_m, 0 );
 
    luaL_newlib( L, VarLib_f );
    return 1;
@@ -187,9 +179,6 @@ int setVar( lua_State *L )
       new_ownertype = GLOBAL_TAG;
       new_ownerid = get_new_id( GLOBAL_TAG );
    }
-   bug( "%s: newot %d newoi %d", __FUNCTION__, new_ownertype, new_ownerid );
-   bug( "%s: oldot %d oldoi %d", __FUNCTION__, var->ownertype, var->ownerid );
-   bug( "%s: varname %s length %d", __FUNCTION__, var->name, strlen( var->name ) );
    if( !quick_query( "UPDATE `vars` SET ownertype=%d, ownerid=%d WHERE ownertype=%d AND ownerid=%d and name='%s';",
       new_ownertype, new_ownerid, var->ownertype, var->ownerid, var->name ) )
    {
@@ -343,11 +332,56 @@ int getVarIndex( lua_State *L )
       lua_pushboolean( L, 0 );
       return 1;
    }
-   db_load_data( var, &index, &data, &row );
+   db_load_data( &data, &row );
    if( data.isscript )
    {
+      int ret, top = lua_gettop( L );
+      if( !prep_stack_handle( L, data.data, index.index ) )
+      {
+         bug( "%s: could not prep the stack for file %s and function %s.", __FUNCTION__, data.data, index.index );
+         lua_pushnil( L );
+         return 1;
+      }
+      lua_pushvalue( L, 1 );
+      if( ( ret = lua_pcall( L, 1, LUA_MULTRET, 0 ) ) )
+      {
+         bug( "%s: red %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, data.data, lua_tostring( lua_handle, -1 ) );
+         lua_pushnil( L );
+         return 1;
+      }
+      int new_top = lua_gettop( L ) - top;
+      return new_top < 0 ? 0 : new_top;
    }
-   return 0;
+   switch( data.type )
+   {
+      default:
+         bug( "%s: bad data type, pushing nil.", __FUNCTION__ );
+         lua_pushnil( L );
+         break;
+      case TAG_STRING:
+         lua_pushstring( L, data.data );
+         break;
+      case TAG_INT:
+         lua_pushnumber( L, atoi( data.data ) );
+         break;
+   }
+   return 1;
+}
+
+int getVarOwner( lua_State *L )
+{
+   LUA_VAR *var;
+
+   if( ( var = *(LUA_VAR **)luaL_checkudata( L, -1, "Var.meta" ) ) == NULL )
+   {
+      bug( "%s: non-Var.meta passed as argument 1 of parameters.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   if( lua_pushvarowner( L, var ) )
+      return 1;
+   lua_pushnil( L );
+   return 1;
 }
 
 /* creation */
@@ -381,7 +415,7 @@ bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 
 int db_load_data( LUA_DATA *data, MYSQL_ROW *row )
 {
-   int counter;
+   int counter = 0;
    data->type = atoi( (*row)[counter++] );
    snprintf( data->data, MAX_BUFFER, "%s", (*row)[counter++] );
    data->isscript = (bool)atoi( (*row)[counter++] );
@@ -459,4 +493,32 @@ bool varsettable( lua_State *L, int index )
       if( !strcmp( settable_vars[x], meta_types[metatype] ) )
          return TRUE;
    return FALSE;
+}
+
+bool lua_pushvarowner( lua_State *L, LUA_VAR *var )
+{
+   switch( var->ownertype )
+   {
+      default: return FALSE;
+      case 0: /* account */
+      {
+         ACCOUNT_DATA *account;
+         if( ( account = get_accountByID_ifActive( var->ownerid ) ) == NULL )
+            return FALSE;
+         lua_pushobj( L, account, ACCOUNT_DATA );
+         break;
+      }
+      case 1: /* nanny */
+      {
+         NANNY_DATA *nanny;
+         if( ( nanny = get_nannyByID_ifActive( var->ownerid ) ) == NULL )
+            return FALSE;
+         lua_pushobj( L, nanny, NANNY_DATA );
+         break;
+      }
+      case 2: /* global */
+         lua_pushstring( L, "global" );
+         break;
+   }
+   return TRUE;
 }

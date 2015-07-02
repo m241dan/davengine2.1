@@ -28,6 +28,7 @@ bool load_nanny( NANNY_DATA *nanny ) /* nanny must have a set path, then it will
       bug( "%s: could not prep stack function call.", __FUNCTION__ );
       return FALSE;
    }
+   AttachToList( nanny, active_nannys );
    lua_pushobj( lua_handle, nanny, NANNY_DATA );
    if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
    {
@@ -44,6 +45,21 @@ void free_nanny( NANNY_DATA *nanny )
    nanny->socket = NULL;
    FREE( nanny->lua_path );
    FREE( nanny );
+}
+
+/* getters */
+NANNY_DATA *get_nannyByID_ifActive( int id )
+{
+   NANNY_DATA *nanny;
+   ITERATOR Iter;
+
+   AttachToList( &Iter, active_nannys );
+   while( ( nanny = (NANNY_DATA *)NextInList( &Iter ) ) != NULL )
+      if( GET_ID( nanny ) == id )
+         break;
+   DetachIterator( &Iter );
+
+   return nanny;
 }
 
 /* utility */

@@ -26,8 +26,11 @@ int luaopen_NannyLib( lua_State *L )
 
 int NannyGC( lua_State *L )
 {
-   NANNY_DATA **nanny;
-   nanny = (NANNY_DATA **)lua_touserdata( L, -1 );
-   *nanny = NULL;
+   NANNY_DATA *nanny;
+   nanny = *(NANNY_DATA **)lua_touserdata( L, -1 );
+   DetachFromList( nanny, active_nannys );
+   quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d;", GET_TYPE( nanny ), GET_ID( nanny ) );
+   free_nanny( nanny );
+   nanny = NULL;
    return 0;
 }

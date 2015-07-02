@@ -34,6 +34,7 @@ int getVar( lua_State *L );
 int delVar( lua_State *L );
 int newVarIndex( lua_State *L );
 int getVarIndex( lua_State *L );
+int getVarOwner( lua_State *L );
 
 /* creation */
 LUA_VAR		*init_var	( void );
@@ -55,3 +56,4 @@ LUA_VAR	*get_var_from_monitor	( TAG_TYPE ownertype, int id, const char *name );
 /* utility */
 bool check_exists( LUA_VAR *var );
 bool varsettable( lua_State *L, int index );
+bool lua_pushvarowner( lua_State *L, LUA_VAR *var );

@@ -112,9 +112,14 @@ bool delete_account( ACCOUNT_DATA *account )
       bug( "%s: could not delete account with id %d from db.", __FUNCTION__, GET_ID( account ) );
       return FALSE;
    }
-   if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d and id=%d;", GET_TYPE( account ), GET_ID( account ) ) )
+   if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d AND id=%d;", GET_TYPE( account ), GET_ID( account ) ) )
    {
       bug( "%s: could not delete account with id %d tag from db.", __FUNCTION__, GET_ID( account ) );
+      return FALSE;
+   }
+   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d;", GET_TYPE( account ), GET_ID( account ) ) )
+   {
+      bug( "%s: could not delete account(%d)'s vars from DB.", __FUNCTION__, GET_ID( account ) );
       return FALSE;
    }
    free_account( account );
@@ -174,15 +179,8 @@ int set_aLevel( ACCOUNT_DATA *account, ACCT_LEVEL level )
 ACCOUNT_DATA *get_accountByID( int id )
 {
    ACCOUNT_DATA *account;
-   ITERATOR Iter;
 
-   AttachIterator( &Iter, active_accounts );
-   while( ( account = (ACCOUNT_DATA *)NextInList( &Iter ) ) != NULL )
-      if( GET_ID( account ) == id )
-         break;
-   DetachIterator( &Iter );
-
-   if( account )
+   if( ( account = get_accountByID_ifActive( id ) ) != NULL )
       return account;
 
    if( ( account = load_accountByID( id ) ) == NULL )
@@ -192,7 +190,35 @@ ACCOUNT_DATA *get_accountByID( int id )
    return account;
 }
 
+ACCOUNT_DATA *get_accountByID_ifActive( int id )
+{
+   ACCOUNT_DATA *account;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, active_accounts );
+   while( ( account = (ACCOUNT_DATA *)NextInList( &Iter ) ) != NULL )
+      if( GET_ID( account ) == id )
+         break;
+   DetachIterator( &Iter );
+  return account;
+}
+
 ACCOUNT_DATA *get_accountByName( const char *name )
+{
+   ACCOUNT_DATA *account;
+
+   if( ( account = get_accountByName_ifActive( name ) ) != NULL )
+      return account;
+
+   if( ( account = load_accountByName( name ) ) == NULL )
+      return NULL;
+
+   AttachToList( account, active_accounts );
+   return account;
+
+}
+
+ACCOUNT_DATA *get_accountByName_ifActive( const char *name )
 {
    ACCOUNT_DATA *account;
    ITERATOR Iter;
@@ -202,16 +228,7 @@ ACCOUNT_DATA *get_accountByName( const char *name )
       if( !strcmp( get_aName( account ), name ) )
          break;
    DetachIterator( &Iter );
-
-   if( account )
-      return account;
-
-   if( ( account = load_accountByName( name ) ) == NULL )
-      return NULL;
-
-   AttachToList( account, active_accounts );
    return account;
-
 }
 
 D_SOCKET *get_aSocket( ACCOUNT_DATA *account )
