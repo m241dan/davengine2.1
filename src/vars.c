@@ -24,9 +24,9 @@ const struct luaL_Reg VarLib_f[] = {
 
 int luaopen_VarLib( lua_State *L )
 {
-   luaL_newmetatable( L, "Var.meta" );
+   lua_newmetatable( L, "Account.meta" );
 
-   lua_pushvalue( L, -1 );
+   lua_pushcfunction( L, getVarIndex );
    lua_setfield( L, -2, "__index" );
 
    lua_pushcfunction( L, VarGC );
@@ -65,9 +65,9 @@ int newVar( lua_State *L )
       return 1;
    }
 
-   if( lua_type( L, 1 ) != LUA_TSTRING || strlen( lua_tostring( L, 1 ) ) > 60 )
+   if( lua_type( L, 1 ) != LUA_TSTRING || strlen( lua_tostring( L, 1 ) ) > MAX_VINDEX )
    {
-      bug( "%s: var name must be of type string or string is longer than 60 chars", __FUNCTION__ );
+      bug( "%s: var name must be of type string or string is longer than %d chars", __FUNCTION__, MAX_VINDEX );
       lua_pushnil( L );
       return 1;
    }
@@ -144,7 +144,6 @@ int newVar( lua_State *L )
 
    /* default script */
    data.isscript = FALSE;
-   memset( &data.script[0], 0, sizeof( data.script ) );
    /* update database */
    new_var( var, &index, &data );
 
@@ -255,11 +254,99 @@ int getVar( lua_State *L )
 
 int delVar( lua_State *L )
 {
-   return 0;
+   LUA_VAR *var;
+
+   if( lua_type( L, 1 ) != LUA_TUSERDATA || !check_meta( L, 1, "Var.meta" ) )
+   {
+      bug( "%s: non-Var.meta passed as arg.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   var = *(LUA_VAR **)lua_touserdata( L, 1 );
+   delete_var_from_db( var );
+   lua_pushboolean( L, 1 );
+   return 1;
 }
 
 int newVarIndex( lua_State *L )
 {
+   LUA_VAR *var;
+   LUA_INDEX index;
+   LUA_DATA data;
+
+   /* we know that L,1 has to be something with Var.meta, so no need to sanity check */
+   var = *(LUA_VAR **)lua_touserdata( L, 1 );
+
+   switch( lua_type( L, 2 ) )
+   {
+      default:
+         bug( "%s: invalid Var.meta index used.", __FUNCTION__ );
+         return 0;
+      case LUA_TSTRING:
+         index.type = TAG_STRING;
+         snprintf( index.index, MAX_VINDEX, "%s", lua_tostring( L, 2 ) );
+         break;
+      case LUA_TNUMBER:
+         index.type = TAG_INT;
+         snprintf( index.index, MAX_VINDEX, "%d", (int)lua_tonumber( L, 2 ) );
+         break;
+   }
+
+   switch( lua_type( L, 3 ) )
+   {
+      default:
+         bug( "%s: invalid Var.meta data used.", __FUNCTION__ );
+         return 0;
+      case LUA_TSTRING:
+         data.type = TAG_STRING;
+         snprintf( data.data, MAX_BUFFER, "%s", lua_tostring( L, 3 ) );
+         break;
+      case LUA_TNUMBER:
+         data.type = TAG_INT;
+         snprintf( data.data, MAX_BUFFER, "%d", (int)lua_tonumber( L, 3 ) );
+         break;
+   }
+   new_var( var, &index, &data );
+   return 0;
+}
+
+int getVarIndex( lua_State *L )
+{
+   LUA_VAR *var;
+   MYSQL_ROW row;
+   LUA_INDEX index;
+   LUA_DATA data;
+   char query[MAX_BUFFER];
+
+   /* we know that L,1 has to be something with Var.meta, so no need to sanity check */
+   var = *(LUA_VAR **)lua_touserdata( L, 1 );
+
+   switch( lua_type( L, 2 ) )
+   {
+      default:
+         bug( "%s: invalid Var.meta index used.", __FUNCTION__ );
+         return 0;
+      case LUA_TSTRING:
+         index.type = TAG_STRING;
+         snprintf( index.index, MAX_VINDEX, "%s", lua_tostring( L, 2 ) );
+         break;
+      case LUA_TNUMBER:
+         index.type = TAG_INT;
+         snprintf( index.index, MAX_VINDEX, "%d", (int)lua_tonumber( L, 2 ) );
+         break;
+   }
+
+   snprintf( query, MAX_BUFFER, "SELECT datatype, data, isscript FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND index='%s'",
+            var->ownertype, var->ownerid, var->name, index.type, index.index );
+   if( ( row = db_query_single_row( query ) ) == NULL )
+   {
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   db_load_data( var, &index, &data, &row );
+   if( data.isscript )
+   {
+   }
    return 0;
 }
 
@@ -279,17 +366,26 @@ LUA_VAR *init_var( void )
 void standard_index( LUA_INDEX *index )
 {
    index->type = TAG_INT;
-   snprintf( index->index, 60, "%d", 0 );
+   snprintf( index->index, MAX_VINDEX, "%d", 0 );
 }
 
 bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 {
-   if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s', '%s', '%d' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';",
-      var->ownertype, var->ownerid, var->name, index->type, index->index, data->type, data->data, data->script, data->isscript, data->type, data->data ) )
+   if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s', '%d' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';",
+      var->ownertype, var->ownerid, var->name, index->type, index->index, data->type, data->data, data->isscript, data->type, data->data ) )
    {
       return FALSE;
    }
    return TRUE;
+}
+
+int db_load_data( LUA_DATA *data, MYSQL_ROW *row )
+{
+   int counter;
+   data->type = atoi( (*row)[counter++] );
+   snprintf( data->data, MAX_BUFFER, "%s", (*row)[counter++] );
+   data->isscript = (bool)atoi( (*row)[counter++] );
+   return counter;
 }
 
 /* deletion */
@@ -301,7 +397,7 @@ void free_var( LUA_VAR *var )
    FREE( var );
 }
 
-void delete_var( LUA_VAR *var )
+void delete_var_from_db( LUA_VAR *var )
 {
    if( var->ownertype == GLOBAL_TAG )
    {
@@ -310,10 +406,9 @@ void delete_var( LUA_VAR *var )
    }
    if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s';", var->ownertype, var->ownerid, var->name ) )
       bug( "%s: could not delete the var and its indexs", __FUNCTION__ );
-   free_var( var );
 }
 
-void delete_index( LUA_VAR *var, LUA_INDEX *index )
+void delete_index_from_db( LUA_VAR *var, LUA_INDEX *index )
 {
    if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND index='%s';",
       var->ownertype, var->ownerid, var->name, index->type, index->index ) )
