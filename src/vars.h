@@ -35,6 +35,7 @@ int delVar( lua_State *L );
 int newVarIndex( lua_State *L );
 int getVarIndex( lua_State *L );
 int getVarOwner( lua_State *L );
+int setScript( lua_State *L );
 
 /* creation */
 LUA_VAR		*init_var	( void );

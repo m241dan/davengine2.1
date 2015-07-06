@@ -13,6 +13,7 @@ const struct luaL_Reg VarLib_f[] = {
    { "set", setVar },
    { "del", delVar },
    { "getOwner", getVarOwner },
+   { "setScript", setScript },
    { NULL, NULL }
 };
 
@@ -263,6 +264,8 @@ int newVarIndex( lua_State *L )
    LUA_INDEX index;
    LUA_DATA data;
 
+   DAVLUACM_VAR_NONE( var, L );
+
    /* we know that L,1 has to be something with Var.meta, so no need to sanity check */
    var = *(LUA_VAR **)lua_touserdata( L, 1 );
 
@@ -294,7 +297,11 @@ int newVarIndex( lua_State *L )
          data.type = TAG_INT;
          snprintf( data.data, MAX_BUFFER, "%d", (int)lua_tonumber( L, 3 ) );
          break;
+      case LUA_TNIL:
+         delete_index_from_db( var, &index );
+         return 0;
    }
+   data.isscript = FALSE;
    new_var( var, &index, &data );
    return 0;
 }
@@ -325,8 +332,9 @@ int getVarIndex( lua_State *L )
          break;
    }
 
-   snprintf( query, MAX_BUFFER, "SELECT datatype, data, isscript FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND index='%s'",
+   snprintf( query, MAX_BUFFER, "SELECT datatype, data, isscript FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND vindex='%s'",
             var->ownertype, var->ownerid, var->name, index.type, index.index );
+
    if( ( row = db_query_single_row( query ) ) == NULL )
    {
       lua_pushboolean( L, 0 );
@@ -384,6 +392,37 @@ int getVarOwner( lua_State *L )
    return 1;
 }
 
+int setScript( lua_State *L )
+{
+   LUA_VAR *var;
+   int top = lua_gettop( L );
+
+   if( top != 2 )
+   {
+      bug( "%s: improper number of arguments passed. Expected 2, got %d.", __FUNCTION__, top );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   /* example var.setScript( variable, "index" ) */
+   DAVLUACM_VAR_BOOL( var, L );
+   if( lua_type( L, 2 ) != LUA_TSTRING )
+   {
+      bug( "%s: argument 2 is not a string.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( !quick_query( "UPDATE `vars` SET isscript=1 WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND vindex='%s';",
+      var->ownertype, var->ownerid, var->name, TAG_STRING, lua_tostring( L, 2 ) ) )
+   {
+      bug( "%s: could not turn var %s's index %s into a script.", __FUNCTION__, var->name, lua_tostring( L, 2 ) );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
 /* creation */
 LUA_VAR *init_var( void )
 {
@@ -406,7 +445,7 @@ void standard_index( LUA_INDEX *index )
 bool new_var( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data )
 {
    if( !quick_query( "INSERT INTO `vars` VALUES( %d, %d, '%s', %d, '%s', %d, '%s', '%d' ) ON DUPLICATE KEY UPDATE datatype=%d, data='%s';",
-      var->ownertype, var->ownerid, var->name, index->type, index->index, data->type, data->data, data->isscript, data->type, data->data ) )
+      var->ownertype, var->ownerid, var->name, index->type, index->index, data->type, data->data, (int)data->isscript, data->type, data->data ) )
    {
       return FALSE;
    }
@@ -444,7 +483,7 @@ void delete_var_from_db( LUA_VAR *var )
 
 void delete_index_from_db( LUA_VAR *var, LUA_INDEX *index )
 {
-   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND index='%s';",
+   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s' AND indextype=%d AND vindex='%s';",
       var->ownertype, var->ownerid, var->name, index->type, index->index ) )
       bug( "%s: could not delete the index", __FUNCTION__ );
 }

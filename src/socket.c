@@ -73,7 +73,7 @@ int main(int argc, char **argv)
    active_nannys = AllocList();
 
   /* note that we are booting up */
-  log_string("Program starting.");
+   log_string("Program starting.");
 
    log_string( "Connecting to Lua" );
    init_lua_handle();
