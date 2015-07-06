@@ -141,7 +141,7 @@ struct dSocket
    ID_TAG	*tag;
    ACCOUNT_DATA *account;
    D_MOBILE     *player;
-   NANNY_DATA	*nanny;
+
    LLIST        *events;
   char          * hostname;
   char            inbuf[MAX_BUFFER];

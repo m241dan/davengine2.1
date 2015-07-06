@@ -1082,7 +1082,6 @@ void clear_socket(D_SOCKET *sock_new, int sock)
    sock_new->state          =  STATE_NEW_NAME;
    sock_new->lookup_status  =  TSTATE_LOOKUP;
    sock_new->player         =  NULL;
-   sock_new->nanny	    =  NULL;
    sock_new->account	    =  NULL;
    sock_new->top_output     =  0;
    sock_new->events         =  AllocList();
@@ -1150,7 +1149,6 @@ void recycle_sockets()
         delete_tag( dsock->tag );
         dsock->account = NULL;
         dsock->player = NULL;
-        dsock->nanny = NULL;
         dsock->events = NULL;
         for( int x = 0; x < OUT_BUFS; x++ )
            free_buffer( dsock->outbuf[x] );
