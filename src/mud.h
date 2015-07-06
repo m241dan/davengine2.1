@@ -124,6 +124,7 @@ do                                          \
 
 /* type defintions */
 typedef struct  dSocket		D_SOCKET;
+typedef struct  socket_state	SOCKET_STATE;
 typedef struct  dMobile		D_MOBILE;
 typedef struct  help_data	HELP_DATA;
 typedef struct  lookup_data	LOOKUP_DATA;
@@ -160,7 +161,7 @@ struct dSocket
 struct dMobile
 {
   D_SOCKET      * socket;
-  LLIST          * events;
+  LLIST         * events;
   char          * name;
   char          * password;
   sh_int          level;
