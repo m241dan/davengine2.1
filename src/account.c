@@ -112,16 +112,7 @@ bool delete_account( ACCOUNT_DATA *account )
       bug( "%s: could not delete account with id %d from db.", __FUNCTION__, GET_ID( account ) );
       return FALSE;
    }
-   if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d AND id=%d;", GET_TYPE( account ), GET_ID( account ) ) )
-   {
-      bug( "%s: could not delete account with id %d tag from db.", __FUNCTION__, GET_ID( account ) );
-      return FALSE;
-   }
-   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d;", GET_TYPE( account ), GET_ID( account ) ) )
-   {
-      bug( "%s: could not delete account(%d)'s vars from DB.", __FUNCTION__, GET_ID( account ) );
-      return FALSE;
-   }
+   delete_tag( account->tag );
    free_account( account );
    return TRUE;
 }

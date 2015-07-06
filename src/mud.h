@@ -134,13 +134,15 @@ typedef struct	nanny_data	NANNY_DATA;
 typedef struct  lua_var		LUA_VAR;
 typedef struct  lua_index	LUA_INDEX;
 typedef struct	lua_data	LUA_DATA;
+
 /* the actual structures */
 struct dSocket
 {
+   ID_TAG	*tag;
    ACCOUNT_DATA *account;
-  D_MOBILE      * player;
-  NANNY_DATA	*nanny;
-  LLIST          * events;
+   D_MOBILE     *player;
+   NANNY_DATA	*nanny;
+   LLIST        *events;
   char          * hostname;
   char            inbuf[MAX_BUFFER];
   D_BUFFER       *outbuf[OUT_BUFS];
@@ -201,6 +203,7 @@ typedef struct buffer_type
 #include "nanny.h"
 #include "lua_nanny.h"
 #include "vars.h"
+#include "lua_socket.h"
 
 /******************************
  * End of new structures      *
@@ -210,7 +213,6 @@ typedef struct buffer_type
  * Global Variables        *
  ***************************/
 
-extern  STACK        *dsock_free;       /* the socket free list               */
 extern  LLIST        *dsock_list;       /* the linked list of active sockets  */
 extern  STACK        *dmobile_free;     /* the mobile free list               */
 extern  LLIST        *dmobile_list;     /* the mobile list of active mobiles  */

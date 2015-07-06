@@ -23,7 +23,6 @@
 
 /* global variables */
 fd_set     fSet;                  /* the socket list for polling       */
-STACK    *dsock_free = NULL;     /* the socket free list              */
 LLIST    *dsock_list = NULL;     /* the linked list of active sockets */
 STACK    *dmobile_free = NULL;   /* the mobile free list              */
 LLIST    *dmobile_list = NULL;   /* the mobile list of active mobiles */
@@ -65,7 +64,6 @@ int main(int argc, char **argv)
   current_time = time(NULL);
 
   /* allocate memory for socket and mobile lists'n'stacks */
-   dsock_free = AllocStack();
    dsock_list = AllocList();
    dmobile_free = AllocStack();
    dmobile_list = AllocList();
@@ -333,25 +331,18 @@ bool new_socket(int sock)
   socklen_t            size;
 
   /* initialize threads */
-  pthread_attr_init(&attr);   
+  pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
   /*
    * allocate some memory for a new socket if
    * there is no free socket in the free_list
    */
-  if (StackSize(dsock_free) <= 0)
-  {
-    if ((sock_new = malloc(sizeof(*sock_new))) == NULL)
-    {
+   if ((sock_new = malloc(sizeof(*sock_new))) == NULL)
+   {
       bug("New_socket: Cannot allocate memory for socket.");
       abort();
-    }
-  }
-  else
-  {
-    sock_new = (D_SOCKET *) PopStack(dsock_free);
-  }
+   }
 
   /* attach the new connection to the socket list */
   FD_SET(sock, &fSet);
@@ -1083,6 +1074,10 @@ void clear_socket(D_SOCKET *sock_new, int sock)
 {
    memset(sock_new, 0, sizeof(*sock_new));
 
+   sock_new->tag	    =  init_tag();
+   SET_TYPE( sock_new, SOCKET_TAG );
+   new_tag( sock_new->tag, "system" );
+
    sock_new->control        =  sock;
    sock_new->state          =  STATE_NEW_NAME;
    sock_new->lookup_status  =  TSTATE_LOOKUP;
@@ -1151,8 +1146,15 @@ void recycle_sockets()
     /* stop compression */
     compressEnd(dsock, dsock->compressing, TRUE);
 
-    /* put the socket in the free stack */
-    PushStack(dsock, dsock_free);
+     {
+        delete_tag( dsock->tag );
+        dsock->account = NULL;
+        dsock->player = NULL;
+        dsock->nanny = NULL;
+        dsock->events = NULL;
+        for( int x = 0; x < OUT_BUFS; x++ )
+           free_buffer( dsock->outbuf[x] );
+     }
   }
   DetachIterator(&Iter);
 }

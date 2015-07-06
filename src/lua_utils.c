@@ -3,7 +3,7 @@
 #include "mud.h"
 
 const char *const meta_types[MAX_TAG_TYPE+1] = {
-   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta",
+   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta", "Socket.meta",
    '\0'
 };
 

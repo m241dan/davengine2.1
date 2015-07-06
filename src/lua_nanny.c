@@ -1,6 +1,7 @@
 #include "mud.h"
 
 const struct luaL_Reg NannyLib_m[] = {
+   { "getState", getState },
    { NULL, NULL }
 };
 
@@ -26,11 +27,13 @@ int luaopen_NannyLib( lua_State *L )
 
 int NannyGC( lua_State *L )
 {
-   NANNY_DATA *nanny;
-   nanny = *(NANNY_DATA **)lua_touserdata( L, -1 );
-   DetachFromList( nanny, active_nannys );
-   quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d;", GET_TYPE( nanny ), GET_ID( nanny ) );
-   free_nanny( nanny );
-   nanny = NULL;
+   NANNY_DATA **nanny;
+   nanny = (NANNY_DATA **)lua_touserdata( L, -1 );
+   *nanny = NULL;
    return 0;
+}
+
+int getState( lua_State *L )
+{
+   return 1;
 }

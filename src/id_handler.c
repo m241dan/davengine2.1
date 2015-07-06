@@ -40,7 +40,7 @@ int free_tag( ID_TAG *tag )
    FREE( tag->created_on );
    FREE( tag->created_by );
    FREE( tag->modified_by );
-   FREE( tag->modified_on);
+   FREE( tag->modified_on );
    FREE( tag );
    return 1;
 }
@@ -51,7 +51,9 @@ int delete_tag( ID_TAG *tag )
       if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%d' );", tag->type, tag->id ) )
          bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, tag->id, tag->type );
    if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d and id=%d;", tag->type, tag->id ) )
-      bug( "%s: could not delete tag %d from the master tag table.", __FUNCTION__, tag->id );
+      bug( "%s: could not delete tag %d of type %d from the master tag table.", __FUNCTION__, tag->id, tag->type );
+   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d;", tag->type, tag->id ) )
+      bug( "%s: could not delete vars of ownerid %d of ownertype %d.", __FUNCTION__, tag->id, tag->type );
    free_tag( tag );
    return 1;
 }
