@@ -1,0 +1,2 @@
+function onConnect( socket )
+end
