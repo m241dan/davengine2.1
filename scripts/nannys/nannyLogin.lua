@@ -9,7 +9,6 @@ function onPrompt( nanny )
 end
 
 function onStateChange( nanny )
-   print( "Being called\n" )
-   nanny:msg( "Helllloooo, login name?", 0 )
+   nanny:msg( "Helllloooo, login name? ", 0 )
 end
 

@@ -28,12 +28,14 @@ void set_state_control( SOCKET_STATE *state, const char *file )
 
 void set_state_as_account( SOCKET_STATE *state, ACCOUNT_DATA *account )
 {
+   account->managing_state = state;
    state->control.account = account;
    state->type = ACCOUNT_TAG;
 }
 
 void set_state_as_nanny( SOCKET_STATE *state, NANNY_DATA *nanny )
 {
+   nanny->managing_state = state;
    state->control.nanny = nanny;
    state->type = NANNY_TAG;
 }
