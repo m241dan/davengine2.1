@@ -881,11 +881,24 @@ bool flush_output(D_SOCKET *dsock)
             text_to_buffer( dsock, "- PROMPT SCRIPT BROKEN -\r\n" );
          }
          else
-            text_to_buffer( dsock, lua_tostring( lua_handle, -1 ) );
+         {
+            switch( lua_type( lua_handle, -1 ) )
+            {
+               default:
+                  bug( "%s: bad return on onPrompt call", __FUNCTION__ );
+                  break;
+               case LUA_TNIL:
+                  break;
+               case LUA_TSTRING:
+                  text_to_buffer( dsock, lua_tostring( lua_handle, -1 ) );
+                  break;
+            }
+         }
          lua_settop( lua_handle, top );
       }
       else
          bug( "%s: control state is NULL at this index somehow.", __FUNCTION__ );
+      dsock->bust_prompt = FALSE;
    }
 
   /* reset the top pointer */
