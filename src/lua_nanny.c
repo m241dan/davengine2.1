@@ -12,6 +12,7 @@ const struct luaL_Reg NannyLib_m[] = {
 
 const struct luaL_Reg NannyLib_f[] = {
    { "new", newNanny },
+   { "get", getNanny },
    { NULL, NULL }
 };
 
@@ -62,6 +63,40 @@ int newNanny( lua_State *L )
 
    lua_pushobj( L, nanny, NANNY_DATA );
    return 1;
+}
+
+int getNanny( lua_State *L )
+{
+/*
+   NANNY_DATA *nanny;
+
+   if( lua_type( L, 1 ) != LUA_TUSERDATA )
+   {
+      bug( "%s: bad argument 1 passed as parameter, needs to be user data.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   switch( get_meta_type_id( L, 1 ) )
+   {
+      default:
+         bug( "%s: bad userdata type passed.", __FUNCTION__ );
+         lua_pushnil( L );
+         return 1;
+      case SOCKET_TAG:
+      {
+         D_SOCKET *socket;
+
+         if( ( socket = *(D_SOCKET **)lua_touserdata( L, 1 ) ) == NULL )
+         {
+            bug( "%s: the socket box is empty!", __FUNCTION__ );
+            lua_pushnil( L );
+            return 1;
+         }
+         
+      }
+   }
+*/
+   return 0;
 }
 
 /* getters */

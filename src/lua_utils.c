@@ -168,6 +168,36 @@ int get_meta_id( lua_State *L, int index )
    }
 }
 
+void lua_pushstateobj( lua_State *L, SOCKET_STATE *state )
+{
+   switch( state->type )
+   {
+      default: return;
+      case NANNY_TAG:
+      {
+         NANNY_DATA *nanny;
+         if( ( nanny = state->control.nanny ) == NULL )
+         {
+            bug( "%s: nanny state has no nanny assigned to it.", __FUNCTION__ );
+            return;
+         }
+         lua_pushobj( lua_handle, nanny, NANNY_DATA );
+         break;
+      }
+      case ACCOUNT_TAG:
+      {
+         ACCOUNT_DATA *account;
+         if( ( account = state->control.account ) == NULL )
+         {
+            bug( "%s: account state has no account assigned to it.", __FUNCTION__ );
+            return;
+         }
+         lua_pushobj( lua_handle, account, ACCOUNT_DATA );
+         break;
+      }
+   }
+}
+
 void lua_onConnect( D_SOCKET *socket )
 {
    int ret, top = lua_gettop( lua_handle );

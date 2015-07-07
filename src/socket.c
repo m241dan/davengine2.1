@@ -207,7 +207,7 @@ void GameLoop(int control)
              int ret, top = lua_gettop( lua_handle );
 
              prep_stack( dsock->states[dsock->state_index]->control_file, "onInterp" );
-             lua_pushobj( lua_handle, dsock, D_SOCKET );
+             lua_pushstateobj( lua_handle, dsock->states[dsock->state_index] );
              lua_pushstring( lua_handle, dsock->next_command );
              if( ( ret = lua_pcall( lua_handle, 2, LUA_MULTRET, 0 ) ) )
                 bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, dsock->states[dsock->state_index]->control_file, lua_tostring( lua_handle, -1 ) );
@@ -874,7 +874,7 @@ bool flush_output(D_SOCKET *dsock)
          int ret, top = lua_gettop( lua_handle );
 
          prep_stack( dsock->states[dsock->state_index]->control_file, "onPrompt" );
-         lua_pushobj( lua_handle, dsock, D_SOCKET );
+         lua_pushstateobj( lua_handle, dsock->states[dsock->state_index] );
          if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
          {
             bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, dsock->states[dsock->state_index]->control_file, lua_tostring( lua_handle, -1 ) );
