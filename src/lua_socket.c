@@ -1,7 +1,7 @@
 #include "mud.h"
 
 const struct luaL_Reg SocketLib_m[] = {
-   { "setState", socket_setState },
+   { "setState", socket_lsetState },
    { "getState", socket_getState },
    { "control", socket_Control },
    { "msg", socket_Message },
@@ -62,13 +62,13 @@ int getSocket( lua_State *L )
             lua_pushnil( L );
             return 1;
          }
-         if( !account->socket )
+         if( !account->managing_state || !account->managing_state->socket )
          {
             bug( "%s: this account has no socket!", __FUNCTION__ );
             lua_pushnil( L );
             return 1;
          }
-         lua_pushobj( L, account->socket, D_SOCKET );
+         lua_pushobj( L, account->managing_state->socket, D_SOCKET );
          break;
       }
       case NANNY_TAG:
@@ -80,20 +80,20 @@ int getSocket( lua_State *L )
             lua_pushnil( L );
             return 1;
          }
-         if( !nanny->socket )
+         if( !nanny->managing_state || !nanny->managing_state->socket )
          {
             bug( "%s: this nanny has no socket!", __FUNCTION__ );
             lua_pushnil( L );
             return 1;
          }
-         lua_pushobj( L, nanny->socket, D_SOCKET );
+         lua_pushobj( L, nanny->managing_state->socket, D_SOCKET );
          break;
       }
    }
    return 1;
 }
 
-int socket_setState( lua_State *L )
+int socket_lsetState( lua_State *L )
 {
    D_SOCKET *socket;
    int state_to_set;
@@ -110,7 +110,7 @@ int socket_setState( lua_State *L )
       bug( "%s: state argument passed outside of range, 0-9 only.", __FUNCTION__ );
       return 0;
    }
-   socket->current_state = state_to_set;
+   socket->state_index = state_to_set;
    return 0;
 }
 
@@ -119,7 +119,7 @@ int socket_getState( lua_State *L )
    D_SOCKET *socket;
 
    DAVLUACM_SOCKET_NIL( socket, L );
-   lua_pushnumber( L, socket->current_state );
+   lua_pushnumber( L, socket->state_index );
    return 1;
 }
 
@@ -149,6 +149,7 @@ int socket_Control( lua_State *L )
          state = init_state();
          set_state_as_account( state, account );
          set_state_control( state, GLOBAL_ACCOUNT_CONTROL );
+         socket->account = account;
          break;
       }
       case NANNY_TAG:

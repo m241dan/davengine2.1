@@ -7,12 +7,12 @@
 NANNY_DATA *init_nanny( void )
 {
    NANNY_DATA *nanny;
-   nanny		= malloc( sizeof( NANNY_DATA ) );
-   nanny->tag		= init_tag();
-   nanny->socket	= NULL;
-   nanny->lua_path	= NULL;
-   nanny->state		= 0;
-   nanny->can_back	= FALSE;
+   nanny			= malloc( sizeof( NANNY_DATA ) );
+   nanny->tag			= init_tag();
+   nanny->managing_state	= NULL;
+   nanny->lua_path		= NULL;
+   nanny->state			= 0;
+   nanny->can_back		= FALSE;
    return nanny;
 }
 
@@ -42,7 +42,7 @@ bool load_nanny( NANNY_DATA *nanny ) /* nanny must have a set path, then it will
 void free_nanny( NANNY_DATA *nanny )
 {
    delete_tag( nanny->tag );
-   nanny->socket = NULL;
+   free_state( nanny->managing_state );
    FREE( nanny->lua_path );
    FREE( nanny );
 }
@@ -67,11 +67,6 @@ bool set_nPath( NANNY_DATA *nanny, const char *path )
 {
    FREE( nanny->lua_path );
    nanny->lua_path = new_string( path );
-   return TRUE;
-}
-bool set_nSocket( NANNY_DATA *nanny, D_SOCKET *socket )
-{
-   nanny->socket = socket;
    return TRUE;
 }
 

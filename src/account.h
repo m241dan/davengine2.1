@@ -5,7 +5,7 @@ typedef enum {
 
 struct game_account
 {
-   D_SOCKET 	*socket;
+   SOCKET_STATE *managing_state;
    ID_TAG	*tag;
    char		*name;
    char		*passwd;

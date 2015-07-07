@@ -1074,7 +1074,7 @@ void clear_socket(D_SOCKET *sock_new, int sock)
    SET_TYPE( sock_new, SOCKET_TAG );
    new_tag( sock_new->tag, "system" );
 
-   sock_new->current_state  = 0;
+   sock_new->state_index  = 0;
    for( int x = 1; x < MAX_STATE; x++ )
       sock_new->states[x] = NULL;
 
@@ -1157,6 +1157,13 @@ void recycle_sockets()
   DetachIterator(&Iter);
 }
 
+void socket_setState( D_SOCKET *socket, sh_int new_state_index )
+{
+   socket->previous_index = socket->state_index;
+   socket->state_index = new_state_index;
+   socket->bust_prompt = TRUE;
+}
+
 int socket_addState( D_SOCKET *socket, SOCKET_STATE *state )
 {
    int x;
@@ -1169,5 +1176,32 @@ int socket_addState( D_SOCKET *socket, SOCKET_STATE *state )
       return -1;
 
    socket->states[x] = state;
+   state->socket = socket;
    return x;
+}
+
+void socket_delState( D_SOCKET *socket, SOCKET_STATE *state )
+{
+   int x;
+
+   for( x = 0; x < MAX_STATE; x++ )
+      if( socket->states[x] == state )
+         break;
+
+   if( x == 10 )
+      return;
+   socket->states[x] = NULL;
+   state->socket = NULL;
+
+   if( socket->states[socket->previous_index] != NULL )
+      x = socket->previous_index;
+   else
+   {
+      for( x = MAX_STATE - 1; x >= 0; x-- )
+         if( socket->states[x] != NULL )
+            break;
+      if( x < 0 )
+         close_socket( socket, FALSE );
+   }
+   socket_setState( socket, x );
 }

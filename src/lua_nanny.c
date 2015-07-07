@@ -1,8 +1,12 @@
 #include "mud.h"
 
 const struct luaL_Reg NannyLib_m[] = {
+   { "setState", nanny_setState },
    { "setSocket", nanny_setSocket },
    { "getState", nanny_getState },
+   { "nextState", nanny_stateNext },
+   { "prevState", nanny_statePrev },
+   { "msg", nanny_Message },
    { NULL, NULL }
 };
 
@@ -74,6 +78,7 @@ int nanny_getState( lua_State *L )
 int nanny_setSocket( lua_State *L )
 {
    NANNY_DATA *nanny;
+   SOCKET_STATE *state;
    D_SOCKET *socket;
 
    DAVLUACM_NANNY_NONE( nanny, L );
@@ -82,7 +87,10 @@ int nanny_setSocket( lua_State *L )
       bug( "%s: setSocket must receive Socket.meta userdata.", __FUNCTION__ );
       return 0;
    }
-   set_nSocket( nanny, socket );
+   state = init_state();
+   set_state_as_nanny( state, nanny );
+   set_state_control( state, nanny->lua_path );
+   nanny->managing_state = state;
    return 0;
 }
 
@@ -123,5 +131,45 @@ int nanny_statePrev( lua_State *L )
    state_nPrev( nanny );
    lua_pushboolean( L, 1 );
    return 1;
+}
+
+int nanny_Message( lua_State *L )
+{
+   NANNY_DATA *nanny;
+   D_SOCKET *socket;
+   int top, buffer_id = 0;
+
+   DAVLUACM_NANNY_NONE( nanny, L );
+
+   if( ( top = lua_gettop( L ) ) < 2 )
+   {
+      bug( "%s: bad number of arguments passed: msg( message, buffer_id )", __FUNCTION__ );
+      return 0;
+   }
+
+   if( lua_type( L, 2 ) != LUA_TSTRING )
+   {
+      bug( "%s: message must be of type string.", __FUNCTION__ );
+      return 0;
+   }
+
+   if( top == 3 )
+   {
+      if( lua_type( L, 3 ) != LUA_TNUMBER )
+      {
+         bug( "%s: buffer_id must be of type number.", __FUNCTION__ );
+         return 0;
+      }
+      buffer_id = lua_tonumber( L, 3 );
+   }
+
+   if( !nanny->managing_state || ( socket = nanny->managing_state->socket ) == NULL )
+   {
+      bug( "%s: cannot send message, nanny has no socket.", __FUNCTION__ );
+      return 0;
+   }
+
+   __text_to_buffer( socket, lua_tostring( L, 2 ), buffer_id );
+   return 0;
 }
 

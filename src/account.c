@@ -4,12 +4,12 @@
 ACCOUNT_DATA *init_account( void )
 {
    ACCOUNT_DATA *account;
-   account		= malloc( sizeof( ACCOUNT_DATA ) );
-   account->tag		= init_tag();
-   account->socket	= NULL;
-   account->name	= NULL;
-   account->passwd	= NULL;
-   account->level	= LEVEL_BASIC;
+   account			= malloc( sizeof( ACCOUNT_DATA ) );
+   account->tag			= init_tag();
+   account->managing_state	= NULL;
+   account->name		= NULL;
+   account->passwd		= NULL;
+   account->level		= LEVEL_BASIC;
    return account;
 }
 
@@ -97,8 +97,10 @@ bool free_account( ACCOUNT_DATA *account )
       bug( "%s: account still apart of global monitor list, cannot free.", __FUNCTION__ );
       return FALSE;
    }
-   set_aSocket( account, NULL );
+   free_state( account->managing_state );
+   account->managing_state = NULL;
    free_tag( account->tag );
+   account->tag = NULL;
    FREE( account->name );
    FREE( account->passwd );
    FREE( account );
@@ -117,17 +119,6 @@ bool delete_account( ACCOUNT_DATA *account )
    return TRUE;
 }
 /* setters */
-int set_aSocket( ACCOUNT_DATA *account, D_SOCKET *socket )
-{
-   if( account->socket )
-      account->socket->account = NULL;
-   account->socket = socket;
-
-   if( socket )
-      socket->account = account;
-   return 1;
-}
-
 int set_aName( ACCOUNT_DATA *account, const char *name )
 {
    FREE( account->name );
@@ -222,10 +213,6 @@ ACCOUNT_DATA *get_accountByName_ifActive( const char *name )
    return account;
 }
 
-D_SOCKET *get_aSocket( ACCOUNT_DATA *account )
-{
-   return account->socket;
-}
 const char *get_aName( ACCOUNT_DATA *account )
 {
    static char buf[MAX_BUFFER];

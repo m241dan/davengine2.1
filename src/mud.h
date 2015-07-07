@@ -146,7 +146,8 @@ struct dSocket
    D_MOBILE     *player;
 
    SOCKET_STATE *states[MAX_STATE];
-   sh_int	 current_state;
+   sh_int	 state_index;
+   sh_int	 previous_index;
 
    LLIST        *events;
    char          * hostname;
@@ -284,7 +285,10 @@ void  handle_new_connections  ( D_S *dsock, char *arg );
 void  clear_socket            ( D_S *sock_new, int sock );
 void  recycle_sockets         ( void );
 void *lookup_address          ( void *arg );
+void	socket_setState		( D_SOCKET *socket, sh_int new_index );
 int	socket_addState		( D_SOCKET *socket, SOCKET_STATE *state );
+void	socket_delState		( D_SOCKET *socket, SOCKET_STATE *state );
+
 
 /*
  * interpret.c

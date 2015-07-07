@@ -1,5 +1,6 @@
 struct socket_state
 {
+   D_SOCKET *socket;
    union control_types {
       ACCOUNT_DATA *account;
       NANNY_DATA *nanny;

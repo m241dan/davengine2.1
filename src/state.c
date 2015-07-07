@@ -6,12 +6,16 @@ SOCKET_STATE *init_state( void )
    SOCKET_STATE *state;
 
    state = (SOCKET_STATE *)calloc( 1, sizeof( SOCKET_STATE ) );
+   state->control.account = NULL;
+   state->socket = NULL;
    state->type = TAG_UNSET;
    return state;
 }
 
 void free_state( SOCKET_STATE *state )
 {
+   if( state->socket )
+      socket_delState( state->socket, state );
    state->control.account = NULL;
    FREE( state );
 }

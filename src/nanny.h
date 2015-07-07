@@ -5,7 +5,7 @@ extern LLIST *active_nannys;
 struct nanny_data
 {
    ID_TAG *tag;
-   D_SOCKET *socket;
+   SOCKET_STATE *managing_state;
    char *lua_path;
    int state;
    bool can_back;
