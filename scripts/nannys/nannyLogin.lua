@@ -1,10 +1,11 @@
 function onNannyLoad( nanny )
 end
 
-function onInterp( nanny, input )
+function onInterp( socket, input )
+   socket:msg( string.format( "This is your input:\r\n", input ) )
 end
 
-function onPrompt( nanny )
+function onPrompt( socket )
    return ">"
 end
 

@@ -200,27 +200,23 @@ void GameLoop(int control)
       next_cmd_from_buffer(dsock);
 
       /* Is there a new command pending ? */
-      if (dsock->next_command[0] != '\0')
-      {
-        /* figure out how to deal with the incoming command */
-        switch(dsock->state)
-        {
-          default:
-            bug("Descriptor in bad state.");
-            break;
-          case STATE_NEW_NAME:
-          case STATE_NEW_PASSWORD:
-          case STATE_VERIFY_PASSWORD:
-          case STATE_ASK_PASSWORD:
-            handle_new_connections(dsock, dsock->next_command);
-            break;
-          case STATE_PLAYING:
-            handle_cmd_input(dsock, dsock->next_command);
-            break;
-        }
+       if (dsock->next_command[0] != '\0')
+       {
+          if( dsock->states[dsock->state_index] != NULL )
+          {
+             int ret, top = lua_gettop( lua_handle );
 
-        dsock->next_command[0] = '\0';
-      }
+             prep_stack( dsock->states[dsock->state_index]->control_file, "onInterp" );
+             lua_pushobj( lua_handle, dsock, D_SOCKET );
+             lua_pushstring( lua_handle, dsock->next_command );
+             if( ( ret = lua_pcall( lua_handle, 2, LUA_MULTRET, 0 ) ) )
+                bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, dsock->states[dsock->state_index]->control_file, lua_tostring( lua_handle, -1 ) );
+             lua_settop( lua_handle, top );
+          }
+          else
+             bug( "%s: state at index %d is NULL.", __FUNCTION__, dsock->state_index );
+          dsock->next_command[0] = '\0';
+       }
 
       /* if the player quits or get's disconnected */
       if (dsock->state == STATE_CLOSED) continue;
@@ -867,15 +863,30 @@ void next_cmd_from_buffer(D_SOCKET *dsock)
 bool flush_output(D_SOCKET *dsock)
 {
   /* nothing to send */
-  if (dsock->top_output <= 0 && !(dsock->bust_prompt && dsock->state == STATE_PLAYING))
+  if (dsock->top_output <= 0 && !dsock->bust_prompt)
     return TRUE;
 
   /* bust a prompt */
-  if (dsock->state == STATE_PLAYING && dsock->bust_prompt)
-  {
-    text_to_buffer(dsock, "\n\rSocketMud:> ");
-    dsock->bust_prompt = FALSE;
-  }
+   if (dsock->bust_prompt)
+   {
+      if( dsock->states[dsock->state_index] != NULL)
+      {
+         int ret, top = lua_gettop( lua_handle );
+
+         prep_stack( dsock->states[dsock->state_index]->control_file, "onPrompt" );
+         lua_pushobj( lua_handle, dsock, D_SOCKET );
+         if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
+         {
+            bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, dsock->states[dsock->state_index]->control_file, lua_tostring( lua_handle, -1 ) );
+            text_to_buffer( dsock, "- PROMPT SCRIPT BROKEN -\r\n" );
+         }
+         else
+            text_to_buffer( dsock, lua_tostring( lua_handle, -1 ) );
+         lua_settop( lua_handle, top );
+      }
+      else
+         bug( "%s: control state is NULL at this index somehow.", __FUNCTION__ );
+   }
 
   /* reset the top pointer */
   dsock->top_output = 0;
