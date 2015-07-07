@@ -25,6 +25,9 @@ function onInterp( nanny, input )
       account = Account.get( info["Name"] )
       if( account:verifyPassword( input ) == true ) then
          socket:setState( socket:control( account ) )
+      else
+         socket:msg( "Bad password, try again!\r\n" )
+         nanny:setState( 1 )
       end
    end
 end

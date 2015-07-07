@@ -17,3 +17,4 @@ int nanny_setState( lua_State *L );
 int nanny_stateNext( lua_State *L );
 int nanny_statePrev( lua_State *L );
 int nanny_Message( lua_State *L );
+int nanny_Finish( lua_State *L );

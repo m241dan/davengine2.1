@@ -9,6 +9,7 @@ const struct luaL_Reg AccountLib_m[] = {
    { "getLevel", account_getLevel },
    /* utility */
    { "verifyPassword", account_verifyPasswd },
+   { "msg", account_Message },
    { NULL, NULL }
 };
 
@@ -225,6 +226,45 @@ int account_verifyPasswd( lua_State *L )
    }
    lua_pushboolean( L, 1 );
    return 1;
+}
+
+int account_Message( lua_State *L )
+{
+   ACCOUNT_DATA *account;
+   D_SOCKET *socket;
+   int top, buffer_id = 0;
+
+   DAVLUACM_ACCOUNT_NONE( account, L );
+
+   if( ( top = lua_gettop( L ) ) < 2 )
+   {
+      bug( "%s: bad number of arguments passed: msg( message, buffer_id )", __FUNCTION__ );
+      return 0;
+   }
+
+   if( lua_type( L, 2 ) != LUA_TSTRING )
+   {
+      bug( "%s: message must be of type string.", __FUNCTION__ );
+      return 0;
+   }
+
+   if( top == 3 )
+   {
+      if( lua_type( L, 3 ) != LUA_TNUMBER )
+      {
+         bug( "%s: buffer_id must be of type number.", __FUNCTION__ );
+         return 0;
+      }
+      buffer_id = lua_tonumber( L, 3 );
+   }
+   if( !account->managing_state || ( socket = account->managing_state->socket ) == NULL )
+   {
+      bug( "%s: cannot send message, account has no socket.", __FUNCTION__ );
+      return 0;
+   }
+
+   __text_to_buffer( socket, lua_tostring( L, 2 ), buffer_id );
+   return 0;
 }
 
 /* int account_addChar( lua_State *L ); */

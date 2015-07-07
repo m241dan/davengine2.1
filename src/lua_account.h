@@ -23,3 +23,4 @@ int account_getLevel( lua_State *L );
 
 int account_verifyPasswd( lua_State *L );
 int account_addChar( lua_State *L );
+int account_Message( lua_State *L );
