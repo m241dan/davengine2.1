@@ -123,6 +123,38 @@ do                                                                      \
    }                                                                    \
 } while(0)
 
+#define DAVLUACM_NANNY_NIL( nanny, L )                              \
+do                                                                      \
+{                                                                       \
+   if( ( (nanny) = *(NANNY_DATA **)luaL_checkudata( (L), 1, "Nanny.meta" ) ) == NULL ) \
+   {                                                                    \
+      bug( "%s: bad meta table.", __FUNCTION__ );                       \
+      lua_pushnil( (L) );                                               \
+      return 1;                                                         \
+   }                                                                    \
+} while(0)
+
+#define DAVLUACM_NANNY_BOOL( nanny, L )                             \
+do                                                                      \
+{                                                                       \
+   if( ( (nanny) = *(NANNY_DATA **)luaL_checkudata( (L), 1, "Nanny.meta" ) ) == NULL ) \
+   {                                                                    \
+      bug( "%s: bad meta table.", __FUNCTION__ );                       \
+      lua_pushboolean( (L), 0 );                                        \
+      return 1;                                                         \
+   }                                                                    \
+} while(0)
+
+#define DAVLUACM_NANNY_NONE( nanny, L )                             \
+do                                                                      \
+{                                                                       \
+   if( ( (nanny) = *(NANNY_DATA **)luaL_checkudata( (L), 1, "Nanny.meta" ) ) == NULL ) \
+   {                                                                    \
+      bug( "%s: bad meta table.", __FUNCTION__ );                       \
+      return 0;                                                         \
+   }                                                                    \
+} while(0)
+
 void init_lua_handle			( void );
 void load_lua_server_config_script	( void );
 

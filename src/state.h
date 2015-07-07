@@ -12,6 +12,7 @@ struct socket_state
 
 /* creation */
 SOCKET_STATE *init_state( void );
+void free_state( SOCKET_STATE *state );
 
 /* setters */
 void set_state_control( SOCKET_STATE *state, const char *file );

@@ -1,5 +1,7 @@
 /* lua_socket written by Davenge to give lua access to parts of the socket */
 
+int luaopen_SocketLib( lua_State *L );
+int SocketGC( lua_State *L );
 int getSocket( lua_State *L );
 
 /* setters */

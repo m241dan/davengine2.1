@@ -31,6 +31,9 @@ void init_lua_handle( void )
    luaL_requiref( lua_handle, "Nanny", luaopen_NannyLib, 1 );
    lua_pop( lua_handle, -1 );
 
+   log_string( "Loading Socket Lua Lib" );
+   luaL_requiref( lua_handle, "Socket", luaopen_SocketLib, 1 );
+   lua_pop( lua_handle, -1 );
 }
 
 void load_lua_server_config_script( void )

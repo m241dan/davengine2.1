@@ -2,7 +2,8 @@ int luaopen_NannyLib( lua_State *L );
 int NannyGC( lua_State *L );
 
 /* Nanny Lib Functions */
-int getState( lua_State *L );
+int newNanny( lua_State *L );
+
 /* nanny object methods */
 
 /* getters */

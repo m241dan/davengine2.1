@@ -41,6 +41,7 @@
 #define MAX_BUFFER         1024                   /* seems like a decent amount         */
 #define MAX_OUTPUT         2048                   /* well shoot me if it isn't enough   */
 #define MAX_HELP_ENTRY     4096                   /* roughly 40 lines of blocktext      */
+#define MAX_STATE	     10
 #define FILE_TERMINATOR    "EOF"                  /* end of file marker                 */
 #define COPYOVER_FILE      "txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "src/DavEngine"     /* the name of the mud binary         */
@@ -143,19 +144,22 @@ struct dSocket
    ACCOUNT_DATA *account;
    D_MOBILE     *player;
 
+   SOCKET_STATE *states[MAX_STATE];
+   sh_int	 current_state;
+
    LLIST        *events;
-  char          * hostname;
-  char            inbuf[MAX_BUFFER];
-  D_BUFFER       *outbuf[OUT_BUFS];
-  char            next_command[MAX_BUFFER];
-  bool            bust_prompt;
-  sh_int          lookup_status;
-  sh_int          state;
-  sh_int          control;
-  sh_int          top_output;
-  unsigned char   compressing;                 /* MCCP support */
-  z_stream      * out_compress;                /* MCCP support */
-  unsigned char * out_compress_buf;            /* MCCP support */
+   char          * hostname;
+   char            inbuf[MAX_BUFFER];
+   D_BUFFER       *outbuf[OUT_BUFS];
+   char            next_command[MAX_BUFFER];
+   bool            bust_prompt;
+   sh_int          lookup_status;
+   sh_int          state;
+   sh_int          control;
+   sh_int          top_output;
+   unsigned char   compressing;                 /* MCCP support */
+   z_stream      * out_compress;                /* MCCP support */
+   unsigned char * out_compress_buf;            /* MCCP support */
 };
 
 struct dMobile

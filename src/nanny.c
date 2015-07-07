@@ -69,13 +69,9 @@ bool set_nPath( NANNY_DATA *nanny, const char *path )
    nanny->lua_path = new_string( path );
    return TRUE;
 }
-
 bool set_nSocket( NANNY_DATA *nanny, D_SOCKET *socket )
 {
-   if( nanny->socket )
-      nanny->socket->nanny = NULL;
    nanny->socket = socket;
-   nanny->socket->nanny = nanny;
    return TRUE;
 }
 
