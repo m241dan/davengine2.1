@@ -42,7 +42,8 @@ bool load_nanny( NANNY_DATA *nanny ) /* nanny must have a set path, then it will
 void free_nanny( NANNY_DATA *nanny )
 {
    delete_tag( nanny->tag );
-   free_state( nanny->managing_state );
+   if( nanny->state )
+      free_state( nanny->managing_state );
    FREE( nanny->lua_path );
    FREE( nanny );
 }
