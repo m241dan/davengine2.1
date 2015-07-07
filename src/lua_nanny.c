@@ -1,11 +1,13 @@
 #include "mud.h"
 
 const struct luaL_Reg NannyLib_m[] = {
+   { "setSocket", nanny_setSocket },
    { "getState", nanny_getState },
    { NULL, NULL }
 };
 
 const struct luaL_Reg NannyLib_f[] = {
+   { "new", newNanny },
    { NULL, NULL }
 };
 
@@ -58,6 +60,7 @@ int newNanny( lua_State *L )
    return 1;
 }
 
+/* getters */
 int nanny_getState( lua_State *L )
 {
    NANNY_DATA *nanny;
@@ -66,3 +69,59 @@ int nanny_getState( lua_State *L )
    lua_pushnumber( L, nanny->state );
    return 1;
 }
+
+/* setters */
+int nanny_setSocket( lua_State *L )
+{
+   NANNY_DATA *nanny;
+   D_SOCKET *socket;
+
+   DAVLUACM_NANNY_NONE( nanny, L );
+   if( ( socket = (D_SOCKET *)check_meta( L, 2, "Socket.meta" ) ) == NULL )
+   {
+      bug( "%s: setSocket must receive Socket.meta userdata.", __FUNCTION__ );
+      return 0;
+   }
+   set_nSocket( nanny, socket );
+   return 0;
+}
+
+int nanny_setState( lua_State *L )
+{
+   NANNY_DATA *nanny;
+
+   DAVLUACM_NANNY_BOOL( nanny, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: nanny states can only be setto numbers", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   set_nState( nanny, lua_tonumber( L, 2 ) );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
+/* utility */
+int nanny_stateNext( lua_State *L )
+{
+   NANNY_DATA *nanny;
+
+   DAVLUACM_NANNY_BOOL( nanny, L );
+   state_nNext( nanny );
+   lua_pushboolean( L, 1 );
+   return 1;
+
+}
+
+int nanny_statePrev( lua_State *L )
+{
+   NANNY_DATA *nanny;
+
+   DAVLUACM_NANNY_BOOL( nanny, L );
+   state_nPrev( nanny );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+

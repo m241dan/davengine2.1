@@ -5,11 +5,11 @@ int SocketGC( lua_State *L );
 int getSocket( lua_State *L );
 
 /* setters */
-int setState( lua_State *L );
+int socket_setState( lua_State *L );
 
 /* getters */
-int getState( lua_State *L );
+int socket_getState( lua_State *L );
 
 /* utility */
-int nextState( lua_State *L );
-int prevState( lua_State *L );
+int socket_Control( lua_State *L );
+int socket_Message( lua_State *L );

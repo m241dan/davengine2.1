@@ -167,3 +167,13 @@ int get_meta_id( lua_State *L, int index )
       }
    }
 }
+
+void lua_onConnect( D_SOCKET *socket )
+{
+   int ret, top = lua_gettop( lua_handle );
+   prep_stack( "scripts/events/globals/onConnect.lua", "onConnect" );
+   lua_pushobj( lua_handle, socket, D_SOCKET );
+   if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
+      bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, "scripts/events/globals/onConnect.lua", lua_tostring( lua_handle, -1 ) );
+   lua_settop( lua_handle, top );
+}

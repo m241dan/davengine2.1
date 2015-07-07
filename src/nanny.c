@@ -77,22 +77,26 @@ bool set_nSocket( NANNY_DATA *nanny, D_SOCKET *socket )
 
 bool set_nState( NANNY_DATA *nanny, int state )
 {
+   int ret, top = lua_gettop( lua_handle );
    nanny->state = state;
-   /* maybe put a state change lua call in here */
+
+   prep_stack( nanny->lua_path, "onStateChange" );
+   if( ( ret = lua_pcall( lua_handle, 0, LUA_MULTRET, 0 ) ) )
+      bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, nanny->lua_path, lua_tostring( lua_handle, -1 ) );
+   lua_settop( lua_handle, top );
+
    return TRUE;
 }
 
 bool state_nNext( NANNY_DATA *nanny )
 {
-   nanny->state++;
-   /* maybe put a state change lua call in here */
+   set_nState( nanny, nanny->state + 1 );
    return TRUE;
 }
 
 bool state_nPrev( NANNY_DATA *nanny )
 {
-   nanny->state--;
-   /* maybe put a state change lua call in here */
+   set_nState( nanny, nanny->state - 1 );
    return TRUE;
 }
 

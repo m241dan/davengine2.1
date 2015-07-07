@@ -387,13 +387,9 @@ bool new_socket(int sock)
     else sock_new->lookup_status++;
   }
 
-  /* negotiate compression */
-  text_to_buffer(sock_new, (char *) compress_will2);
-  text_to_buffer(sock_new, (char *) compress_will);
-
   /* send the greeting */
   text_to_buffer(sock_new, greeting);
-  text_to_buffer(sock_new, "What is your name? ");
+  lua_onConnect( sock_new );
 
   /* initialize socket events */
   init_events_socket(sock_new);
@@ -1078,6 +1074,10 @@ void clear_socket(D_SOCKET *sock_new, int sock)
    SET_TYPE( sock_new, SOCKET_TAG );
    new_tag( sock_new->tag, "system" );
 
+   sock_new->current_state  = 0;
+   for( int x = 1; x < MAX_STATE; x++ )
+      sock_new->states[x] = NULL;
+
    sock_new->control        =  sock;
    sock_new->state          =  STATE_NEW_NAME;
    sock_new->lookup_status  =  TSTATE_LOOKUP;
@@ -1155,4 +1155,19 @@ void recycle_sockets()
      }
   }
   DetachIterator(&Iter);
+}
+
+int socket_addState( D_SOCKET *socket, SOCKET_STATE *state )
+{
+   int x;
+
+   for( x = 0; x < MAX_STATE; x++ )
+      if( socket->states[x] == NULL )
+         break;
+
+   if( x == 10 )
+      return -1;
+
+   socket->states[x] = state;
+   return x;
 }

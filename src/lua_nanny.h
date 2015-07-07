@@ -9,6 +9,7 @@ int newNanny( lua_State *L );
 /* getters */
 int nanny_getState( lua_State *L );
 /* setters */
+int nanny_setSocket( lua_State *L );
 int nanny_setState( lua_State *L );
 
 /* utility */

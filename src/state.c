@@ -25,13 +25,13 @@ void set_state_control( SOCKET_STATE *state, const char *file )
 void set_state_as_account( SOCKET_STATE *state, ACCOUNT_DATA *account )
 {
    state->control.account = account;
-   state->type = TAG_ACCOUNT;
+   state->type = ACCOUNT_TAG;
 }
 
 void set_state_as_nanny( SOCKET_STATE *state, NANNY_DATA *nanny )
 {
    state->control.nanny = nanny;
-   state->type = TAG_NANNY;
+   state->type = NANNY_TAG;
 }
 
 /* getters */

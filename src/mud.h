@@ -45,6 +45,7 @@
 #define FILE_TERMINATOR    "EOF"                  /* end of file marker                 */
 #define COPYOVER_FILE      "txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "src/DavEngine"     /* the name of the mud binary         */
+#define GLOBAL_ACCOUNT_CONTROL "scripts/controls/accountControl.lua"
 
 /* Connection states */
 #define STATE_NEW_NAME         0
@@ -209,6 +210,7 @@ typedef struct buffer_type
 #include "lua_nanny.h"
 #include "vars.h"
 #include "lua_socket.h"
+#include "state.h"
 
 /******************************
  * End of new structures      *
@@ -282,6 +284,7 @@ void  handle_new_connections  ( D_S *dsock, char *arg );
 void  clear_socket            ( D_S *sock_new, int sock );
 void  recycle_sockets         ( void );
 void *lookup_address          ( void *arg );
+int	socket_addState		( D_SOCKET *socket, SOCKET_STATE *state );
 
 /*
  * interpret.c
