@@ -33,6 +33,29 @@ function onInterp( nanny, input )
          socket:msg( "Bad password, try again!\r\n" )
          nanny:setState( 1 )
       end
+   elseif( state == 2 ) then
+      if( checkPass( input ) ) then
+         info["Pass"] = input
+         nanny:setState( 3 )
+      else
+         nanny:msg( "Password is too long or too short.\r\n" )
+         nanny:setState( 2 )
+      end
+   elseif( state == 3 ) then
+      if( info["Pass"] == input ) then
+         account = Account.new( info["Name"], info["Pass"] )
+         if( account ~= nil ) then
+            socket:setState( socket:control( account ) )
+            nanny:finish()
+         else
+            nanny:msg( "Something has gone terribly wrong.\r\n" )
+            nanny:finish()
+            socket:setState( socket:control( Nanny.new( "scripts/nannys/nannyLogin.lua" ) ) )
+         end
+      else
+         nanny:msg( "Passwords do not match, try again!!!\r\n" )
+         nanny:setState( 2 )
+      end
    end
 end
 
@@ -44,3 +67,9 @@ function onStateChange( nanny )
    nanny:msg( string.format( "%s\r\n", login_msgs[nanny:getState()] ) )
 end
 
+function checkPass( input )
+   if( input:len() < 5 or input:len() > 20 ) then
+      return false
+   end
+   return true
+end
