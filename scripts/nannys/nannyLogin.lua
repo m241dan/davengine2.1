@@ -8,6 +8,9 @@ function onNannyLoad( nanny )
    var.new( "Info", "Login Nanny", nanny );
 end
 
+function onNannyFinish( nanny )
+end
+
 function onInterp( nanny, input )
    local account
    local socket = Socket.get( nanny )
@@ -25,6 +28,7 @@ function onInterp( nanny, input )
       account = Account.get( info["Name"] )
       if( account:verifyPassword( input ) == true ) then
          socket:setState( socket:control( account ) )
+         nanny:finish()
       else
          socket:msg( "Bad password, try again!\r\n" )
          nanny:setState( 1 )
