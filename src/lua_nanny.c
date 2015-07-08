@@ -212,14 +212,14 @@ int nanny_Message( lua_State *L )
 int nanny_Finish( lua_State *L )
 {
    NANNY_DATA *nanny;
-   int ret, top = lua_gettop( lua_handle );
+   int ret, top = lua_gettop( L );
 
    DAVLUACM_NANNY_NONE( nanny, L );
    prep_stack( nanny->lua_path, "onNannyFinish" );
-   lua_pushobj( lua_handle, nanny, NANNY_DATA );
-   if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
-      bug( "%s: ret %d: path %s\r\n - error message: %s", __FUNCTION__, ret, nanny->lua_path, lua_tostring( lua_handle, -1 ) );
+   lua_pushobj( L, nanny, NANNY_DATA );
+   if( ( ret = lua_pcall( L, 1, LUA_MULTRET, 0 ) ) )
+      bug( "%s: ret %d: path %s\r\n - error message: %s", __FUNCTION__, ret, nanny->lua_path, lua_tostring( L, -1 ) );
    free_nanny( nanny );
-   lua_settop( lua_handle, top );
+   lua_settop( L, top );
    return 0;
 }
