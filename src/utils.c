@@ -216,3 +216,15 @@ D_MOBILE *check_reconnect(char *player)
 
   return dMob;
 }
+
+void inline clearlist( LLIST *list )
+{
+   void *cell;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, list );
+   while( ( cell = NextInList( &Iter ) ) != NULL )
+      DetachFromList( cell, list );
+   DetachIterator( &Iter );
+}
+

@@ -137,6 +137,7 @@ typedef struct	nanny_data	NANNY_DATA;
 typedef struct  lua_var		LUA_VAR;
 typedef struct  lua_index	LUA_INDEX;
 typedef struct	lua_data	LUA_DATA;
+typedef struct  entity		ENTITY_DATA;
 
 /* the actual structures */
 struct dSocket
@@ -212,6 +213,7 @@ typedef struct buffer_type
 #include "vars.h"
 #include "lua_socket.h"
 #include "state.h"
+#include "entities.h"
 
 /******************************
  * End of new structures      *
@@ -344,7 +346,7 @@ void  load_muddata            ( bool fCopyOver );
 char *get_time                ( void );
 void  copyover_recover        ( void );
 D_M  *check_reconnect         ( char *player );
-
+extern void inline clearlist  ( LLIST *list );
 /*
  * action_safe.c
  */
