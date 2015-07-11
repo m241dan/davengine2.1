@@ -3,7 +3,7 @@
 #include "mud.h"
 
 const char *const meta_types[MAX_TAG_TYPE+1] = {
-   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta", "Socket.meta",
+   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta", "Socket.meta", "Entity.meta",
    '\0'
 };
 
@@ -149,21 +149,26 @@ int get_meta_id( lua_State *L, int index )
       default:
          bug( "%s: unknown metatype for searching out meta data IDs.", __FUNCTION__ );
          return -1;
-      case 0:
+      case ACCOUNT_TAG:
       {
          ACCOUNT_DATA *account = *(ACCOUNT_DATA **)lua_touserdata( L, index );
          return GET_ID( account );
       }
-      case 1:
+      case NANNY_TAG:
       {
          NANNY_DATA *nanny = *(NANNY_DATA **)lua_touserdata( L, index );
          return GET_ID( nanny );
       }
-      case 2:
-      case 3:
+      case GLOBAL_TAG:
+      case VAR_TAG:
       {
          LUA_VAR *var = *(LUA_VAR **)lua_touserdata( L, index );
          return var->ownerid;
+      }
+      case ENTITY_TAG:
+      {
+         ENTITY_DATA *entity = *(ENTITY_DATA **)lua_touserdata( L, index );
+         return GET_ID( entity );
       }
    }
 }
@@ -181,7 +186,7 @@ void lua_pushstateobj( lua_State *L, SOCKET_STATE *state )
             bug( "%s: nanny state has no nanny assigned to it.", __FUNCTION__ );
             return;
          }
-         lua_pushobj( lua_handle, nanny, NANNY_DATA );
+         lua_pushobj( L, nanny, NANNY_DATA );
          break;
       }
       case ACCOUNT_TAG:
@@ -192,7 +197,18 @@ void lua_pushstateobj( lua_State *L, SOCKET_STATE *state )
             bug( "%s: account state has no account assigned to it.", __FUNCTION__ );
             return;
          }
-         lua_pushobj( lua_handle, account, ACCOUNT_DATA );
+         lua_pushobj( L, account, ACCOUNT_DATA );
+         break;
+      }
+      case ENTITY_TAG:
+      {
+         ENTITY_DATA *entity;
+         if( ( entity = state->control.entity ) == NULL )
+         {
+            bug( "%s: entity state has no entity assigned to it.", __FUNCTION__ );
+            return;
+         }
+         lua_pushobj( L, entity, ENTITY_DATA );
          break;
       }
    }

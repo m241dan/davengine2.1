@@ -166,7 +166,20 @@ int socket_Control( lua_State *L )
          set_state_control( state, nanny->lua_path );
          break;
       }
-
+      case ENTITY_TAG:
+      {
+         ENTITY_DATA *entity;
+         if( ( entity = *(ENTITY_DATA **)lua_touserdata( L, 2 ) ) == NULL )
+         {
+            bug( "%s: the entity box is empty.", __FUNCTION__ );
+            lua_pushnil( L );
+            return 1;
+         }
+         state = init_state();
+         set_state_as_entity( state, entity );
+         set_state_control( state, GLOBAL_ENTITY_CONTROL );
+         break;
+      }
    }
    if( ( control_index = socket_addState( socket, state ) ) == -1 )
    {

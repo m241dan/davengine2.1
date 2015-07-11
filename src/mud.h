@@ -46,6 +46,7 @@
 #define COPYOVER_FILE      "txt/copyover.dat"  /* tempfile to store copyover data    */
 #define EXE_FILE           "src/DavEngine"     /* the name of the mud binary         */
 #define GLOBAL_ACCOUNT_CONTROL "scripts/controls/accountControl.lua"
+#define GLOBAL_ENTITY_CONTROL "scripts/controls/entityControl.lua"
 
 /* Connection states */
 #define STATE_NEW_NAME         0
@@ -329,6 +330,7 @@ int     find_real_length      ( const char *str, int goal );
 char   *copy_string_fl	      ( const char *orig, int length );
 char   *create_pattern	      ( const char *pattern, int width );
 char   *strip_nl	      ( const char *str );
+char   *bool_array_to_string  ( bool array[], int size );
 /*
  * help.c
  */

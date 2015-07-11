@@ -347,10 +347,30 @@ char *strip_nl( const char *str )
       return newstr;
    }
 
+   memset( &newstr[0], 0, sizeof( newstr ) );
+
    for( i = j = 0; str[i] != '\0'; i++ )
       if( str[i] != '\n' )
          newstr[j++] = str[i];
 
    newstr[j] = '\0';
    return newstr;
+}
+
+char *bool_array_to_string( bool array[], int size )
+{
+   static char buf[MAX_BUFFER];
+   int x;
+
+   memset( &buf[MAX_BUFFER], 0, sizeof( buf ) );
+
+   for( x = 0; x < size; x++ )
+   {
+      if( array[x] == TRUE )
+         buf[x] = 'y';
+      else
+         buf[x] = 'n';
+   }
+   buf[x] = '\0';
+   return buf;
 }
