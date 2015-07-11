@@ -374,3 +374,16 @@ char *bool_array_to_string( bool array[], int size )
    buf[x] = '\0';
    return buf;
 }
+
+void string_to_bool_array( const char *string, bool *array, int size )
+{
+   int x;
+
+   for( x = 0; x < size && string[x] != '\0'; x++ )
+   {
+      if( string[x] == 'y' )
+         array[x] = TRUE;
+      else
+         array[x] = FALSE;
+   }
+}

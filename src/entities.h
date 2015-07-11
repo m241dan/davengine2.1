@@ -23,6 +23,7 @@ struct entity
    bool subtype[MAX_ENTITY_SUB_TYPE];
 
    ENTITY_DATA *contained_by;
+   int contained_byID;
    LLIST *inventory;
    LLIST *inventory_qs[MAX_ENTITY_TYPE];
 };
@@ -31,8 +32,7 @@ struct entity
 
 ENTITY_DATA *init_entity( void );
 ENTITY_DATA *load_entityByID( int id );
-ENTITY_DATA *load_entityByName( const char *name );
-int db_load_entity( ENTITY_DATA *entity );
+int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row );
 bool new_entity( ENTITY_DATA *entity );
 
 void free_entity( ENTITY_DATA *entity );

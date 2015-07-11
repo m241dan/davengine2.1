@@ -17,6 +17,42 @@ ENTITY_DATA *init_entity( void )
    return entity;
 }
 
+ENTITY_DATA *load_entityByID( int id )
+{
+   ENTITY_DATA *entity;
+   MYSQL_ROW tag_row;
+   MYSQL_ROW entity_row;
+   char query[MAX_BUFFER];
+
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `entities` WHERE entityID=%d;", id );
+   if( ( entity_row = db_query_single_row( query ) ) == NULL )
+      return NULL;
+
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%d;", ENTITY_TAG, id );
+   if( ( tag_row = db_query_single_row( query ) ) == NULL )
+   {
+      bug( "%s: could not find tag for entity with ID %d", __FUNCTION__, id );
+      return NULL;
+   }
+
+   entity = init_entity();
+   db_load_tag( entity->tag, &tag_row );
+   db_load_entity( entity, &entity_row );
+   FREE( tag_row );
+   FREE( entity_row );
+   return entity;
+}
+
+int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
+{
+   int counter = 0;
+   entity->script = strdup( (*row)[counter++] );
+   string_to_bool_array( (*row)[counter++], entity->type, MAX_ENTITY_TYPE );
+   string_to_bool_array( (*row)[counter++], entity->subtype, MAX_ENTITY_SUB_TYPE );
+   entity->contained_byID = atoi( (*row)[counter++] );
+   return counter;
+}
+
 bool new_entity( ENTITY_DATA *entity )
 {
    char type[256];
@@ -70,3 +106,32 @@ bool delete_entity( ENTITY_DATA *entity )
    return FALSE;
 }
 
+/* getters */
+ENTITY_DATA *get_entityByID( int id )
+{
+   ENTITY_DATA *entity;
+
+   if( ( entity = get_entityByID_ifActive( id ) ) != NULL )
+      return entity;
+
+   if( ( entity = load_entityByID( id ) ) != NULL )
+      return NULL;
+
+   AttachToList( entity, active_entities[id % ENTITY_HASH] );
+   return NULL;
+}
+
+ENTITY_DATA *get_entityByID_ifActive( int id )
+{
+   ENTITY_DATA *entity;
+   ITERATOR Iter;
+
+   AttachIterator( &Iter, active_entities[id % ENTITY_HASH] );
+   while( ( entity = (ENTITY_DATA *)NextInList( &Iter ) ) != NULL )
+      if( GET_ID( entity ) == id )
+         break;
+   DetachIterator( &Iter );
+   return entity;
+}
+
+/* setters */

@@ -331,6 +331,8 @@ char   *copy_string_fl	      ( const char *orig, int length );
 char   *create_pattern	      ( const char *pattern, int width );
 char   *strip_nl	      ( const char *str );
 char   *bool_array_to_string  ( bool array[], int size );
+void    string_to_bool_array  ( const char *string, bool *array, int size );
+
 /*
  * help.c
  */
