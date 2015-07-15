@@ -7,7 +7,7 @@ typedef enum
 
 #define GET_ID( obj )	!(obj) ? 0 : (obj)->tag->id
 #define GET_TYPE( obj )	!(obj) ? TAG_UNSET : (obj)->tag->type
-#define SET_TYPE( obj, val ) (obj) ? (obj)->tag->type = (val)
+#define SET_TYPE( obj, val ) (obj) ? (obj)->tag->type = (val) : 0
 #define VALID_TAG( obj ) !(obj) ? FALSE : (obj)->tag->id < 1 ? FALSE : TRUE
 
 struct id_tag

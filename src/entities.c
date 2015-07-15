@@ -1,4 +1,4 @@
-	#include "mud.h"
+#include "mud.h"
 
 /* creation */
 
@@ -49,7 +49,7 @@ int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
    entity->script = strdup( (*row)[counter++] );
    string_to_bool_array( (*row)[counter++], entity->type, MAX_ENTITY_TYPE );
    string_to_bool_array( (*row)[counter++], entity->subtype, MAX_ENTITY_SUB_TYPE );
-   entity->contained_by = atoi( (*row)[counter++] );
+   entity->contained_byID = atoi( (*row)[counter++] );
    return counter;
 }
 
@@ -141,26 +141,67 @@ ENTITY_DATA *get_entityByID_ifActive( int id )
    return entity;
 }
 
-const char *entity_getScript( ENTITY_DATA *entity )
-{
-   return NULL;
-}
-
 /* setters */
 bool entity_setScript( ENTITY_DATA *entity, const char *script )
 {
-   return FALSE;
+   FREE( entity->script );
+   entity->script = strdup( script );
+   if( VALID_TAG( entity ) )
+      if( !quick_query( "UPDATE `entities` SET script='%s' WHERE entityID=%d;", entity->script, GET_ID( entity ) ) )
+         bug( "%s: could not update database with new script.", __FUNCTION__ );
+   return TRUE;
 }
-bool entity_settype( ENTITY_DATA *entity, ENTITY_TYPE type )
+bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type )
 {
-   /* handle inventory_qs if contained */
-   return FALSE;
+   if( !entity )
+   {
+      bug( "%s: entity is NULL.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   if( entity->type[type] )
+      return TRUE;
+
+   entity->type[type] = TRUE;
+   if( entity->contained_by )
+      AttachToList( entity, entity->contained_by->inventory_qs[type] );
+
+   if( VALID_TAG( entity ) )
+   {
+      char type_string[256];
+      snprintf( type_string, 256, "%s", bool_array_to_string( entity->type, MAX_ENTITY_TYPE ) );
+      if( !quick_query( "UPDATE `entities` SET type='%s' WHERE entityID=%d;", type_string, GET_ID( entity ) ) )
+         bug( "%s: could not update database with new type.", __FUNCTION__ );
+   }
+   return TRUE;
+}
+
+bool entity_setSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype )
+{
+   if( !entity )
+   {
+      bug( "%s: entity is NULL.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   if( entity->subtype[stype] )
+      return TRUE;
+
+   entity->subtype[stype] = TRUE;
+   if( VALID_TAG( entity ) )
+   {
+      char stype_string[256];
+      snprintf( stype_string, 256, "%s", bool_array_to_string( entity->subtype, MAX_ENTITY_SUB_TYPE ) );
+      if( !quick_query( "UPDATE `entities` SET subtype='%s' WHERE entityID=%d;", stype_string, GET_ID( entity ) ) )
+         bug( "%s: could not update databse with new subtype.", __FUNCTION__ );
+   }
+   return TRUE;
 }
 
 /* utility */
 bool entity_from_its_container( ENTITY_DATA *entity )
 {
-   ENTITY_CONTAINER *container;
+   ENTITY_DATA *container;
 
    if( !entity )
    {
@@ -173,7 +214,7 @@ bool entity_from_its_container( ENTITY_DATA *entity )
 
    DetachFromList( entity, container->inventory );
    for( int x = 0; x < MAX_ENTITY_TYPE; x++ )
-      if( entity[x] == TRUE )
+      if( entity->type[x] == TRUE )
          DetachFromList( entity, container->inventory_qs[x] );
 
    return TRUE;
@@ -208,7 +249,7 @@ bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container )
 
 bool update_position( ENTITY_DATA *entity )
 {
-   if( VALID_TAG( entity ) && ListHas( active_entities, entity ) )
+   if( VALID_TAG( entity ) && ListHas( active_entities[GET_ID( entity ) % ENTITY_HASH], entity ) )
       if( !quick_query( "UPDATE `entities` SET containedBy=%d WHERE entityID=%d;", entity->contained_byID, GET_ID( entity ) ) )
          return FALSE;
    return TRUE;
