@@ -5,10 +5,10 @@ typedef enum
    TAG_INT=-3, TAG_STRING=-2, TAG_UNSET=-1, ACCOUNT_TAG = 0, NANNY_TAG, GLOBAL_TAG, VAR_TAG, SOCKET_TAG, ENTITY_TAG, MAX_TAG_TYPE
 } TAG_TYPE;
 
-#define GET_ID( obj )	(obj)->tag->id
-#define GET_TYPE( obj )	(obj)->tag->type
-#define SET_TYPE( obj, val ) (obj)->tag->type = (val)
-#define VALID_TAG( obj ) (obj)->tag->id < 1 ? FALSE : TRUE
+#define GET_ID( obj )	!(obj) ? 0 : (obj)->tag->id
+#define GET_TYPE( obj )	!(obj) ? TAG_UNSET : (obj)->tag->type
+#define SET_TYPE( obj, val ) (obj) ? (obj)->tag->type = (val)
+#define VALID_TAG( obj ) !(obj) ? FALSE : (obj)->tag->id < 1 ? FALSE : TRUE
 
 struct id_tag
 {

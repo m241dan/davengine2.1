@@ -50,3 +50,4 @@ bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type );
 /* utility */
 bool entity_from_its_container( ENTITY_DATA *entity );
 bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container );
+bool update_position( ENTITY_DATA *entity );

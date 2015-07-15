@@ -119,8 +119,12 @@ ENTITY_DATA *get_entityByID( int id )
       return NULL;
 
    AttachToList( entity, active_entities[id % ENTITY_HASH] );
-   if( ( container = get_entityByID_ifActive( entity->contained_byID ) ) != NULL )
+
+   if( entity->contained_byID != 0 && ( container = get_entityByID_ifActive( entity->contained_byID ) ) != NULL )
       entity_to_container( entity, container );
+   else if( !entity->type[ENTITY_ROOM] )
+      bug( "%s: left entity #%d floating in limbo and it's not a room.", __FUNCTION__, GET_ID( entity ) );
+
    return entity;
 }
 
@@ -182,12 +186,30 @@ bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container )
       bug( "%s: trying to 'to' a NULL entity.", __FUNCTION__ );
       return FALSE;
    }
+
+   if( !entity_from_its_container( entity ) )
+      return FALSE;
+
    if( !container )
    {
-      bug( "%s: triyng to 'to' an entity to a NULL container.", __FUNCTION__ );
-      return FALSE;
+      entity->contained_by = NULL;
+      entity->contained_byID = 0;
+      return TRUE;
    }
 
-   entity_from_its_container( entity );
-   
+   AttachToList( entity, container->inventory );
+   for( int x = 0; x < MAX_ENTITY_TYPE; x++ )
+      if( entity->type[x] == TRUE )
+         AttachToList( entity, container->inventory_qs[x] );
+   entity->contained_byID = GET_ID( container );
+
+   return TRUE;
+}
+
+bool update_position( ENTITY_DATA *entity )
+{
+   if( VALID_TAG( entity ) && ListHas( active_entities, entity ) )
+      if( !quick_query( "UPDATE `entities` SET containedBy=%d WHERE entityID=%d;", entity->contained_byID, GET_ID( entity ) ) )
+         return FALSE;
+   return TRUE;
 }
