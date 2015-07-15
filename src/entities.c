@@ -49,7 +49,7 @@ int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
    entity->script = strdup( (*row)[counter++] );
    string_to_bool_array( (*row)[counter++], entity->type, MAX_ENTITY_TYPE );
    string_to_bool_array( (*row)[counter++], entity->subtype, MAX_ENTITY_SUB_TYPE );
-   entity->contained_byID = atoi( (*row)[counter++] );
+   entity->contained_by = atoi( (*row)[counter++] );
    return counter;
 }
 
@@ -109,16 +109,19 @@ bool delete_entity( ENTITY_DATA *entity )
 /* getters */
 ENTITY_DATA *get_entityByID( int id )
 {
+   ENTITY_DATA *container;
    ENTITY_DATA *entity;
 
    if( ( entity = get_entityByID_ifActive( id ) ) != NULL )
       return entity;
 
-   if( ( entity = load_entityByID( id ) ) != NULL )
+   if( ( entity = load_entityByID( id ) ) == NULL )
       return NULL;
 
    AttachToList( entity, active_entities[id % ENTITY_HASH] );
-   return NULL;
+   if( ( container = get_entityByID_ifActive( entity->contained_byID ) ) != NULL )
+      entity_to_container( entity, container );
+   return entity;
 }
 
 ENTITY_DATA *get_entityByID_ifActive( int id )
@@ -134,4 +137,57 @@ ENTITY_DATA *get_entityByID_ifActive( int id )
    return entity;
 }
 
+const char *entity_getScript( ENTITY_DATA *entity )
+{
+   return NULL;
+}
+
 /* setters */
+bool entity_setScript( ENTITY_DATA *entity, const char *script )
+{
+   return FALSE;
+}
+bool entity_settype( ENTITY_DATA *entity, ENTITY_TYPE type )
+{
+   /* handle inventory_qs if contained */
+   return FALSE;
+}
+
+/* utility */
+bool entity_from_its_container( ENTITY_DATA *entity )
+{
+   ENTITY_CONTAINER *container;
+
+   if( !entity )
+   {
+      bug( "%s: trying to 'from' a NULL entity.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   if( ( container = entity->contained_by ) == NULL )
+      return TRUE;
+
+   DetachFromList( entity, container->inventory );
+   for( int x = 0; x < MAX_ENTITY_TYPE; x++ )
+      if( entity[x] == TRUE )
+         DetachFromList( entity, container->inventory_qs[x] );
+
+   return TRUE;
+}
+
+bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container )
+{
+   if( !entity )
+   {
+      bug( "%s: trying to 'to' a NULL entity.", __FUNCTION__ );
+      return FALSE;
+   }
+   if( !container )
+   {
+      bug( "%s: triyng to 'to' an entity to a NULL container.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   entity_from_its_container( entity );
+   
+}

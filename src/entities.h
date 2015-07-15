@@ -41,7 +41,12 @@ bool delete_entity( ENTITY_DATA *entity );
 /* getters */
 ENTITY_DATA *get_entityByID( int id );
 ENTITY_DATA *get_entityByID_ifActive( int id );
-const char *get_script( ENTITY_DATA *entity );
+const char *entity_getScript( ENTITY_DATA *entity );
 
 /* setters */
-bool set_script( ENTITY_DATA *entity, const char *script );
+bool entity_setScript( ENTITY_DATA *entity, const char *script );
+bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type );
+
+/* utility */
+bool entity_from_its_container( ENTITY_DATA *entity );
+bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container );

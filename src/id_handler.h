@@ -8,6 +8,7 @@ typedef enum
 #define GET_ID( obj )	(obj)->tag->id
 #define GET_TYPE( obj )	(obj)->tag->type
 #define SET_TYPE( obj, val ) (obj)->tag->type = (val)
+#define VALID_TAG( obj ) (obj)->tag->id < 1 ? FALSE : TRUE
 
 struct id_tag
 {
