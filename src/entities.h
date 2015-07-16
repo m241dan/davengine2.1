@@ -33,6 +33,7 @@ struct entity
 ENTITY_DATA *init_entity( void );
 ENTITY_DATA *load_entityByID( int id );
 int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row );
+bool load_entityInventory( ENTITY_DATA *entity );
 bool new_entity( ENTITY_DATA *entity );
 
 void free_entity( ENTITY_DATA *entity );

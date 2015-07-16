@@ -53,6 +53,43 @@ int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
    return counter;
 }
 
+bool load_entityInventory( ENTITY_DATA *entity )
+{
+   ENTITY_DATA *invEntity;
+   LLIST *row_list;
+   MYSQL_ROW row;
+   ITERATOR Iter;
+   char query[MAX_BUFFER];
+
+   if( !VALID_TAG( entity ) )
+   {
+      bug( "%s: attempting to load inventory on entity with a bad tag.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   snprintf( query, MAX_BUFFER, "SELECT entityID FROM `entities` WHERE containedBy=%d;", GET_ID( entity ) );
+   row_list = AllocList();
+   if( !db_query_list_row( row_list, query ) )
+   {
+      FreeList( row_list );
+      return TRUE;
+   }
+
+   AttachIterator( &Iter, row_list );
+   while( ( row = (MYSQL_ROW)NextInList( &Iter ) ) != NULL )
+   {
+      if( ( invEntity = (ENTITY_DATA *)get_entityByID( atoi( row[0] ) ) ) == NULL )
+      {
+         bug( "%s: database could not load entity #%d for #%d's inventory.", __FUNCTION__, atoi( row[0] ), GET_ID( entity ) );
+         continue;
+      }
+      entity_to_container( invEntity, entity );
+   }
+   DetachIterator( &Iter );
+   FreeList( row_list );
+   return TRUE;
+}
+
 bool new_entity( ENTITY_DATA *entity )
 {
    char type[256];
@@ -140,6 +177,7 @@ ENTITY_DATA *get_entityByID( int id )
       return NULL;
 
    AttachToList( entity, active_entities[id % ENTITY_HASH] );
+   load_entityInventory( entity );
 
    if( entity->contained_byID != 0 && ( container = get_entityByID_ifActive( entity->contained_byID ) ) != NULL )
       entity_to_container( entity, container );
