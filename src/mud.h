@@ -215,6 +215,7 @@ typedef struct buffer_type
 #include "lua_socket.h"
 #include "state.h"
 #include "entities.h"
+#include "lua_entities.h"
 
 /******************************
  * End of new structures      *
@@ -309,6 +310,7 @@ char   *fread_line            ( FILE *fp );                 /* pointer         *
 char   *fread_string          ( FILE *fp );                 /* allocated data  */
 char   *fread_word            ( FILE *fp );                 /* pointer         */
 int     fread_number          ( FILE *fp );                 /* just an integer */
+bool file_exists( const char *string );
 
 /* 
  * strings.c
@@ -332,6 +334,7 @@ char   *create_pattern	      ( const char *pattern, int width );
 char   *strip_nl	      ( const char *str );
 char   *bool_array_to_string  ( bool array[], int size );
 void    string_to_bool_array  ( const char *string, bool *array, int size );
+const char *quick_format( const char *format, ... );
 
 /*
  * help.c

@@ -387,3 +387,23 @@ void string_to_bool_array( const char *string, bool *array, int size )
          array[x] = FALSE;
    }
 }
+
+const char *quick_format( const char *format, ... )
+{
+   static char buf[MAX_BUFFER];
+   memset( &buf, 0, sizeof( buf ) );
+   va_list va;
+   int res;
+
+   va_start( va, format );
+   res = vsnprintf( buf, MAX_BUFFER, format, va );
+   va_end( va );
+
+   if( res >= MAX_BUFFER -1 )
+   {
+      buf[0] = '\0';
+      bug( "Overflow when printing string %s", format );
+   }
+   return buf;
+}
+

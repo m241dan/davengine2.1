@@ -78,32 +78,53 @@ bool new_entity( ENTITY_DATA *entity )
 
 void free_entity( ENTITY_DATA *entity )
 {
+   ENTITY_DATA *invEntity;
+   ITERATOR Iter;
+
    free_tag( entity->tag );
    entity->tag = NULL;
    free_state( entity->managing_state );
    entity->managing_state = NULL;
    FREE( entity->script );
 
-   clearlist( entity->inventory );
-   entity->inventory = NULL;
    for( int x = 0; x < ENTITY_HASH; x++ )
    {
       clearlist( entity->inventory_qs[x] );
+      FreeList( entity->inventory_qs[x] );
       entity->inventory_qs[x] = NULL;
    }
+
+   AttachIterator( &Iter, entity->inventory );
+   while( ( invEntity = (ENTITY_DATA *)NextInList( &Iter ) ) != NULL )
+      free_entity( invEntity );
+   DetachIterator( &Iter );
+   FreeList( entity->inventory );
+   entity->inventory = NULL;
    FREE( entity );
 }
 
 bool delete_entity( ENTITY_DATA *entity )
 {
+   ENTITY_DATA *invEntity;
+   ITERATOR Iter;
+
    if( !quick_query( "DELETE FROM `entities` WHERE entityID=%d;", GET_ID( entity ) ) )
    {
       bug( "%s: could not delete entity with id %d from db.", __FUNCTION__, GET_ID( entity ) );
       return FALSE;
    }
+
+   AttachIterator( &Iter, entity->inventory );
+   while( ( invEntity = (ENTITY_DATA *)NextInList( &Iter ) ) != NULL )
+   {
+      DetachFromList( invEntity, entity->inventory );
+      entity_from_its_container( invEntity );
+   }
+   DetachIterator( &Iter );
+
    delete_tag( entity->tag );
    free_entity( entity );
-   return FALSE;
+   return TRUE;
 }
 
 /* getters */
