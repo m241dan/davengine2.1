@@ -33,6 +33,7 @@ struct entity
 ENTITY_DATA *init_entity( void );
 ENTITY_DATA *load_entityByID( int id );
 int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row );
+bool load_entityInventory( ENTITY_DATA *entity );
 bool new_entity( ENTITY_DATA *entity );
 
 void free_entity( ENTITY_DATA *entity );
@@ -41,7 +42,13 @@ bool delete_entity( ENTITY_DATA *entity );
 /* getters */
 ENTITY_DATA *get_entityByID( int id );
 ENTITY_DATA *get_entityByID_ifActive( int id );
-const char *get_script( ENTITY_DATA *entity );
 
 /* setters */
-bool set_script( ENTITY_DATA *entity, const char *script );
+bool entity_setScript( ENTITY_DATA *entity, const char *script );
+bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type );
+bool entity_setSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype );
+
+/* utility */
+bool entity_from_its_container( ENTITY_DATA *entity );
+bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container );
+bool update_position( ENTITY_DATA *entity );

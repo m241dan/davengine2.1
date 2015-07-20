@@ -312,3 +312,14 @@ char *fread_word(FILE *fp)
 
   return buf;
 }
+
+bool file_exists( const char *string )
+{
+   FILE *fp;
+
+   if( ( fp = fopen( string, "r" ) ) == NULL )
+      return FALSE;
+
+   fclose( fp );
+   return TRUE;
+}
