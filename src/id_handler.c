@@ -21,7 +21,7 @@ int clear_tag( ID_TAG *tag )
       return 0;
 
    tag->type = TAG_UNSET;
-   tag->id = -1;
+   tag->id = 0;
    tag->can_recycle = FALSE;
    FREE( tag->created_by );
    FREE( tag->created_on );
@@ -48,12 +48,12 @@ int free_tag( ID_TAG *tag )
 int delete_tag( ID_TAG *tag )
 {
    if( tag->can_recycle )
-      if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%d' );", tag->type, tag->id ) )
+      if( !quick_query( "INSERT INTO `id_recycled` VALUES( '%d', '%lli' );", tag->type, tag->id ) )
          bug( "%s: did not update recycled ids database with tag %d of type %d.", __FUNCTION__, tag->id, tag->type );
-   if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d and id=%d;", tag->type, tag->id ) )
+   if( !quick_query( "DELETE FROM `id_tags` WHERE type=%d and id=%lli;", tag->type, tag->id ) )
       bug( "%s: could not delete tag %d of type %d from the master tag table.", __FUNCTION__, tag->id, tag->type );
-   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%d;", tag->type, tag->id ) )
-      bug( "%s: could not delete vars of ownerid %d of ownertype %d.", __FUNCTION__, tag->id, tag->type );
+   if( !quick_query( "DELETE FROM `vars` WHERE ownertype=%d AND ownerid=%lli;", tag->type, tag->id ) )
+      bug( "%s: could not delete vars of ownerid %lli of ownertype %d.", __FUNCTION__, tag->id, tag->type );
    free_tag( tag );
    return 1;
 }
@@ -85,7 +85,7 @@ int db_load_tag( ID_TAG *tag, MYSQL_ROW *row )
    int counter = 0;
 
    tag->type = atoi( (*row)[counter++] );
-   tag->id = atoi( (*row)[counter++] );
+   tag->id = atoll( (*row)[counter++] );
    tag->can_recycle = atoi( (*row)[counter++] );
    tag->created_by = strdup( (*row)[counter++] );
    tag->created_on = strdup( (*row)[counter++] );
@@ -124,43 +124,43 @@ int update_tag( ID_TAG *tag, const char *effector, ... )
    return 1;
 }
 
-int get_new_id( TAG_TYPE type )
+long long get_new_id( TAG_TYPE type )
 {
-   int new_id = -1;
+   long long new_id = 0;
 
    if( can_tag_be_recycled( type ) && ( new_id = get_recycled_id( type ) ) != -1 )
    {
-      if( !quick_query( "DELETE FROM `id_recycled` WHERE rec_id=%d and type=%d;", new_id, type ) )
+      if( !quick_query( "DELETE FROM `id_recycled` WHERE rec_id=%lli and type=%d;", new_id, type ) )
          bug( "%s: could not delete recycled ID from id_recycled table", __FUNCTION__ );
    }
-   else if( ( new_id = get_potential_id( type ) ) != -1 )
+   else if( ( new_id = get_potential_id( type ) ) != 0 )
    {
-      if( !quick_query( "UPDATE `id_handlers` SET top_id=%d WHERE type=%d;", ( new_id + 1 ), type ) )
+      if( !quick_query( "UPDATE `id_handlers` SET top_id=%lli WHERE type=%d;", ( new_id + 1 ), type ) )
          bug( "%s: could not update database with new Top ID", __FUNCTION__ );
    }
    else
    {
-      new_id = -1;
+      new_id = 0;
       bug( "%s: could not get proper new ID", __FUNCTION__ );
    }
    return new_id;
 }
 
-int get_potential_id( TAG_TYPE type )
+long long get_potential_id( TAG_TYPE type )
 {
    MYSQL_ROW row;
    char query[MAX_BUFFER];
    int potential;
 
-   if( !can_tag_be_recycled( type ) || ( potential = get_recycled_id( type ) ) == -1 )
+   if( !can_tag_be_recycled( type ) || ( potential = get_recycled_id( type ) ) == 0 )
    {
       snprintf( query, MAX_BUFFER, "SELECT top_id FROM `id_handlers` WHERE type=%d;", type );
       if( ( row = db_query_single_row( query ) ) == NULL )
       {
          bug( "%s: db_query_single_row returned NULL.", __FUNCTION__ );
-         return -1;
+         return 0;
       }
-      potential = atoi( row[0] );
+      potential = atoll( row[0] );
       free( row );
    }
    return potential;
@@ -183,17 +183,17 @@ bool can_tag_be_recycled( TAG_TYPE type )
    return recycle;
 }
 
-int get_recycled_id( TAG_TYPE type )
+long long get_recycled_id( TAG_TYPE type )
 {
    MYSQL_ROW row;
    char query[MAX_BUFFER];
-   int rec_id;
+   long long rec_id;
 
    snprintf( query, MAX_BUFFER, "SELECT rec_id FROM `id_recycled` WHERE type=%d LIMIT 1;", type );
    if( ( row = db_query_single_row( query ) ) == NULL )
-      return -1;
+      return 0;
 
-   rec_id = atoi( row[0] );
+   rec_id = atoll( row[0] );
    free( row );
    return rec_id;
 }

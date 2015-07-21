@@ -22,8 +22,13 @@ struct entity
    bool type[MAX_ENTITY_TYPE];
    bool subtype[MAX_ENTITY_SUB_TYPE];
 
+   bool is_mapped;
+   int coord_x;
+   int coord_y;
+   int coord_z;
+
    ENTITY_DATA *contained_by;
-   int contained_byID;
+   long long contained_byID;
    LLIST *inventory;
    LLIST *inventory_qs[MAX_ENTITY_TYPE];
 };
@@ -31,7 +36,7 @@ struct entity
 /* creation */
 
 ENTITY_DATA *init_entity( void );
-ENTITY_DATA *load_entityByID( int id );
+ENTITY_DATA *load_entityByID( long long id );
 int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row );
 bool load_entityInventory( ENTITY_DATA *entity );
 bool new_entity( ENTITY_DATA *entity );
@@ -40,8 +45,8 @@ void free_entity( ENTITY_DATA *entity );
 bool delete_entity( ENTITY_DATA *entity );
 
 /* getters */
-ENTITY_DATA *get_entityByID( int id );
-ENTITY_DATA *get_entityByID_ifActive( int id );
+ENTITY_DATA *get_entityByID( long long id );
+ENTITY_DATA *get_entityByID_ifActive( long long id );
 
 /* setters */
 bool entity_setScript( ENTITY_DATA *entity, const char *script );

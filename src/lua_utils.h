@@ -193,7 +193,7 @@ void load_lua_server_config_script	( void );
 bool prep_stack_handle( lua_State *handle, const char *file, const char *function );
 void *check_meta( lua_State *L, int index, const char *meta_name );
 int  get_meta_type_id( lua_State *L, int index );
-int  get_meta_id( lua_State *L, int index );
+long long get_meta_id( lua_State *L, int index );
 void lua_pushstateobj( lua_State *L, SOCKET_STATE *state );
 
 void lua_onConnect( D_SOCKET *socket );

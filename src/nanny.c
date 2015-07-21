@@ -49,7 +49,7 @@ void free_nanny( NANNY_DATA *nanny )
 }
 
 /* getters */
-NANNY_DATA *get_nannyByID_ifActive( int id )
+NANNY_DATA *get_nannyByID_ifActive( long long id )
 {
    NANNY_DATA *nanny;
    ITERATOR Iter;

@@ -48,7 +48,8 @@ int newVar( lua_State *L )
    LUA_VAR *var;
    LUA_INDEX index;
    LUA_DATA data;
-   int ownertype, ownerid;
+   int ownertype;
+   long long ownerid;
    int top = lua_gettop( L );
 
    if( top < 1 )
@@ -147,7 +148,8 @@ int newVar( lua_State *L )
 int setVar( lua_State *L )
 {
    LUA_VAR *var;
-   int new_ownertype, new_ownerid, top = lua_gettop( L );
+   long long new_ownerid;
+   int new_ownertype, top = lua_gettop( L );
 
    if( top != 2 )
    {
@@ -180,7 +182,7 @@ int setVar( lua_State *L )
       new_ownertype = GLOBAL_TAG;
       new_ownerid = get_new_id( GLOBAL_TAG );
    }
-   if( !quick_query( "UPDATE `vars` SET ownertype=%d, ownerid=%d WHERE ownertype=%d AND ownerid=%d and name='%s';",
+   if( !quick_query( "UPDATE `vars` SET ownertype=%d, ownerid=%lli WHERE ownertype=%d AND ownerid=%lli and name='%s';",
       new_ownertype, new_ownerid, var->ownertype, var->ownerid, var->name ) )
    {
       bug( "%s: could not change the vars ownership in the database.", __FUNCTION__ );

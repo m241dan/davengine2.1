@@ -21,7 +21,7 @@ bool load_nanny( NANNY_DATA *nanny ); /* nanny must have a set path, then it wil
 void free_nanny( NANNY_DATA *nanny ); /* nannys are not persistant or saved but do get ID tags to track active variables because I didn't want to write a seperate variable system just for nannys */
 
 /* getters */
-NANNY_DATA *get_nannyByID_ifActive( int id );
+NANNY_DATA *get_nannyByID_ifActive( long long id );
 
 /* utility */
 bool set_nPath( NANNY_DATA *nanny, const char *path );

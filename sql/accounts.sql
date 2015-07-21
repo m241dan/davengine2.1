@@ -2,7 +2,7 @@ SET FOREIGN_KEY_CHECKS=0;
 
 DROP TABLE IF EXISTS `accounts`;
 CREATE TABLE IF NOT EXISTS `accounts` (
-   `accountID` int NOT NULL DEFAULT '-1',
+   `accountID` bigint NOT NULL DEFAULT '0',
    `name` varchar(25) NOT NULL DEFAULT '',
    `password` varchar(30) NOT NULL DEFAULT '',
    `level` smallint NOT NULL DEFAULT '0',

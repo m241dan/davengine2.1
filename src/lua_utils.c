@@ -136,7 +136,7 @@ int get_meta_type_id( lua_State *L, int index )
    return metatype;
 }
 
-int get_meta_id( lua_State *L, int index )
+long long get_meta_id( lua_State *L, int index )
 {
    if( lua_type( L, index ) != LUA_TUSERDATA )
    {

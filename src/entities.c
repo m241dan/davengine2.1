@@ -17,21 +17,21 @@ ENTITY_DATA *init_entity( void )
    return entity;
 }
 
-ENTITY_DATA *load_entityByID( int id )
+ENTITY_DATA *load_entityByID( long long id )
 {
    ENTITY_DATA *entity;
    MYSQL_ROW tag_row;
    MYSQL_ROW entity_row;
    char query[MAX_BUFFER];
 
-   snprintf( query, MAX_BUFFER, "SELECT * FROM `entities` WHERE entityID=%d;", id );
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `entities` WHERE entityID=%lli;", id );
    if( ( entity_row = db_query_single_row( query ) ) == NULL )
       return NULL;
 
-   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%d;", ENTITY_TAG, id );
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%lli;", ENTITY_TAG, id );
    if( ( tag_row = db_query_single_row( query ) ) == NULL )
    {
-      bug( "%s: could not find tag for entity with ID %d", __FUNCTION__, id );
+      bug( "%s: could not find tag for entity with ID %lli", __FUNCTION__, id );
       return NULL;
    }
 
@@ -49,7 +49,7 @@ int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
    entity->script = strdup( (*row)[counter++] );
    string_to_bool_array( (*row)[counter++], entity->type, MAX_ENTITY_TYPE );
    string_to_bool_array( (*row)[counter++], entity->subtype, MAX_ENTITY_SUB_TYPE );
-   entity->contained_byID = atoi( (*row)[counter++] );
+   entity->contained_byID = atoll( (*row)[counter++] );
    return counter;
 }
 
@@ -67,7 +67,7 @@ bool load_entityInventory( ENTITY_DATA *entity )
       return FALSE;
    }
 
-   snprintf( query, MAX_BUFFER, "SELECT entityID FROM `entities` WHERE containedBy=%d;", GET_ID( entity ) );
+   snprintf( query, MAX_BUFFER, "SELECT entityID FROM `entities` WHERE containedBy=%lli;", GET_ID( entity ) );
    row_list = AllocList();
    if( !db_query_list_row( row_list, query ) )
    {
@@ -78,9 +78,9 @@ bool load_entityInventory( ENTITY_DATA *entity )
    AttachIterator( &Iter, row_list );
    while( ( row = (MYSQL_ROW)NextInList( &Iter ) ) != NULL )
    {
-      if( ( invEntity = (ENTITY_DATA *)get_entityByID( atoi( row[0] ) ) ) == NULL )
+      if( ( invEntity = (ENTITY_DATA *)get_entityByID( atoll( row[0] ) ) ) == NULL )
       {
-         bug( "%s: database could not load entity #%d for #%d's inventory.", __FUNCTION__, atoi( row[0] ), GET_ID( entity ) );
+         bug( "%s: database could not load entity #%lli for #%lli's inventory.", __FUNCTION__, atoll( row[0] ), GET_ID( entity ) );
          continue;
       }
       entity_to_container( invEntity, entity );
@@ -145,9 +145,9 @@ bool delete_entity( ENTITY_DATA *entity )
    ENTITY_DATA *invEntity;
    ITERATOR Iter;
 
-   if( !quick_query( "DELETE FROM `entities` WHERE entityID=%d;", GET_ID( entity ) ) )
+   if( !quick_query( "DELETE FROM `entities` WHERE entityID=%lli;", GET_ID( entity ) ) )
    {
-      bug( "%s: could not delete entity with id %d from db.", __FUNCTION__, GET_ID( entity ) );
+      bug( "%s: could not delete entity with id %lli from db.", __FUNCTION__, GET_ID( entity ) );
       return FALSE;
    }
 
@@ -165,7 +165,7 @@ bool delete_entity( ENTITY_DATA *entity )
 }
 
 /* getters */
-ENTITY_DATA *get_entityByID( int id )
+ENTITY_DATA *get_entityByID( long long id )
 {
    ENTITY_DATA *container;
    ENTITY_DATA *entity;
@@ -182,12 +182,12 @@ ENTITY_DATA *get_entityByID( int id )
    if( entity->contained_byID != 0 && ( container = get_entityByID_ifActive( entity->contained_byID ) ) != NULL )
       entity_to_container( entity, container );
    else if( !entity->type[ENTITY_ROOM] )
-      bug( "%s: left entity #%d floating in limbo and it's not a room.", __FUNCTION__, GET_ID( entity ) );
+      bug( "%s: left entity #%lli floating in limbo and it's not a room.", __FUNCTION__, GET_ID( entity ) );
 
    return entity;
 }
 
-ENTITY_DATA *get_entityByID_ifActive( int id )
+ENTITY_DATA *get_entityByID_ifActive( long long id )
 {
    ENTITY_DATA *entity;
    ITERATOR Iter;
@@ -206,7 +206,7 @@ bool entity_setScript( ENTITY_DATA *entity, const char *script )
    FREE( entity->script );
    entity->script = strdup( script );
    if( VALID_TAG( entity ) )
-      if( !quick_query( "UPDATE `entities` SET script='%s' WHERE entityID=%d;", entity->script, GET_ID( entity ) ) )
+      if( !quick_query( "UPDATE `entities` SET script='%s' WHERE entityID=%lli;", entity->script, GET_ID( entity ) ) )
          bug( "%s: could not update database with new script.", __FUNCTION__ );
    return TRUE;
 }
@@ -229,7 +229,7 @@ bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type )
    {
       char type_string[256];
       snprintf( type_string, 256, "%s", bool_array_to_string( entity->type, MAX_ENTITY_TYPE ) );
-      if( !quick_query( "UPDATE `entities` SET type='%s' WHERE entityID=%d;", type_string, GET_ID( entity ) ) )
+      if( !quick_query( "UPDATE `entities` SET type='%s' WHERE entityID=%lli;", type_string, GET_ID( entity ) ) )
          bug( "%s: could not update database with new type.", __FUNCTION__ );
    }
    return TRUE;
@@ -309,7 +309,7 @@ bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container )
 bool update_position( ENTITY_DATA *entity )
 {
    if( VALID_TAG( entity ) && ListHas( active_entities[GET_ID( entity ) % ENTITY_HASH], entity ) )
-      if( !quick_query( "UPDATE `entities` SET containedBy=%d WHERE entityID=%d;", entity->contained_byID, GET_ID( entity ) ) )
+      if( !quick_query( "UPDATE `entities` SET containedBy=%lli WHERE entityID=%lli;", entity->contained_byID, GET_ID( entity ) ) )
          return FALSE;
    return TRUE;
 }

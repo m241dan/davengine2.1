@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS `id_handlers`;
 CREATE TABLE IF NOT EXISTS `id_handlers` (
    `type` smallint NOT NULL DEFAULT '-1',
    `name` varchar(40) NOT NULL DEFAULT 'unknown',
-   `top_id` int NOT NULL DEFAULT '-1',
+   `top_id` bigint NOT NULL DEFAULT '0',
    `can_recycle` smallint NOT NULL DEFAULT '0',
    PRIMARY KEY (`type`),
    UNIQUE INDEX `name` (`name`)

@@ -13,21 +13,21 @@ ACCOUNT_DATA *init_account( void )
    return account;
 }
 
-ACCOUNT_DATA *load_accountByID( int id )
+ACCOUNT_DATA *load_accountByID( long long id )
 {
    ACCOUNT_DATA *account;
    MYSQL_ROW tag_row;
    MYSQL_ROW account_row;
    char query[MAX_BUFFER];
 
-   snprintf( query, MAX_BUFFER, "SELECT * FROM `accounts` WHERE accountID=%d;", id );
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `accounts` WHERE accountID=%lli;", id );
    if( ( account_row = db_query_single_row( query ) ) == NULL )
       return NULL;
 
-   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%d;", ACCOUNT_TAG, id );
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%lli;", ACCOUNT_TAG, id );
    if( ( tag_row = db_query_single_row( query ) ) == NULL )
    {
-      bug( "%s: could not find tag for account with ID %d", __FUNCTION__, id );
+      bug( "%s: could not find tag for account with ID %lli", __FUNCTION__, id );
       return NULL;
    }
    account = init_account();
@@ -49,10 +49,10 @@ ACCOUNT_DATA *load_accountByName( const char *name )
    if( ( account_row = db_query_single_row( query ) ) == NULL )
       return NULL;
 
-   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%d;", ACCOUNT_TAG, atoi( account_row[0] ) );
+   snprintf( query, MAX_BUFFER, "SELECT * FROM `id_tags` WHERE type=%d AND id=%lli;", ACCOUNT_TAG, atoll( account_row[0] ) );
    if( ( tag_row = db_query_single_row( query ) ) == NULL )
    {
-      bug( "%s: could not find tag for account with ID %d", __FUNCTION__, atoi( account_row[0] ) );
+      bug( "%s: could not find tag for account with ID %lli", __FUNCTION__, atoll( account_row[0] ) );
       return NULL;
    }
    account = init_account();
@@ -79,7 +79,7 @@ int new_account( ACCOUNT_DATA *account )
       return 0;
    if( GET_TYPE( account ) == ACCOUNT_TAG && GET_ID( account ) > 0 )
    {
-      if( !quick_query( "INSERT INTO `accounts` VALUES ( %d, '%s', '%s', %d );",
+      if( !quick_query( "INSERT INTO `accounts` VALUES ( %lli, '%s', '%s', %d );",
          GET_ID( account ), get_aName( account ), get_aPasswd( account ), get_aLevel( account ) ) )
       {
          bug( "%s: could not add new account to databse.", __FUNCTION__ );
@@ -109,9 +109,9 @@ bool free_account( ACCOUNT_DATA *account )
 
 bool delete_account( ACCOUNT_DATA *account )
 {
-   if( !quick_query( "DELETE FROM `accounts` WHERE accountID=%d;", GET_ID( account ) ) )
+   if( !quick_query( "DELETE FROM `accounts` WHERE accountID=%lli;", GET_ID( account ) ) )
    {
-      bug( "%s: could not delete account with id %d from db.", __FUNCTION__, GET_ID( account ) );
+      bug( "%s: could not delete account with id %lli from db.", __FUNCTION__, GET_ID( account ) );
       return FALSE;
    }
    delete_tag( account->tag );
@@ -124,7 +124,7 @@ int set_aName( ACCOUNT_DATA *account, const char *name )
    FREE( account->name );
    account->name = new_string( name );
    if( GET_TYPE( account ) != TAG_UNSET && GET_ID( account ) > 0 )
-      if( !quick_query( "UPDATE `accounts` SET name='%s' WHERE accountID=%d;", account->name, GET_ID( account ) ) )
+      if( !quick_query( "UPDATE `accounts` SET name='%s' WHERE accountID=%lli;", account->name, GET_ID( account ) ) )
          bug( "%s: unable to update db with the new name.", __FUNCTION__ );
    return 1;
 }
@@ -139,7 +139,7 @@ int set_aPasswd( ACCOUNT_DATA *account, const char *oldpw, const char *passwd )
    FREE( account->passwd );
    account->passwd = new_string( crypt( passwd, account->name ) );
    if( GET_TYPE( account ) != TAG_UNSET && GET_ID( account ) > 0 )
-      if( !quick_query( "UPDATE `accounts` SET password='%s' WHERE accountID=%d;", account->passwd, GET_ID( account ) ) )
+      if( !quick_query( "UPDATE `accounts` SET password='%s' WHERE accountID=%lli;", account->passwd, GET_ID( account ) ) )
          bug( "%s: unable to update db with the new name.", __FUNCTION__ );
    return 1;
 }
@@ -152,13 +152,13 @@ int set_aLevel( ACCOUNT_DATA *account, ACCT_LEVEL level )
    }
    account->level = level;
    if( GET_TYPE( account ) != TAG_UNSET && GET_ID( account ) > 0 )
-      if( !quick_query( "UPDATE `accounts` SET level=%d WHERE accountID=%d;", account->level, GET_ID( account ) ) )
+      if( !quick_query( "UPDATE `accounts` SET level=%d WHERE accountID=%lli;", account->level, GET_ID( account ) ) )
          bug( "%s: unable to update db with the new name.", __FUNCTION__ );
    return 1;
 }
 
 /* getters */
-ACCOUNT_DATA *get_accountByID( int id )
+ACCOUNT_DATA *get_accountByID( long long id )
 {
    ACCOUNT_DATA *account;
 
@@ -172,7 +172,7 @@ ACCOUNT_DATA *get_accountByID( int id )
    return account;
 }
 
-ACCOUNT_DATA *get_accountByID_ifActive( int id )
+ACCOUNT_DATA *get_accountByID_ifActive( long long id )
 {
    ACCOUNT_DATA *account;
    ITERATOR Iter;
