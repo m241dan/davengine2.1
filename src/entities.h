@@ -1,4 +1,5 @@
-#define ENTITY_HASH 10
+#define ENTITY_HASH	10
+#define MAX_TILE	5
 
 extern LLIST *active_entities[ENTITY_HASH];
 
@@ -14,6 +15,29 @@ typedef enum
    MAX_ENTITY_SUB_TYPE
 } ENTITY_SUB_TYPE;
 
+struct coord_set
+{
+   int x;
+   int y;
+   int z;
+};
+
+struct map_data
+{
+   int min_x;
+   int max_x;
+   int min_y;
+   int max_y;
+   int min_z;
+   int max_z;
+};
+
+struct entity_look
+{
+   char floor_tile[MAX_TILE];
+   char ceiling_tile[MAX_TILE];
+};
+
 struct entity
 {
    ID_TAG *tag;
@@ -23,9 +47,9 @@ struct entity
    bool subtype[MAX_ENTITY_SUB_TYPE];
 
    bool ismapped;
-   int coord_x;
-   int coord_y;
-   int coord_z;
+   MAP_DATA map;
+   COORD_SET coord;
+   ENTITY_LOOK look;
 
    ENTITY_DATA *contained_by;
    int contained_byID;

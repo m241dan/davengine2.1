@@ -139,6 +139,9 @@ typedef struct  lua_var		LUA_VAR;
 typedef struct  lua_index	LUA_INDEX;
 typedef struct	lua_data	LUA_DATA;
 typedef struct  entity		ENTITY_DATA;
+typedef struct  coord_set	COORD_SET;
+typedef struct  map_data	MAP_DATA;
+typedef struct  entity_look	ENTITY_LOOK;
 
 /* the actual structures */
 struct dSocket

@@ -6,10 +6,8 @@ ENTITY_DATA *init_entity( void )
 {
    ENTITY_DATA *entity;
 
-   entity 			= malloc( sizeof( ENTITY_DATA ) );
+   entity 			= calloc( 1, sizeof( ENTITY_DATA ) );
    entity->tag			= init_tag();
-   entity->managing_state 	= NULL;
-   entity->script		= NULL;
    entity->inventory		= AllocList();
    for( int x = 0; x < ENTITY_HASH; x++ )
       entity->inventory_qs[x] = AllocList();
