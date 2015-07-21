@@ -22,6 +22,11 @@ struct entity
    bool type[MAX_ENTITY_TYPE];
    bool subtype[MAX_ENTITY_SUB_TYPE];
 
+   bool ismapped;
+   int coord_x;
+   int coord_y;
+   int coord_z;
+
    ENTITY_DATA *contained_by;
    int contained_byID;
    LLIST *inventory;
