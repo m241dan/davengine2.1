@@ -41,7 +41,7 @@ int setScript( lua_State *L );
 LUA_VAR		*init_var	( void );
 void		 standard_index	( LUA_INDEX *index );
 bool		 new_var	( LUA_VAR *var, LUA_INDEX *index, LUA_DATA *data );
-LUA_VAR		*load_var	( TAG_TYPE ownertype, long long ownerid, const char *name );
+LUA_VAR		*load_var	( TAG_TYPE ownertype, int ownerid, const char *name );
 int		 db_load_var	( LUA_VAR *var, MYSQL_ROW *row );
 int		 db_load_data	( LUA_DATA *data, MYSQL_ROW *row );
 

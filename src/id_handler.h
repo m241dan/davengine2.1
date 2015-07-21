@@ -13,7 +13,7 @@ typedef enum
 struct id_tag
 {
    TAG_TYPE type;
-   unsigned long long int id;
+   int id;
    bool can_recycle;
    char *created_by;
    char *created_on;
@@ -29,10 +29,10 @@ int new_tag( ID_TAG *tag, const char *creator );
 int db_load_tag( ID_TAG *tag, MYSQL_ROW *row );
 int update_tag( ID_TAG *tag, const char *effector, ... );
 
-long long get_top_id( TAG_TYPE type );
-long long get_new_id( TAG_TYPE type );
-long long get_potential_id( TAG_TYPE type );
+int get_top_id( TAG_TYPE type );
+int get_new_id( TAG_TYPE type );
+int get_potential_id( TAG_TYPE type );
 bool can_tag_be_recycled( TAG_TYPE type );
-long long get_recycled_id( TAG_TYPE type );
+int get_recycled_id( TAG_TYPE type );
 ID_TAG *copy_tag( ID_TAG *tag );
 
