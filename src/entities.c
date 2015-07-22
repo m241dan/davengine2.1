@@ -43,11 +43,27 @@ ENTITY_DATA *load_entityByID( int id )
 
 int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
 {
-   int counter = 0;
+   int counter = 1;
    entity->script = strdup( (*row)[counter++] );
    string_to_bool_array( (*row)[counter++], entity->type, MAX_ENTITY_TYPE );
    string_to_bool_array( (*row)[counter++], entity->subtype, MAX_ENTITY_SUB_TYPE );
    entity->contained_byID = atoi( (*row)[counter++] );
+
+   entity->ismapped = (bool)atoi( (*row)[counter++] );
+   entity->map.min_x = atoi( (*row)[counter++] );
+   entity->map.max_x = atoi( (*row)[counter++] );
+   entity->map.min_y = atoi( (*row)[counter++] );
+   entity->map.max_y = atoi( (*row)[counter++] );
+   entity->map.min_z = atoi( (*row)[counter++] );
+   entity->map.max_z = atoi( (*row)[counter++] );
+
+   entity->coord.x = atoi( (*row)[counter++] );
+   entity->coord.y = atoi( (*row)[counter++] );
+   entity->coord.z = atoi( (*row)[counter++] );
+
+   snprintf( entity->look.floor_tile, 5, "%s", (*row)[counter++] );
+   snprintf( entity->look.ceiling_tile, 5, "%s", (*row)[counter++] );
+
    return counter;
 }
 
@@ -101,8 +117,10 @@ bool new_entity( ENTITY_DATA *entity )
    {
       snprintf( type, 256, "%s", bool_array_to_string( entity->type, MAX_ENTITY_TYPE ) );
       snprintf( subtype, 256, "%s", bool_array_to_string( entity->subtype, MAX_ENTITY_SUB_TYPE ) );
-      if( !quick_query( "INSERT INTO `entities` VALUES( '%d', '%s', '%s', '%s', '%d' );",
-         GET_ID( entity ), entity->script, type, subtype, entity->contained_by ? GET_ID( entity->contained_by ) : 0 ) )
+      if( !quick_query( "INSERT INTO `entities` VALUES( '%d', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s' );",
+         GET_ID( entity ), entity->script, type, subtype, entity->contained_by ? GET_ID( entity->contained_by ) : 0,
+         (int)entity->ismapped, entity->map.min_x, entity->map.max_x, entity->map.min_y, entity->map.max_y, entity->map.min_z, entity->map.max_z,
+         entity->coord.x, entity->coord.y, entity->coord.z, entity->look.floor_tile, entity->look.ceiling_tile ) )
       {
          bug( "%s: could not add new entity to database.", __FUNCTION__ );
          return 0;
@@ -311,3 +329,58 @@ bool update_position( ENTITY_DATA *entity )
          return FALSE;
    return TRUE;
 }
+
+bool toggle_eType( ENTITY_DATA *entity, ENTITY_TYPE type )
+{
+   if( !entity )
+   {
+      bug( "%s: entity is NULL.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   if( entity->type[type] )
+   {
+      entity->type[type] = FALSE;
+      if( entity->contained_by )
+         DetachFromList( entity, entity->contained_by->inventory_qs[type ] );
+   }
+   else
+   {
+      entity->type[type] = TRUE;
+      if( entity->contained_by )
+         AttachToList( entity, entity->contained_by->inventory_qs[type] );
+   }
+
+   if( VALID_TAG( entity ) )
+   {
+      char type_string[256];
+      snprintf( type_string, 256, "%s", bool_array_to_string( entity->type, MAX_ENTITY_TYPE ) );
+      if( !quick_query( "UPDATE `entities` SET type='%s' WHERE entityID=%d;", type_string, GET_ID( entity ) ) )
+         bug( "%s: could not update database with new type.", __FUNCTION__ );
+   }
+   return TRUE;
+}
+
+bool toggle_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype )
+{
+   if( !entity )
+   {
+      bug( "%s: entity is NULL.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   if( entity->subtype[stype] )
+      entity->subtype[stype] = FALSE;
+   else
+      entity->subtype[stype] = TRUE;
+
+   if( VALID_TAG( entity ) )
+   {
+      char stype_string[256];
+      snprintf( stype_string, 256, "%s", bool_array_to_string( entity->subtype, MAX_ENTITY_SUB_TYPE ) );
+      if( !quick_query( "UPDATE `entities` SET subtype='%s' WHERE entityID=%d;", stype_string, GET_ID( entity ) ) )
+         bug( "%s: could not update databse with new subtype.", __FUNCTION__ );
+   }
+   return TRUE;
+}
+

@@ -1,3 +1,5 @@
+require( "scripts/libs/entity_lib" )
+
 function onCall()
-   local entity = Entity.new( "scripts/first_entity.lua" )
+   local entity = Entity.get( 1 )
 end

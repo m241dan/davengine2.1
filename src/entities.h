@@ -81,3 +81,5 @@ bool set_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype );
 bool entity_from_its_container( ENTITY_DATA *entity );
 bool entity_to_container( ENTITY_DATA *entity, ENTITY_DATA *container );
 bool update_position( ENTITY_DATA *entity );
+bool toggle_eType( ENTITY_DATA *entity, ENTITY_TYPE type );
+bool toggle_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype );

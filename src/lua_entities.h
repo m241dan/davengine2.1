@@ -17,9 +17,13 @@ int entity_getContainedBy( lua_State *L );
 
 /* lua setters */
 int entity_setScript( lua_State *L );
+int entity_setType( lua_State *L );
+int entity_setSubType( lua_State *L );
 
 /* utility */
 int entity_isType( lua_State *L );
 int entity_isSubType( lua_State *L );
 int entity_isMapped( lua_State *L );
 int entity_toEntity( lua_State *L );
+int entity_toggleType( lua_State *L );
+int entity_toggleSubType( lua_State *L );

@@ -8,11 +8,15 @@ const struct luaL_Reg EntityLib_m[] = {
    { "getContainedBy", entity_getContainedBy },
    /* setters */
    { "setScript", entity_setScript },
+   { "setType", entity_setType },
+   { "setSubType", entity_setSubType },
    /* utility */
    { "isType", entity_isType },
    { "isSubType", entity_isSubType },
    { "isMapped", entity_isMapped },
    { "to", entity_toEntity },
+   { "toggleType", entity_toggleType },
+   { "toggleSubType", entity_toggleSubType },
    { NULL, NULL }
 };
 
@@ -265,6 +269,57 @@ int entity_setScript( lua_State *L )
    return 1;
 }
 
+int entity_setType( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int type;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: argument 1 expected to be of type number.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   type = lua_tonumber( L, 2 );
+   if( type < 0 || type >= MAX_ENTITY_TYPE )
+   {
+      bug( "%s: the type number passed is out of range.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   set_eType( entity, (ENTITY_TYPE)type );
+   lua_pushboolean( L, 0 );
+   return 1;
+}
+
+int entity_setSubType( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int stype;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: argument 1 expected to be of type number.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   stype = lua_tonumber( L, 2 );
+   if( stype < 0 || stype >= MAX_ENTITY_SUB_TYPE )
+   {
+      bug( "%s: the type number passed is out of range.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   set_eSubType( entity, (ENTITY_TYPE)stype );
+   lua_pushboolean( L, 0 );
+   return 1;
+
+}
+
 /* utility */
 int entity_isType( lua_State *L )
 {
@@ -342,3 +397,52 @@ int entity_toEntity( lua_State *L )
    return 1;
 }
 
+int entity_toggleType( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int type;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: need to pass a type as an integer.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   type = lua_tonumber( L, 2 );
+   if( type < 0 || type >= MAX_ENTITY_TYPE )
+   {
+      bug( "%s: the type number passed is out of range.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   toggle_eType( entity, (ENTITY_TYPE)type );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
+int entity_toggleSubType( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int stype;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: need to pass a type as an integer.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   stype = lua_tonumber( L, 2 );
+   if( stype < 0 || stype >= MAX_ENTITY_SUB_TYPE )
+   {
+      bug( "%s: the sub type number passed is out of range.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   toggle_eSubType( entity, (ENTITY_TYPE)stype );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
