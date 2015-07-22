@@ -1,4 +1,5 @@
-local global_account, global_input
+local global_account = nil
+local global_input = nil
 
 account_command = {}
 
