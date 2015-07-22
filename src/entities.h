@@ -73,9 +73,9 @@ ENTITY_DATA *get_entityByID( int id );
 ENTITY_DATA *get_entityByID_ifActive( int id );
 
 /* setters */
-bool entity_setScript( ENTITY_DATA *entity, const char *script );
-bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type );
-bool entity_setSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype );
+bool set_eScript( ENTITY_DATA *entity, const char *script );
+bool set_eType( ENTITY_DATA *entity, ENTITY_TYPE type );
+bool set_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype );
 
 /* utility */
 bool entity_from_its_container( ENTITY_DATA *entity );

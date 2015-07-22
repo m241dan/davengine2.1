@@ -34,6 +34,10 @@ void init_lua_handle( void )
    log_string( "Loading Socket Lua Lib" );
    luaL_requiref( lua_handle, "Socket", luaopen_SocketLib, 1 );
    lua_pop( lua_handle, -1 );
+
+   log_string( "Loading Entity Lua Lib" );
+   luaL_requiref( lua_handle, "Entity", luaopen_EntityLib, 1 );
+   lua_pop( lua_handle, -1 );
 }
 
 void load_lua_server_config_script( void )

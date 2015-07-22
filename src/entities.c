@@ -199,7 +199,7 @@ ENTITY_DATA *get_entityByID_ifActive( int id )
 }
 
 /* setters */
-bool entity_setScript( ENTITY_DATA *entity, const char *script )
+bool set_eScript( ENTITY_DATA *entity, const char *script )
 {
    FREE( entity->script );
    entity->script = strdup( script );
@@ -208,7 +208,7 @@ bool entity_setScript( ENTITY_DATA *entity, const char *script )
          bug( "%s: could not update database with new script.", __FUNCTION__ );
    return TRUE;
 }
-bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type )
+bool set_eType( ENTITY_DATA *entity, ENTITY_TYPE type )
 {
    if( !entity )
    {
@@ -233,7 +233,7 @@ bool entity_setType( ENTITY_DATA *entity, ENTITY_TYPE type )
    return TRUE;
 }
 
-bool entity_setSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype )
+bool set_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype )
 {
    if( !entity )
    {

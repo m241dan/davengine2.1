@@ -3,7 +3,7 @@
 #include "mud.h"
 
 const char *const settable_vars[] = {
-   "Account.meta", "Nanny.meta",
+   "Account.meta", "Nanny.meta", "Entity.meta",
    '\0'
 };
 

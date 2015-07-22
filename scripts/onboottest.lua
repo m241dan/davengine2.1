@@ -1,2 +1,3 @@
 function onCall()
-end;
+   local entity = Entity.new( "scripts/first_entity.lua" )
+end

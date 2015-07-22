@@ -1,10 +1,25 @@
 #include "mud.h"
 
 const struct luaL_Reg EntityLib_m[] = {
+   /* getters */
+   { "getID", entity_getID },
+   { "getScript", entity_getScript },
+   { "getCoords", entity_getCoords },
+   { "getContainedBy", entity_getContainedBy },
+   /* setters */
+   { "setScript", entity_setScript },
+   /* utility */
+   { "isType", entity_isType },
+   { "isSubType", entity_isSubType },
+   { "isMapped", entity_isMapped },
+   { "to", entity_toEntity },
    { NULL, NULL }
 };
 
 const struct luaL_Reg EntityLib_f[] = {
+   { "new", newEntity },
+   { "get", getEntity },
+   { "del", delEntity },
    { NULL, NULL }
 };
 
@@ -59,7 +74,7 @@ int newEntity( lua_State *L )
    }
 
    entity = init_entity();
-   entity_setScript( entity, lua_tostring( L, 1 ) );
+   set_eScript( entity, lua_tostring( L, 1 ) );
    new_entity( entity );
 
    lua_pushobj( L, entity, ENTITY_DATA );
@@ -159,3 +174,171 @@ int logEntity( lua_State *L )
 {
    return 0;
 }
+
+/* lua getters */
+int entity_getID( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   DAVLUACM_ENTITY_NIL( entity, L );
+
+   if( VALID_TAG( entity ) )
+      lua_pushnumber( L, GET_ID( entity ) );
+   else
+      lua_pushnil( L );
+
+   return 1;
+}
+
+int entity_getScript( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   DAVLUACM_ENTITY_NIL( entity, L );
+
+   if( VALID_TAG( entity ) )
+      lua_pushstring( L, entity->script );
+   else
+      lua_pushnil( L );
+
+   return 1;
+}
+
+int entity_getCoords( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   DAVLUACM_ENTITY_NIL( entity, L );
+
+   if( VALID_TAG( entity ) )
+   {
+      lua_pushnumber( L, entity->coord.x );
+      lua_pushnumber( L, entity->coord.y );
+      lua_pushnumber( L, entity->coord.z );
+   }
+   else
+   {
+      lua_pushnil( L );
+      lua_pushnil( L );
+      lua_pushnil( L );
+   }
+
+   return 3;
+}
+
+int entity_getContainedBy( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   DAVLUACM_ENTITY_NIL( entity, L );
+
+   if( VALID_TAG( entity ) && entity->contained_by )
+      lua_pushobj( L, entity, ENTITY_DATA );
+   else
+      lua_pushnil( L );
+
+   return 1;
+}
+
+/* lua setters */
+int entity_setScript( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   char script[MAX_BUFFER];
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TSTRING )
+   {
+      bug( "%s: argument 1 expect type string.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   snprintf( script, MAX_BUFFER, "%s", lua_tostring( L, 2 ) );
+   if( !file_exists( script ) )
+   {
+      bug( "%s: script file %s does not exist.", __FUNCTION__, script );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   set_eScript( entity, script );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
+/* utility */
+int entity_isType( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int type;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: need to pass a type as an integer.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   type = lua_tonumber( L, 2 );
+   if( type < 0 || type >= MAX_ENTITY_TYPE )
+   {
+      bug( "%s: the type number passed is out of range.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   lua_pushboolean( L, entity->type[type] );
+   return 1;
+}
+
+int entity_isSubType( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int stype;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: need to pass a type as an integer.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   stype = lua_tonumber( L, 2 );
+   if( stype < 0 || stype >= MAX_ENTITY_SUB_TYPE )
+   {
+      bug( "%s: the type number passed is out of range.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   lua_pushboolean( L, entity->subtype[stype] );
+   return 1;
+}
+
+int entity_isMapped( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   lua_pushboolean( L, entity->ismapped );
+   return 1;
+}
+
+int entity_toEntity( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   ENTITY_DATA *send_to;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( ( send_to = (ENTITY_DATA *)check_meta( L, 2, "Entity.meta" ) ) == NULL )
+   {
+      bug( "%s: argument 1 needs to be of type USERDATA with the Entity.meta metatable.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   entity_to_container( entity, send_to );
+   update_position( entity );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
