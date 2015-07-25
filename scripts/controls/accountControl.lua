@@ -20,11 +20,34 @@ end
 
 function onPrompt( account )
    local socket = Socket.get( account )
+   local width = socket:getOutBufLength( 0 )
+   local header = " Account Menu "
+   local length = header:len()
+   local l_len, r_len, prompt
 
-   local prompt
-   return "<>"
+   l_len = ( width - length ) / 2
+   r_len = l_len
+
+   if( ( width - length ) % 2 ~= 0 ) then
+      l_len = l_len - 1
+   end
+
+   prompt = string.format( "%s%s%s ", string.rep( "-", l_len ), header, string.rep( "-", r_len ) )
+   prompt = prompt .. "Commands:\r\n"
+   for i, _ in pairs( account_command ) do
+      prompt = prompt .. string.format( "   %s\r\n", i )
+   end
+   prompt = prompt .. string.format( "%s\r\n", string.rep( "-", width ) )
+   return prompt
 end
 
+account_command["create a character"] = { function()
+   local nanny = Nanny.new( "scripts/nannys/nannyCharCreate.lua" )
+   local socket = Socket.get( global_account )  
+   local control_index = socket:control( nanny )
+   socket:setState( control_index )
+   nanny:setState( 0 )
+end, 0 }
 account_command["hi"] = { function()
    global_account:msg( "Hi there.\r\n" ) 
    return "lets shorten this a bit\r\n"

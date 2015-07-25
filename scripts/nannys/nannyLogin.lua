@@ -13,7 +13,7 @@ function onNannyFinish( nanny )
    local account = Account.get( info["Name"] )
    local buffer_info = var.get( "Buffer_Info", account )
 
-   if( buffer_info ~= nil )
+   if( buffer_info ~= nil ) then
       account:msg( "Setting up buffers...\r\n" )
    else
       account:msg( "Using default buffers...\r\n" )

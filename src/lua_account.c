@@ -16,6 +16,7 @@ const struct luaL_Reg AccountLib_m[] = {
 const struct luaL_Reg AccountLib_f[] = {
    { "new", newAccount },
    { "get", getAccount },
+   { "checkExists", checkExistsAccount },
    { "delete", delAccount },
    { NULL, NULL }
 };
@@ -100,6 +101,40 @@ int getAccount( lua_State *L )
             lua_pushobj( L, account, ACCOUNT_DATA );
          break;
    }
+   return 1;
+}
+
+int checkExistsAccount( lua_State *L )
+{
+   MYSQL_ROW row;
+   char query[MAX_BUFFER];
+
+   switch( lua_type( L, -1 ) )
+   {
+      default:
+         bug( "%s: bad argument passed.", __FUNCTION__ );
+         lua_pushnil( L );
+         return 1;
+      case LUA_TSTRING:
+         snprintf( query, MAX_BUFFER, "SELECT accountID FROM `accounts` WHERE name='%s' LIMIT 1;", lua_tostring( L, -1 ) );
+         if( ( row = db_query_single_row( query ) ) != NULL )
+         {
+            lua_pushnumber( L, atoi( row[0] ) );
+            break;
+         }
+         lua_pushnil( L );
+         break;
+      case LUA_TNUMBER:
+         snprintf( query, MAX_BUFFER, "SELECT name FROM `accounts` WHERE accountID=%d LIMIT 1;", (int)lua_tonumber( L, -1 ) );
+         if( ( row = db_query_single_row( query ) ) != NULL )
+         {
+            lua_pushstring( L, row[0] );
+            break;
+         }
+         lua_pushnil( L );
+         break;
+   }
+   FREE( row );
    return 1;
 }
 

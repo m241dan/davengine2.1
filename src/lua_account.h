@@ -4,6 +4,7 @@ int AccountGC( lua_State *L );
 /* account lib functions */
 int newAccount( lua_State *L );
 int getAccount( lua_State *L );
+int checkExistsAccount( lua_State *L );
 int delAccount( lua_State *L );
 int logAccount( lua_State *L );
 
