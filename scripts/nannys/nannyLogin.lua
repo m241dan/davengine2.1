@@ -9,6 +9,15 @@ function onNannyLoad( nanny )
 end
 
 function onNannyFinish( nanny )
+   local info = var.get( "Info", nanny );
+   local account = Account.get( info["Name"] )
+   local buffer_info = var.get( "Buffer_Info", account )
+
+   if( buffer_info ~= nil )
+      account:msg( "Setting up buffers...\r\n" )
+   else
+      account:msg( "Using default buffers...\r\n" )
+   end
 end
 
 function onInterp( nanny, input )

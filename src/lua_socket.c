@@ -2,6 +2,7 @@
 
 const struct luaL_Reg SocketLib_m[] = {
    { "setState", socket_lsetState },
+   { "getOutBufLength", socket_getOutBufLength },
    { "getState", socket_getState },
    { "control", socket_Control },
    { "msg", socket_Message },
@@ -112,6 +113,31 @@ int socket_lsetState( lua_State *L )
    }
    socket->state_index = state_to_set;
    return 0;
+}
+
+int socket_getOutBufLength( lua_State *L )
+{
+   D_SOCKET *socket;
+   int buf_index;
+
+   DAVLUACM_SOCKET_NIL( socket, L );
+
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: argument one needs to be of type number.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+
+   buf_index = lua_tonumber( L, 2 );
+   if( buf_index < 0 || buf_index >= OUT_BUFS )
+   {
+      bug( "%s: The buffer indexs range from 0 to %s.", __FUNCTION__, (OUT_BUFS-1) );
+      lua_pushnil( L );
+      return 1;
+   }
+   lua_pushnumber( L, socket->outbuf[buf_index]->width );
+   return 1;
 }
 
 int socket_getState( lua_State *L )

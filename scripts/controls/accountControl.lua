@@ -19,6 +19,9 @@ function onInterp( account, input )
 end
 
 function onPrompt( account )
+   local socket = Socket.get( account )
+
+   local prompt
    return "<>"
 end
 
