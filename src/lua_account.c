@@ -292,6 +292,7 @@ int account_Message( lua_State *L )
       }
       buffer_id = lua_tonumber( L, 3 );
    }
+
    if( !account->managing_state || ( socket = account->managing_state->socket ) == NULL )
    {
       bug( "%s: cannot send message, account has no socket.", __FUNCTION__ );

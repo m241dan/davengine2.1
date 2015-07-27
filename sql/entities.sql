@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `entities` (
    `script` varchar(256) NOT NULL DEFAULT '',
    `type` varchar(256) NOT NULL DEFAULT '',
    `subtype` varchar(256) NOT NULL DEFAULT '',
+   `level` int NOT NULL DEFAULT '0',
    `containedBy` int NOT NULL DEFAULT '0',
    `ismapped` tinyint NOT NULL DEFAULT '0',
    `min_x` int NOT NULL DEFAULT '0',

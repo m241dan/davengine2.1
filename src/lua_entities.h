@@ -27,3 +27,4 @@ int entity_isMapped( lua_State *L );
 int entity_toEntity( lua_State *L );
 int entity_toggleType( lua_State *L );
 int entity_toggleSubType( lua_State *L );
+int entity_message( lua_State *L );

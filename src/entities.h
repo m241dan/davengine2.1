@@ -45,6 +45,7 @@ struct entity
    char *script;
    bool type[MAX_ENTITY_TYPE];
    bool subtype[MAX_ENTITY_SUB_TYPE];
+   int level;
 
    bool ismapped;
    MAP_DATA map;
@@ -76,6 +77,7 @@ ENTITY_DATA *get_entityByID_ifActive( int id );
 bool set_eScript( ENTITY_DATA *entity, const char *script );
 bool set_eType( ENTITY_DATA *entity, ENTITY_TYPE type );
 bool set_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype );
+bool set_eLevel( ENTITY_DATA *entity, int level );
 
 /* utility */
 bool entity_from_its_container( ENTITY_DATA *entity );

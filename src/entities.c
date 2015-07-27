@@ -47,6 +47,7 @@ int db_load_entity( ENTITY_DATA *entity, MYSQL_ROW *row )
    entity->script = strdup( (*row)[counter++] );
    string_to_bool_array( (*row)[counter++], entity->type, MAX_ENTITY_TYPE );
    string_to_bool_array( (*row)[counter++], entity->subtype, MAX_ENTITY_SUB_TYPE );
+   entity->level = atoi( (*row)[counter++] );
    entity->contained_byID = atoi( (*row)[counter++] );
 
    entity->ismapped = (bool)atoi( (*row)[counter++] );
@@ -118,7 +119,7 @@ bool new_entity( ENTITY_DATA *entity )
       snprintf( type, 256, "%s", bool_array_to_string( entity->type, MAX_ENTITY_TYPE ) );
       snprintf( subtype, 256, "%s", bool_array_to_string( entity->subtype, MAX_ENTITY_SUB_TYPE ) );
       if( !quick_query( "INSERT INTO `entities` VALUES( '%d', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s' );",
-         GET_ID( entity ), entity->script, type, subtype, entity->contained_by ? GET_ID( entity->contained_by ) : 0,
+         GET_ID( entity ), entity->script, type, subtype, entity->level, entity->contained_by ? GET_ID( entity->contained_by ) : 0,
          (int)entity->ismapped, entity->map.min_x, entity->map.max_x, entity->map.min_y, entity->map.max_y, entity->map.min_z, entity->map.max_z,
          entity->coord.x, entity->coord.y, entity->coord.z, entity->look.floor_tile, entity->look.ceiling_tile ) )
       {
@@ -270,6 +271,21 @@ bool set_eSubType( ENTITY_DATA *entity, ENTITY_SUB_TYPE stype )
       if( !quick_query( "UPDATE `entities` SET subtype='%s' WHERE entityID=%d;", stype_string, GET_ID( entity ) ) )
          bug( "%s: could not update databse with new subtype.", __FUNCTION__ );
    }
+   return TRUE;
+}
+
+bool set_eLevel( ENTITY_DATA *entity, int level )
+{
+   if( !entity )
+   {
+      bug( "%s: entity is NULL.", __FUNCTION__ );
+      return FALSE;
+   }
+
+   entity->level = level;
+   if( VALID_TAG( entity ) )
+      if( !quick_query( "UPDATE `entities` SET level=%d WHERE entityID=%d;", entity->level, GET_ID( entity ) ) )
+         bug( "%s: couldnot update database with newlevel.", __FUNCTION__ );
    return TRUE;
 }
 

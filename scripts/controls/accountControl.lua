@@ -47,8 +47,10 @@ account_command["create a character"] = { function()
    local control_index = socket:control( nanny )
    socket:setState( control_index )
    nanny:setState( 0 )
+   return nil
 end, 0 }
+
 account_command["hi"] = { function()
    global_account:msg( "Hi there.\r\n" ) 
-   return "lets shorten this a bit\r\n"
+   return nil
 end, 0 }
