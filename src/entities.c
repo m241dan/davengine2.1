@@ -6,10 +6,10 @@ ENTITY_DATA *init_entity( void )
 {
    ENTITY_DATA *entity;
 
-   entity 			= calloc( 1, sizeof( ENTITY_DATA ) );
+   entity 			= (ENTITY_DATA *)calloc( 1, sizeof( ENTITY_DATA ) );
    entity->tag			= init_tag();
    entity->inventory		= AllocList();
-   for( int x = 0; x < ENTITY_HASH; x++ )
+   for( int x = 0; x < MAX_ENTITY_TYPE; x++ )
       entity->inventory_qs[x] = AllocList();
 
    return entity;

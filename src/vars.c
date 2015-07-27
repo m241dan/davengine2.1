@@ -43,7 +43,7 @@ int VarGC( lua_State *L )
    return 0;
 }
 
-int newVar( lua_State *L )
+inline int newVar( lua_State *L )
 {
    LUA_VAR *var;
    LUA_INDEX index;
@@ -144,7 +144,7 @@ int newVar( lua_State *L )
    return 1;
 }
 
-int setVar( lua_State *L )
+inline int setVar( lua_State *L )
 {
    LUA_VAR *var;
    int new_ownertype, new_ownerid, top = lua_gettop( L );
@@ -193,7 +193,7 @@ int setVar( lua_State *L )
    return 1;
 }
 
-int getVar( lua_State *L )
+inline int getVar( lua_State *L )
 {
    LUA_VAR *var;
    TAG_TYPE type;
@@ -242,7 +242,7 @@ int getVar( lua_State *L )
    return 1;
 }
 
-int delVar( lua_State *L )
+inline int delVar( lua_State *L )
 {
    LUA_VAR *var;
 
@@ -258,7 +258,7 @@ int delVar( lua_State *L )
    return 1;
 }
 
-int newVarIndex( lua_State *L )
+inline int newVarIndex( lua_State *L )
 {
    LUA_VAR *var;
    LUA_INDEX index;
@@ -306,7 +306,7 @@ int newVarIndex( lua_State *L )
    return 0;
 }
 
-int getVarIndex( lua_State *L )
+inline int getVarIndex( lua_State *L )
 {
    LUA_VAR *var;
    MYSQL_ROW row;
@@ -376,7 +376,7 @@ int getVarIndex( lua_State *L )
    return 1;
 }
 
-int getVarOwner( lua_State *L )
+inline int getVarOwner( lua_State *L )
 {
    LUA_VAR *var;
 
@@ -392,7 +392,7 @@ int getVarOwner( lua_State *L )
    return 1;
 }
 
-int setScript( lua_State *L )
+inline int setScript( lua_State *L )
 {
    LUA_VAR *var;
    int top = lua_gettop( L );
