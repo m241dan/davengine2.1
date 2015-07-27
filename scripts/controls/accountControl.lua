@@ -23,23 +23,23 @@ function onPrompt( account )
 
    prompt = string.format( "%s%s%s ", string.rep( "-", l_len ), header, string.rep( "-", r_len ) )
    prompt = prompt .. "Commands:\r\n"
-   for i, _ in pairs( account_command ) do
-      prompt = prompt .. string.format( "   %s\r\n", i )
+   for i, c in pairs( account_command ) do
+      prompt = prompt .. string.format( "   %s - %s\r\n", i, c[2] )
    end
    prompt = prompt .. string.format( "%s\r\n", string.rep( "-", width ) )
    return prompt
 end
 
-account_command["create a character"] = { function( account, input )
+account_command["create"] = { function( account, input )
    local nanny = Nanny.new( "scripts/nannys/nannyCharCreate.lua" )
    local socket = Socket.get( account )  
    local control_index = socket:control( nanny )
    socket:setState( control_index )
    nanny:setState( 0 )
    return nil
-end, 0 }
+end, "Use this command to create a new character", 0 }
 
 account_command["hi"] = { function( account, input )
    account:msg( "Hi there.\r\n" ) 
    return nil
-end, 0 }
+end, "Say hi to... well no one", 0 }
