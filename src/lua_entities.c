@@ -6,6 +6,7 @@ const struct luaL_Reg EntityLib_m[] = {
    { "getScript", entity_getScript },
    { "getCoords", entity_getCoords },
    { "getContainedBy", entity_getContainedBy },
+   { "getLevel", entity_getLevel },
    /* setters */
    { "setScript", entity_setScript },
    { "setType", entity_setType },
@@ -17,6 +18,7 @@ const struct luaL_Reg EntityLib_m[] = {
    { "to", entity_toEntity },
    { "toggleType", entity_toggleType },
    { "toggleSubType", entity_toggleSubType },
+   { "msg", entity_message },
    { NULL, NULL }
 };
 
@@ -241,6 +243,15 @@ int entity_getContainedBy( lua_State *L )
    else
       lua_pushnil( L );
 
+   return 1;
+}
+
+int entity_getLevel( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   DAVLUACM_ENTITY_NIL( entity, L );
+   lua_pushnumber( L, entity->level );
    return 1;
 }
 

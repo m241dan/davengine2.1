@@ -14,6 +14,7 @@ int entity_getID( lua_State *L );
 int entity_getScript( lua_State *L );
 int entity_getCoords( lua_State *L );
 int entity_getContainedBy( lua_State *L );
+int entity_getLevel( lua_State *L );
 
 /* lua setters */
 int entity_setScript( lua_State *L );
