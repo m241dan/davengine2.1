@@ -1187,6 +1187,11 @@ void recycle_sockets()
 
 void socket_setState( D_SOCKET *socket, sh_int new_state_index )
 {
+   if( socket->states[new_state_index] == NULL )
+   {
+      bug( "%s: cannot change states, new_state_index is NULL.", __FUNCTION__ );
+      return;
+   }
    socket->previous_index = socket->state_index;
    socket->state_index = new_state_index;
    socket->bust_prompt = TRUE;

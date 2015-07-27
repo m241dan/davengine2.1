@@ -60,7 +60,7 @@ function onInterp( nanny, input )
          else
             nanny:msg( "Something has gone terribly wrong.\r\n" )
             nanny:finish()
-            socket:setState( socket:control( Nanny.new( "scripts/nannys/nannyLogin.lua" ) ) )
+            socket:setState( socket:control( Nanny.new( "scripts/nannys/login.lua" ) ) )
          end
       else
          nanny:msg( "Passwords do not match, try again!!!\r\n" )

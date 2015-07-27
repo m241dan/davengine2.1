@@ -14,3 +14,4 @@ int socket_getState( lua_State *L );
 /* utility */
 int socket_Control( lua_State *L );
 int socket_Message( lua_State *L );
+int socket_PrevState( lua_State *L );

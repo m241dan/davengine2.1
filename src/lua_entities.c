@@ -326,7 +326,7 @@ int entity_setType( lua_State *L )
    }
 
    set_eType( entity, (ENTITY_TYPE)type );
-   lua_pushboolean( L, 0 );
+   lua_pushboolean( L, 1 );
    return 1;
 }
 

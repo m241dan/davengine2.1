@@ -118,7 +118,7 @@ bool new_entity( ENTITY_DATA *entity )
    {
       snprintf( type, 256, "%s", bool_array_to_string( entity->type, MAX_ENTITY_TYPE ) );
       snprintf( subtype, 256, "%s", bool_array_to_string( entity->subtype, MAX_ENTITY_SUB_TYPE ) );
-      if( !quick_query( "INSERT INTO `entities` VALUES( '%d', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s' );",
+      if( !quick_query( "INSERT INTO `entities` VALUES( '%d', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s' );",
          GET_ID( entity ), entity->script, type, subtype, entity->level, entity->contained_by ? GET_ID( entity->contained_by ) : 0,
          (int)entity->ismapped, entity->map.min_x, entity->map.max_x, entity->map.min_y, entity->map.max_y, entity->map.min_z, entity->map.max_z,
          entity->coord.x, entity->coord.y, entity->coord.z, entity->look.floor_tile, entity->look.ceiling_tile ) )

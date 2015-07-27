@@ -5,6 +5,7 @@ const struct luaL_Reg AccountLib_m[] = {
    { "setName", account_setName },
    { "setPassword", account_setPasswd },
    /* getters */
+   { "getID", account_getID },
    { "getName", account_getName },
    { "getLevel", account_getLevel },
    /* utility */

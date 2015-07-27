@@ -2,14 +2,16 @@ require( "scripts/libs/entity_lib" )
 
 local create_msgs = {
    [0] = "Please input a name for your new character",
-   [1] = "\r\nCharacter created.",
 }
 
 function onNannyLoad( nanny )
-   var.new( "Info", "Login Char Create", nanny );
+   print( "nanny initing" )
+   var.new( "Info", "Login Char Create", nanny )
 end
 
 function onNannyFinish( nanny )
+   local socket = Socket.get( nanny )
+   socket:prev()
 end
 
 function onInterp( nanny, input )
@@ -22,19 +24,17 @@ function onInterp( nanny, input )
       if( Account.checkExists( input ) ~= nil ) then
          nanny:msg( "Invalid character name, an Account with that name already exists and we do not allow characters with the same name as accounts.\r\n" )
          nanny:setState( 0 )
-      else
-         info["name"] = input
-         nanny:setState( 1 )
+         return;
       end
-   elseif( state == 1 ) then
       -- create the entity
       character = Entity.new( "scripts/generics/entity.lua" )
+      character:init()
 
       -- setup important mobile entity variables
       Entity.makePlayer( character )
       character:setType( ENTITY_MOBILE )
-      profile = var.new( "Profile", "Entity Strings(name,short,long,desc,etc)", character )
-      profile["name"] = info["name"]
+      profile = var.get( "profile", character )
+      profile["name"] = input
       profile["short_descr"] = "A new player."
       profile["long_descr"] = "A new player is having a long description here."
       profile["description"] = "This entity is undescribable"
@@ -43,7 +43,10 @@ function onInterp( nanny, input )
       account = Account.get( info["account"] )
       charlist = var.get( "characters", account )
       charlist[profile["name"]] = character:getID()
-      charlist[0] = charlist[0] + 1     
+      charlist[0] = charlist[0] + 1
+
+      nanny:msg( "Character created.\r\n" )
+      nanny:finish()
    end
 end
 

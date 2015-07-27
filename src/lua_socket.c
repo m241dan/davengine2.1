@@ -6,6 +6,7 @@ const struct luaL_Reg SocketLib_m[] = {
    { "getState", socket_getState },
    { "control", socket_Control },
    { "msg", socket_Message },
+   { "prev", socket_PrevState },
    { NULL, NULL }
 };
 
@@ -111,7 +112,7 @@ int socket_lsetState( lua_State *L )
       bug( "%s: state argument passed outside of range, 0-9 only.", __FUNCTION__ );
       return 0;
    }
-   socket->state_index = state_to_set;
+   socket_setState( socket, state_to_set );
    return 0;
 }
 
@@ -247,5 +248,14 @@ int socket_Message( lua_State *L )
    }
 
    __text_to_buffer( socket, lua_tostring( L, 2 ), buffer_id );
+   return 0;
+}
+
+int socket_PrevState( lua_State *L )
+{
+   D_SOCKET *socket;
+
+   DAVLUACM_SOCKET_NONE( socket, L );
+   socket_setState( socket, socket->previous_index );
    return 0;
 }

@@ -35,7 +35,7 @@ function onPrompt( account )
 end
 
 account_command["create"] = { function( account, input )
-   local nanny = Nanny.new( "scripts/nannys/nannyCharCreate.lua" )
+   local nanny = Nanny.new( "scripts/nannys/charCreate.lua" )
    local socket = Socket.get( account )  
    local control_index = socket:control( nanny )
    local info = var.get( "Info", nanny )
