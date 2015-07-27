@@ -1,21 +1,37 @@
+require( "scripts/libs/string_lib" )
+
 local global_account = nil
 local global_input = nil
 
 account_command = {}
 
 function onInterp( account, input )
+   local value, cmd, command, found
    global_account = account
+
+   cmd, input = oneArg( input )
+   command = account_command[cmd]
    global_input = input
-   local value
-   local command = account_command[input]
-   if( command ~= nil and command[2] <= account:getLevel() ) then
+   
+   if( command == nil ) then
+      for i, command in pairs( account_command ) do
+         if( isPrefix( i, cmd ) == true ) then
+            found = true
+            break
+         end
+      end
+      if( found == false )
+         account:msg( "Bad command, try again.\r\n" )
+         return
+      end
+   end
+   if( command[2] <= account:getLevel() ) then
       value = command[1]()
       if( value ~= nil ) then
          account:msg( string.format( "%s", value ) )
       end
    else
-      account:msg( "Bad command, try again.\r\n" )
-   end
+
 end
 
 function onPrompt( account )
