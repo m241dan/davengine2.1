@@ -3,6 +3,10 @@ require( "scripts/libs/string_lib" )
 
 account_command = {}
 
+function init( account )
+   var.new( "characters", 0, entity )
+end
+
 function onInterp( account, input )
    davInterp( account, account_command, input )
 end
@@ -34,6 +38,9 @@ account_command["create"] = { function( account, input )
    local nanny = Nanny.new( "scripts/nannys/nannyCharCreate.lua" )
    local socket = Socket.get( account )  
    local control_index = socket:control( nanny )
+   local info = var.get( "Info", nanny )
+
+   info["account"] = account:getID()
    socket:setState( control_index )
    nanny:setState( 0 )
    return nil

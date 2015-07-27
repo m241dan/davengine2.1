@@ -17,11 +17,13 @@ int account_setPasswd( lua_State *L );
 
 /* lua getters */
 
+int account_getID( lua_State *L );
 int account_getName( lua_State *L );
 int account_getLevel( lua_State *L );
 
 /* utility */
 
+int account_init( lua_State *L );
 int account_verifyPasswd( lua_State *L );
 int account_addChar( lua_State *L );
 int account_Message( lua_State *L );

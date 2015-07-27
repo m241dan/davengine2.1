@@ -12,6 +12,7 @@ const struct luaL_Reg EntityLib_m[] = {
    { "setType", entity_setType },
    { "setSubType", entity_setSubType },
    /* utility */
+   { "init", entity_init },
    { "isType", entity_isType },
    { "isSubType", entity_isSubType },
    { "isMapped", entity_isMapped },
@@ -26,6 +27,7 @@ const struct luaL_Reg EntityLib_f[] = {
    { "new", newEntity },
    { "get", getEntity },
    { "del", delEntity },
+   { "makePlayer", makePlayer },
    { NULL, NULL }
 };
 
@@ -172,6 +174,29 @@ int delEntity( lua_State *L )
    }
 
    delete_entity( entity );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
+int makePlayer( lua_State *L )
+{
+   ENTITY_DATA *entity;
+
+   if( lua_gettop( L ) != 1 )
+   {
+      bug( "%s: invalid number of arguments passed, 1 only please.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( ( entity = *(ENTITY_DATA **)luaL_checkudata( L, 1, "Entity.meta" ) ) == NULL )
+   {
+      bug( "%s: bad userdata passed, should be of type Entity.meta", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   set_eLevel( entity, 1 );
    lua_pushboolean( L, 1 );
    return 1;
 }
@@ -332,6 +357,30 @@ int entity_setSubType( lua_State *L )
 }
 
 /* utility */
+int entity_init( lua_State *L )
+{
+   ENTITY_DATA *entity;
+   int ret;
+
+   DAVLUACM_ENTITY_BOOL( entity, L );
+   if( !prep_stack_handle( L, entity->script, "init" ) )
+   {
+      bug( "%s: could not prep the stack for file %s and function %s.", __FUNCTION__, entity->script, "init" );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   lua_pushvalue( L, 1 );
+   if( ( ret = lua_pcall( L, 1, LUA_MULTRET, 0 ) ) )
+   {
+      bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, entity->script, lua_tostring( lua_handle, -1 ) );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   lua_pushboolean( L, 1 );
+   return 1;
+
+}
+
 int entity_isType( lua_State *L )
 {
    ENTITY_DATA *entity;

@@ -13,3 +13,6 @@ CREATE TABLE IF NOT EXISTS `vars` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `vars` ADD UNIQUE `unique_index` ( `ownerid`, `ownertype`, `name`, `vindex`, `indextype` );
+
+INSERT INTO `vars` VALUES ( '0', '1', 'characters', '-3', 0, '-3', '0', '0' );
+INSERT INTO `vars` VALUES ( '0', '2', 'characters', '-3', 0, '-3', '0', '0' );

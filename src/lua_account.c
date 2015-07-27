@@ -8,6 +8,7 @@ const struct luaL_Reg AccountLib_m[] = {
    { "getName", account_getName },
    { "getLevel", account_getLevel },
    /* utility */
+   { "init", account_init },
    { "verifyPassword", account_verifyPasswd },
    { "msg", account_Message },
    { NULL, NULL }
@@ -223,6 +224,15 @@ int account_setPasswd( lua_State *L )
 
 /* lua getters */
 
+int account_getID( lua_State *L )
+{
+   ACCOUNT_DATA *account;
+
+   DAVLUACM_ACCOUNT_NIL( account, L );
+   lua_pushnumber( L, GET_ID( account ) );
+   return 1;
+}
+
 int account_getName( lua_State *L )
 {
    ACCOUNT_DATA *account;
@@ -231,6 +241,7 @@ int account_getName( lua_State *L )
    lua_pushstring( L, get_aName( account ) );
    return 1;
 }
+
 int account_getLevel( lua_State *L )
 {
    ACCOUNT_DATA *account;
@@ -242,6 +253,29 @@ int account_getLevel( lua_State *L )
 
 
 /* utility */
+
+int account_init( lua_State *L )
+{
+   ACCOUNT_DATA *account;
+   int ret;
+
+   DAVLUACM_ACCOUNT_BOOL( account, L );
+   if( !prep_stack_handle( L, GLOBAL_ACCOUNT_CONTROL, "init" ) )
+   {
+      bug( "%s: could not prep the stack for file %s and function %s.", __FUNCTION__, GLOBAL_ACCOUNT_CONTROL, "init" );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   lua_pushvalue( L, 1 );
+   if( ( ret = lua_pcall( L, 1, LUA_MULTRET, 0 ) ) )
+   {
+      bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, GLOBAL_ACCOUNT_CONTROL, lua_tostring( lua_handle, -1 ) );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   lua_pushboolean( L, 1 );
+   return 1;
+}
 
 int account_verifyPasswd( lua_State *L )
 {

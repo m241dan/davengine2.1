@@ -54,6 +54,7 @@ function onInterp( nanny, input )
       if( info["Pass"] == input ) then
          account = Account.new( info["Name"], info["Pass"] )
          if( account ~= nil ) then
+            account:init()
             socket:setState( socket:control( account ) )
             nanny:finish()
          else
