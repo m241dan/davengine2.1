@@ -3,7 +3,7 @@
 #include "mud.h"
 
 const char *const meta_types[MAX_TAG_TYPE+1] = {
-   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta", "Socket.meta", "Entity.meta",
+   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta", "Socket.meta", "Entity.meta", "SqlRes.meta",
    '\0'
 };
 
@@ -174,6 +174,8 @@ int get_meta_id( lua_State *L, int index )
          ENTITY_DATA *entity = *(ENTITY_DATA **)lua_touserdata( L, index );
          return GET_ID( entity );
       }
+      case SQLRES_TAG:
+         return 0;
    }
 }
 

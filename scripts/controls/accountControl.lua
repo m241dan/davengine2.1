@@ -16,7 +16,7 @@ function onPrompt( account )
    local width = socket:getOutBufLength( 0 )
    local header = " Account Menu "
    local length = header:len()
-   local l_len, r_len, prompt
+   local l_len, r_len, prompt, characters
 
    l_len = ( width - length ) / 2
    r_len = l_len
@@ -26,11 +26,21 @@ function onPrompt( account )
    end
 
    prompt = string.format( "%s%s%s ", string.rep( "-", l_len ), header, string.rep( "-", r_len ) )
+
    prompt = prompt .. "Commands:\r\n"
    for i, c in pairs( account_command ) do
       prompt = prompt .. string.format( "   %s - %s\r\n", i, c[2] )
    end
    prompt = prompt .. string.format( "%s\r\n", string.rep( "-", width ) )
+
+   characters = var.get( "characters", account )
+   if( characters[0] ~= 0 ) then
+      prompt = prompt .. "\r\nCharacters:\r\n"
+      for i, c in pairs( characters ) do
+         prompt = prompt .. string.format( "   %s\r\n", i )
+      end
+   end
+
    return prompt
 end
 

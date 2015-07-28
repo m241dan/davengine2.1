@@ -14,6 +14,7 @@ const struct luaL_Reg VarLib_f[] = {
    { "del", delVar },
    { "getOwner", getVarOwner },
    { "setScript", setScript },
+   { "iterate", iterateVar },
    { NULL, NULL }
 };
 
@@ -266,9 +267,6 @@ inline int newVarIndex( lua_State *L )
 
    DAVLUACM_VAR_NONE( var, L );
 
-   /* we know that L,1 has to be something with Var.meta, so no need to sanity check */
-   var = *(LUA_VAR **)lua_touserdata( L, 1 );
-
    switch( lua_type( L, 2 ) )
    {
       default:
@@ -422,6 +420,90 @@ inline int setScript( lua_State *L )
    lua_pushboolean( L, 1 );
    return 1;
 }
+
+inline int iterateVar( lua_State *L )
+{
+   MYSQL_RES *result, **box;
+   LUA_VAR *var;
+   char query[MAX_BUFFER];
+   int size;
+
+   DAVLUACM_VAR_NIL( var, L );
+
+   snprintf( query, MAX_BUFFER, "SELECT indextype, vindex, datatype, data, isscript FROM `vars` WHERE ownertype=%d, ownerid=%d, name='%s';",
+      GET_TYPE( var ), GET_ID( var ), var->name );
+
+   if( !quick_query( query ) )
+   {
+      lua_pushnil( L );
+      return 1;
+   }
+
+   if( ( result = mysql_store_result( sql_handle ) ) == NULL )
+   {
+      lua_pushnil( L );
+      return 1;
+   }
+
+   if( ( size = mysql_num_fields( result ) ) == 0 )
+   {
+      lua_pushnil( L );
+      mysql_free_result( result );
+      return 1;
+   }
+
+   box = (MYSQL_RES **)lua_newuserdata( L, sizeof( MYSQL_RES * ) );
+   luaL_getmetatable( L, "SqlRes.meta" );
+   if( lua_isnil( L, -1 ) )
+   {
+      bug( "%s: SqlRes.meta is missing.", __FUNCTION__ );
+      lua_pop( L, 2 );
+      lua_pushnil( L );
+      return 1;
+   }
+   lua_setmetatable( L, -2 );
+   *box = result;
+
+   lua_pushcclosure( L, iterate_var, 1 );
+   return 1;
+}
+
+inline int iterate_var( lua_State *L )
+{
+   MYSQL_RES *result = *(MYSQL_RES **)lua_touserdata( L, lua_upvalueindex(1) );
+   MYSQL_ROW row;
+
+   if( ( row = mysql_fetch_row( result ) ) == NULL )
+      return 0;
+
+   switch( atoi( row[0] ) )
+   {
+      default:
+         bug( "%s: bad index type, canceling iteration.", __FUNCTION__ );
+         return 0;
+      case TAG_STRING:
+         lua_pushstring( L, row[1] );
+         break;
+      case TAG_INT:
+         lua_pushnumber( L, atoi( row[1] ) );
+         break;
+   }
+
+   switch( atoi( row[2] ) )
+   {
+      default:
+         bug( "%s: bad data type, canceling iteration.", __FUNCTION__ );
+         return 0;
+      case TAG_STRING:
+         lua_pushstring( L, row[3] );
+         break;
+      case TAG_INT:
+         lua_pushnumber( L, atoi( row[3] ) );
+         break;
+   }
+   return 2;
+}
+
 
 /* creation */
 LUA_VAR *init_var( void )

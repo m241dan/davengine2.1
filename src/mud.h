@@ -219,6 +219,7 @@ typedef struct buffer_type
 #include "state.h"
 #include "entities.h"
 #include "lua_entities.h"
+#include "lua_sqlres.h"
 
 /******************************
  * End of new structures      *
