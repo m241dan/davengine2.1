@@ -23,6 +23,9 @@ void init_lua_handle( void )
    luaL_requiref( lua_handle, "var", luaopen_VarLib, 1 );
    lua_pop( lua_handle, -1 );
 
+   log_string( "Loading SqlRes Lua Lib" );
+   luaopen_SqlResLib( lua_handle );
+
    log_string( "Loading Account Lua Lib" );
    luaL_requiref( lua_handle, "Account", luaopen_AccountLib, 1 );
    lua_pop( lua_handle, -1 );
