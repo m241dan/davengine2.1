@@ -36,7 +36,7 @@ function onPrompt( account )
    characters = var.get( "characters", account )
    if( characters[0] ~= 0 ) then
       prompt = prompt .. "\r\nCharacters:\r\n"
-      for i, c in pairs( characters ) do
+      for i, c in var.iterate( characters ) do
          prompt = prompt .. string.format( "   %s\r\n", i )
       end
    end
