@@ -1,8 +1,9 @@
 #include "mud.h"
 
 const struct luaL_Reg SocketLib_m[] = {
+   { "setOutBufWidth", socket_setOutBufWidth },
    { "setState", socket_lsetState },
-   { "getOutBufLength", socket_getOutBufLength },
+   { "getOutBufWidth", socket_getOutBufWidth },
    { "getState", socket_getState },
    { "control", socket_Control },
    { "msg", socket_Message },
@@ -95,6 +96,44 @@ int getSocket( lua_State *L )
    return 1;
 }
 
+int socket_setOutBufWidth( lua_State *L )
+{
+   D_SOCKET *socket;
+   int index, width;
+
+   DAVLUACM_SOCKET_BOOL( socket, L );
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: bad argument 1 passed, must be of type number.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( lua_type( L, 3 ) != LUA_TNUMBER )
+   {
+      bug( "%s: bad argument 2 passed,must be of type number.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( ( index = lua_tonumber( L, 2 ) ) < 0 || index >= OUT_BUFS )
+   {
+      bug( "%s: bad index passed, must be between 0 and %d.", __FUNCTION__, ( OUT_BUFS - 1 ) );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+
+   if( ( width = lua_tonumber( L, 3 ) ) < 0 )
+   {
+      bug( "%s: bad width passed, must be greater than 0.", __FUNCTION__ );
+      lua_pushboolean( L, 0 );
+      return 1;
+   }
+   set_buffer_width( socket->outbuf[index], width );
+   lua_pushboolean( L, 1 );
+   return 1;
+}
+
 int socket_lsetState( lua_State *L )
 {
    D_SOCKET *socket;
@@ -116,7 +155,7 @@ int socket_lsetState( lua_State *L )
    return 0;
 }
 
-int socket_getOutBufLength( lua_State *L )
+int socket_getOutBufWidth( lua_State *L )
 {
    D_SOCKET *socket;
    int buf_index;

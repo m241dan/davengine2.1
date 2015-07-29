@@ -4,7 +4,7 @@ require( "scripts/libs/string_lib" )
 account_command = {}
 
 function init( account )
-   var.new( "characters", 0, entity )
+   var.new( "characters", 0, account )
 end
 
 function onInterp( account, input )
@@ -27,7 +27,7 @@ end
 
 function onPrompt( account )
    local socket = Socket.get( account )
-   local width = socket:getOutBufLength( 0 )
+   local width = socket:getOutBufWidth( 0 )
    local header = " Account Menu "
    local length = header:len()
    local l_len, r_len, prompt, characters
@@ -72,6 +72,10 @@ account_command["create"] = { function( account, input )
    nanny:setState( 0 )
    return nil
 end, "Use this command to create a new character", 0 }
+
+account_command["config"] = { function( account, input )
+   
+end, "Use the config command to edit your configurable options", 0 }
 
 account_command["hi"] = { function( account, input )
    account:msg( "Hi there.\r\n" ) 
