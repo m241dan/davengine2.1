@@ -5,7 +5,6 @@ local create_msgs = {
 }
 
 function onNannyLoad( nanny )
-   print( "nanny initing" )
    var.new( "Info", "Login Char Create", nanny )
 end
 

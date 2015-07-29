@@ -431,7 +431,7 @@ inline int iterateVar( lua_State *L )
    DAVLUACM_VAR_NIL( var, L );
 
    snprintf( query, MAX_BUFFER, "SELECT indextype, vindex, datatype, data, isscript FROM `vars` WHERE ownertype=%d AND ownerid=%d AND name='%s';",
-      GET_TYPE( var ), GET_ID( var ), var->name );
+      var->ownertype, var->ownerid, var->name );
 
    if( !quick_query( query ) )
    {

@@ -31,15 +31,18 @@ function onPrompt( account )
    for i, c in pairs( account_command ) do
       prompt = prompt .. string.format( "   %s - %s\r\n", i, c[2] )
    end
-   prompt = prompt .. string.format( "%s\r\n", string.rep( "-", width ) )
 
    characters = var.get( "characters", account )
    if( characters[0] ~= 0 ) then
       prompt = prompt .. "\r\nCharacters:\r\n"
       for i, c in var.iterate( characters ) do
-         prompt = prompt .. string.format( "   %s\r\n", i )
+         if(  i ~= 0 ) then
+            prompt = prompt .. string.format( "   %s\r\n", i )
+         end
       end
    end
+
+   prompt = prompt .. string.format( "%s\r\n", string.rep( "-", width ) )
 
    return prompt
 end
