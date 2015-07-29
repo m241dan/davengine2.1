@@ -12,3 +12,10 @@ function isPrefix( input, prefix )
    end
    return true 
 end
+
+function capitalize( tocaps )
+   local function tchelper( first, rest )
+      return first:upper()..rest:lower()
+   end
+   return tocaps:gsub( "(%a)([%w_']*)", tchelper )
+end

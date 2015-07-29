@@ -14,13 +14,12 @@ function davInterp( object, table, input )
    end
 
    if( command == nil or command[3] > object:getLevel() ) then
-      object:msg( "Bad command, try again.\r\n" )
-      return
+      return false
    end
 
    value = command[1]( object, input )
    if( value ~= nil ) then
       account:msg( value )
    end
-
+   return true
 end

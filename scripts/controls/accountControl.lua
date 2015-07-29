@@ -8,7 +8,21 @@ function init( account )
 end
 
 function onInterp( account, input )
-   davInterp( account, account_command, input )
+   local characters, socket, control_index, charid
+
+   if( davInterp( account, account_command, input ) == true ) then
+      return
+   end
+
+   characters = var.get( "characters", account )
+   charid = characters[capitalize( input )]
+   if( charid ~= nil ) then
+      socket = Socket.get( account );
+      control_index = socket:control( Entity.get( charid ) )
+      socket:setState( control_index )
+      return
+   end
+   account:msg( "Bad command, try again." )
 end
 
 function onPrompt( account )

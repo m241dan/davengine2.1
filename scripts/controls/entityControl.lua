@@ -4,7 +4,9 @@ function onInterp( entity, input )
    davInterp( entity, entity_command, input )
 end
 
-function onPrompt( account )
+function onPrompt( entity )
+   entity:msg( "<Prompt>" )
+   
 end
 
 entity_command["hi"] = { function( entity, input )

@@ -1,4 +1,5 @@
 require( "scripts/libs/entity_lib" )
+require( "scripts/libs/string_lib" )
 
 local create_msgs = {
    [0] = "Please input a name for your new character",
@@ -33,7 +34,7 @@ function onInterp( nanny, input )
       Entity.makePlayer( character )
       character:setType( ENTITY_MOBILE )
       profile = var.get( "profile", character )
-      profile["name"] = input
+      profile["name"] = capitalize( input )
       profile["short_descr"] = "A new player."
       profile["long_descr"] = "A new player is having a long description here."
       profile["description"] = "This entity is undescribable"
