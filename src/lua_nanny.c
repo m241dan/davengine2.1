@@ -1,19 +1,10 @@
 #include "mud.h"
 
 const struct luaL_Reg NannyLib_m[] = {
-   { "setState", nanny_setState },
-   { "setSocket", nanny_setSocket },
-   { "getState", nanny_getState },
-   { "nextState", nanny_stateNext },
-   { "prevState", nanny_statePrev },
-   { "msg", nanny_Message },
-   { "finish", nanny_Finish },
    { NULL, NULL }
 };
 
 const struct luaL_Reg NannyLib_f[] = {
-   { "new", newNanny },
-   { "get", getNanny },
    { NULL, NULL }
 };
 

@@ -273,7 +273,7 @@ extern const unsigned char compress_will2[];
 
 char  *crypt                  ( const char *key, const char *salt );
 
-#define text_to_buffer( dsock, txt ) __text_to_buffer( (dsock), (txt), 0 )
+#define text_to_buffer( state, txt ) __text_to_buffer( (state), (txt), 0 )
 /*
  * socket.c
  */
@@ -285,7 +285,7 @@ bool  new_socket              ( int sock );
 void  close_socket            ( D_S *dsock, bool reconnect );
 bool  read_from_socket        ( D_S *dsock );
 bool  text_to_socket          ( D_S *dsock, const char *txt );  /* sends the output directly */
-void  __text_to_buffer          ( D_S *dsock, const char *txt, int buffer );  /* buffers the output        */
+void  __text_to_buffer          ( SOCKET_STATE *state, const char *txt, int buffer );  /* buffers the output        */
 void  text_to_mobile          ( D_M *dMob, const char *txt );   /* buffers the output        */
 void  next_cmd_from_buffer    ( D_S *dsock );
 bool  flush_output            ( D_S *dsock );

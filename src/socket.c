@@ -568,7 +568,7 @@ bool text_to_socket(D_SOCKET *dsock, const char *txt)
  *
  * Will also parse ANSI colors and other tags.
  */
-void __text_to_buffer(D_SOCKET *dsock, const char *txt, int buffer)
+void __text_to_buffer(SOCKET_STATE *state, const char *txt, int buffer)
 {
   static char output[8 * MAX_BUFFER];
   bool underline = FALSE, bold = FALSE;
@@ -761,16 +761,16 @@ void __text_to_buffer(D_SOCKET *dsock, const char *txt, int buffer)
   }
   output[iPtr] = '\0';
 
-  /* check to see if the socket can accept that much data */
+  /* check to see if the socket can accept that much data *
   if (dsock->top_output + iPtr >= MAX_OUTPUT)
   {
     bug("Text_to_buffer: ouput overflow on %s.", dsock->hostname);
     return;
-  }
+  } */
 
   /* add data to buffer */
-   parse_into_buffer( dsock->outbuf[buffer], output );
-   dsock->top_output += iPtr;
+   parse_into_buffer( state->outbuf[buffer], output );
+   state->top_outbuf += iPtr;
 }
 
 /*
@@ -867,7 +867,7 @@ void next_cmd_from_buffer(D_SOCKET *dsock)
 bool flush_output(D_SOCKET *dsock)
 {
   /* nothing to send */
-  if (dsock->top_output <= 0 && !dsock->bust_prompt)
+  if (dsock->states[dsock->state_index]->top_output <= 0 && !dsock->bust_prompt)
     return TRUE;
 
   /* bust a prompt */
@@ -882,7 +882,7 @@ bool flush_output(D_SOCKET *dsock)
          if( ( ret = lua_pcall( lua_handle, 1, LUA_MULTRET, 0 ) ) )
          {
             bug( "%s: ret %d: path %s\r\n - error message: %s.", __FUNCTION__, ret, dsock->states[dsock->state_index]->control_file, lua_tostring( lua_handle, -1 ) );
-            text_to_buffer( dsock, "- PROMPT SCRIPT BROKEN -\r\n" );
+            text_to_buffer( dsock->states[dsock->state_index], "- PROMPT SCRIPT BROKEN -\r\n" );
          }
          else
          {
@@ -894,7 +894,7 @@ bool flush_output(D_SOCKET *dsock)
                case LUA_TNIL:
                   break;
                case LUA_TSTRING:
-                  text_to_buffer( dsock, lua_tostring( lua_handle, -1 ) );
+                  text_to_buffer( dsock->states[dsock->state_index], lua_tostring( lua_handle, -1 ) );
                   break;
             }
          }
@@ -906,17 +906,17 @@ bool flush_output(D_SOCKET *dsock)
    }
 
   /* reset the top pointer */
-  dsock->top_output = 0;
+  dsock->states[dsock->state_index]->top_output = 0;
 
   /*
    * Send the buffer, and return FALSE
    * if the write fails.
    */
-  if (!text_to_socket(dsock, buffers_to_string( dsock->outbuf, OUT_BUFS ) ) )
+  if (!text_to_socket(dsock, buffers_to_string( dsock->states[dsock->state_index]->outbuf, OUT_BUFS ) ) )
     return FALSE;
 
    for( int x =0; x < OUT_BUFS; x++ )
-      clear_buffer( dsock->outbuf[x] );
+      clear_buffer( dsock->states[dsock->state_index]->outbuf[x] );
 
   /* Success */
   return TRUE;

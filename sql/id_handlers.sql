@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS `id_handlers` (
 
 
 INSERT INTO `id_handlers` VALUES ( '0', 'Account Handler', '3', '0' );
-INSERT INTO `id_handlers` VALUES ( '1', 'Nanny Handler', '1', '1' );
+INSERT INTO `id_handlers` VALUES ( '1', 'State Handler', '1', '1' );
 INSERT INTO `id_handlers` VALUES ( '2', 'Global Vars Handler', '1', '1' );
 INSERT INTO `id_handlers` VALUES ( '4', 'Socket Handler', '1', '1' );
 INSERT INTO `id_handlers` VALUES ( '5', 'Entity Handler', '1', '1' );
+

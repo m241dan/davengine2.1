@@ -3,7 +3,7 @@
 #include "mud.h"
 
 const char *const meta_types[MAX_TAG_TYPE+1] = {
-   "Account.meta", "Nanny.meta", "Global.meta", "Var.meta", "Socket.meta", "Entity.meta", "SqlRes.meta",
+   "Account.meta", "State.meta", "Global.meta", "Var.meta", "Socket.meta", "Entity.meta", "SqlRes.meta",
    '\0'
 };
 
@@ -30,8 +30,8 @@ void init_lua_handle( void )
    luaL_requiref( lua_handle, "Account", luaopen_AccountLib, 1 );
    lua_pop( lua_handle, -1 );
 
-   log_string( "Loading Nanny Lua Lib" );
-   luaL_requiref( lua_handle, "Nanny", luaopen_NannyLib, 1 );
+   log_string( "Loading State Lua Lib" );
+   luaL_requiref( lua_handle, "State", luaopen_StateLib, 1 );
    lua_pop( lua_handle, -1 );
 
    log_string( "Loading Socket Lua Lib" );
@@ -161,10 +161,10 @@ int get_meta_id( lua_State *L, int index )
          ACCOUNT_DATA *account = *(ACCOUNT_DATA **)lua_touserdata( L, index );
          return GET_ID( account );
       }
-      case NANNY_TAG:
+      case STATE_TAG:
       {
-         NANNY_DATA *nanny = *(NANNY_DATA **)lua_touserdata( L, index );
-         return GET_ID( nanny );
+         SOCKET_STATE *state = *(SOCKET_STATE **)lua_touserdata( L, index );
+         return GET_ID( state );
       }
       case GLOBAL_TAG:
       case VAR_TAG:
@@ -187,17 +187,6 @@ void lua_pushstateobj( lua_State *L, SOCKET_STATE *state )
    switch( state->type )
    {
       default: return;
-      case NANNY_TAG:
-      {
-         NANNY_DATA *nanny;
-         if( ( nanny = state->control.nanny ) == NULL )
-         {
-            bug( "%s: nanny state has no nanny assigned to it.", __FUNCTION__ );
-            return;
-         }
-         lua_pushobj( L, nanny, NANNY_DATA );
-         break;
-      }
       case ACCOUNT_TAG:
       {
          ACCOUNT_DATA *account;

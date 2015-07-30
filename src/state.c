@@ -5,10 +5,14 @@ SOCKET_STATE *init_state( void )
 {
    SOCKET_STATE *state;
 
-   state = (SOCKET_STATE *)calloc( 1, sizeof( SOCKET_STATE ) );
-   state->control.account = NULL;
-   state->socket = NULL;
-   state->type = TAG_UNSET;
+   state 			= (SOCKET_STATE *)calloc( 1, sizeof( SOCKET_STATE ) );
+   state->top_outbuf		= 0;
+   state->outbuf[0]		= new_buffer( 70 );
+   for( int x = 1; x < OUT_BUFS; x++ )
+      state->outbuf[x] = new_buffer( 0 );
+   state->control.account 	= NULL;
+   state->socket 		= NULL;
+   state->type 			= TAG_UNSET;
    return state;
 }
 
@@ -31,13 +35,6 @@ void set_state_as_account( SOCKET_STATE *state, ACCOUNT_DATA *account )
    account->managing_state = state;
    state->control.account = account;
    state->type = ACCOUNT_TAG;
-}
-
-void set_state_as_nanny( SOCKET_STATE *state, NANNY_DATA *nanny )
-{
-   nanny->managing_state = state;
-   state->control.nanny = nanny;
-   state->type = NANNY_TAG;
 }
 
 void set_state_as_entity( SOCKET_STATE *state, ENTITY_DATA *entity )
