@@ -3,7 +3,7 @@
 #include "mud.h"
 
 const char *const settable_vars[] = {
-   "Account.meta", "Nanny.meta", "Entity.meta", "Socket.meta",
+   "Account.meta", "State.meta", "Entity.meta", "Socket.meta",
    '\0'
 };
 
@@ -621,7 +621,7 @@ bool lua_pushvarowner( lua_State *L, LUA_VAR *var )
    switch( var->ownertype )
    {
       default: return FALSE;
-      case 0: /* account */
+      case ACCOUNT_TAG: /* account */
       {
          ACCOUNT_DATA *account;
          if( ( account = get_accountByID_ifActive( var->ownerid ) ) == NULL )
@@ -629,17 +629,24 @@ bool lua_pushvarowner( lua_State *L, LUA_VAR *var )
          lua_pushobj( L, account, ACCOUNT_DATA );
          break;
       }
-      case 1: /* nanny */
+      case STATE_TAG: /* nanny */
       {
-         NANNY_DATA *nanny;
+         SOCKET_STATE *state;
          if( ( nanny = get_nannyByID_ifActive( var->ownerid ) ) == NULL )
             return FALSE;
-         lua_pushobj( L, nanny, NANNY_DATA );
+         lua_pushobj( L, state, SOCKET_STATE );
          break;
       }
-      case 2: /* global */
+      case GLOBAL_TAG: /* global */
          lua_pushstring( L, "global" );
          break;
+      case ENTITY_TAG:
+      {
+         ENTITY_DATA *entity;
+         if( ( entity = get_entityByID_ifActive( var->ownerid ) ) == NULL )
+            return FALSE;
+         lua_pushobj( L, entity, ENTITY_DATA );
+      }
    }
    return TRUE;
 }

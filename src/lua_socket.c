@@ -218,20 +218,6 @@ int socket_Control( lua_State *L )
          socket->account = account;
          break;
       }
-      case NANNY_TAG:
-      {
-         NANNY_DATA *nanny;
-         if( ( nanny = *(NANNY_DATA **)lua_touserdata( L, 2 ) ) == NULL )
-         {
-            bug( "%s: the nanny box is empty.", __FUNCTION__ );
-            lua_pushnil( L );
-            return 1;
-         }
-         state = init_state();
-         set_state_as_nanny( state, nanny );
-         set_state_control( state, nanny->lua_path );
-         break;
-      }
       case ENTITY_TAG:
       {
          ENTITY_DATA *entity;
