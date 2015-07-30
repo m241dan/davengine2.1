@@ -44,7 +44,7 @@ void set_state_as_entity( SOCKET_STATE *state, ENTITY_DATA *entity )
 {
    entity->managing_state = state;
    state->control.entity = entity;
-   state->type = ENTITY_TAG; 
+   state->type = ENTITY_TAG;
 }
 /* getters */
 
