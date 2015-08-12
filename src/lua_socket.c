@@ -5,7 +5,7 @@ const struct luaL_Reg SocketLib_m[] = {
    { "setState", socket_lsetState },
    { "getOutBufWidth", socket_getOutBufWidth },
    { "getState", socket_getState },
-   { "control", socket_Control },
+   { "addState", socket_addState },
    { "prev", socket_PrevState },
    { NULL, NULL }
 };
@@ -40,7 +40,7 @@ int SocketGC( lua_State *L )
    return 0;
 }
 
-int getSocket( lua_State *L )
+inline int getSocket( lua_State *L )
 {
    if( lua_type( L, 1 ) != LUA_TUSERDATA )
    {
@@ -95,7 +95,7 @@ int getSocket( lua_State *L )
    return 1;
 }
 
-int socket_setOutBufWidth( lua_State *L )
+inline int socket_setOutBufWidth( lua_State *L )
 {
    D_SOCKET *socket;
    int index, width;
@@ -133,7 +133,7 @@ int socket_setOutBufWidth( lua_State *L )
    return 1;
 }
 
-int socket_lsetState( lua_State *L )
+inline int socket_lsetState( lua_State *L )
 {
    D_SOCKET *socket;
    int state_to_set;
@@ -154,7 +154,7 @@ int socket_lsetState( lua_State *L )
    return 0;
 }
 
-int socket_getOutBufWidth( lua_State *L )
+inline int socket_getOutBufWidth( lua_State *L )
 {
    D_SOCKET *socket;
    int buf_index;
@@ -179,7 +179,7 @@ int socket_getOutBufWidth( lua_State *L )
    return 1;
 }
 
-int socket_getState( lua_State *L )
+inline int socket_getState( lua_State *L )
 {
    D_SOCKET *socket;
 
@@ -188,61 +188,12 @@ int socket_getState( lua_State *L )
    return 1;
 }
 
-int socket_Control( lua_State *L )
+inline int socket_addState( lua_State *L )
 {
-   D_SOCKET *socket;
-   SOCKET_STATE *state;
-   int control_index;
 
-   DAVLUACM_SOCKET_NIL( socket, L );
-
-   switch( get_meta_type_id( L, 2 ) )
-   {
-      default:
-         bug( "%s: this user data is not controllable by a socket", __FUNCTION__ );
-         lua_pushnil( L );
-         return 1;
-      case ACCOUNT_TAG:
-      {
-         ACCOUNT_DATA *account;
-         if( ( account = *(ACCOUNT_DATA **)lua_touserdata( L, 2 ) ) == NULL )
-         {
-            bug( "%s: the account box is empty.", __FUNCTION__ );
-            lua_pushnil( L );
-            return 1;
-         }
-         state = init_state();
-         set_state_as_account( state, account );
-         set_state_control( state, GLOBAL_ACCOUNT_CONTROL );
-         socket->account = account;
-         break;
-      }
-      case ENTITY_TAG:
-      {
-         ENTITY_DATA *entity;
-         if( ( entity = *(ENTITY_DATA **)lua_touserdata( L, 2 ) ) == NULL )
-         {
-            bug( "%s: the entity box is empty.", __FUNCTION__ );
-            lua_pushnil( L );
-            return 1;
-         }
-         state = init_state();
-         set_state_as_entity( state, entity );
-         set_state_control( state, GLOBAL_ENTITY_CONTROL );
-         break;
-      }
-   }
-   if( ( control_index = socket_addState( socket, state ) ) == -1 )
-   {
-      bug( "%s: no available states, could not add another.", __FUNCTION__ );
-      lua_pushnil( L );
-      return 1;
-   }
-   lua_pushnumber( L, control_index );
-   return 1;
 }
 
-int socket_PrevState( lua_State *L )
+inline int socket_PrevState( lua_State *L )
 {
    D_SOCKET *socket;
 

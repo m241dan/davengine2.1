@@ -1101,20 +1101,14 @@ void clear_socket(D_SOCKET *sock_new, int sock)
    SET_TYPE( sock_new, SOCKET_TAG );
    new_tag( sock_new->tag, "system" );
 
-   sock_new->state_index  = 0;
-   for( int x = 1; x < MAX_STATE; x++ )
-      sock_new->states[x] = NULL;
+   sock_new->state_index    = 0;
+   sock_new->states         = AllocList();
 
    sock_new->control        =  sock;
    sock_new->state          =  STATE_NEW_NAME;
    sock_new->lookup_status  =  TSTATE_LOOKUP;
-   sock_new->player         =  NULL;
    sock_new->account	    =  NULL;
-   sock_new->top_output     =  0;
    sock_new->events         =  AllocList();
-   sock_new->outbuf[0] 	    = new_buffer( 70 );
-   for( int x = 1; x < OUT_BUFS; x++ )
-      sock_new->outbuf[x] = new_buffer( 0 );
 }
 
 /* does the lookup, changes the hostname, and dies */

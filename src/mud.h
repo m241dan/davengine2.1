@@ -150,20 +150,18 @@ struct dSocket
    ACCOUNT_DATA *account; /* perhaps keep as a quicklink but may end up not using */
    D_MOBILE     *player;
 
-   SOCKET_STATE *states[MAX_STATE];
+   LLIST	*states;
    sh_int	 state_index;
    sh_int	 previous_index;
 
-   LLIST        *events;
+   LLIST         *events;
    char          * hostname;
    char            inbuf[MAX_BUFFER];
-   D_BUFFER       *outbuf[OUT_BUFS];
    char            next_command[MAX_BUFFER];
    bool            bust_prompt;
    sh_int          lookup_status;
    sh_int          state;
    sh_int          control;
-   sh_int          top_output;
    unsigned char   compressing;                 /* MCCP support */
    z_stream      * out_compress;                /* MCCP support */
    unsigned char * out_compress_buf;            /* MCCP support */
