@@ -123,10 +123,10 @@ do                                                                      \
    }                                                                    \
 } while(0)
 
-#define DAVLUACM_NANNY_NIL( nanny, L )                              \
+#define DAVLUACM_STATE_NIL( state, L )                              \
 do                                                                      \
 {                                                                       \
-   if( ( (nanny) = *(NANNY_DATA **)luaL_checkudata( (L), 1, "Nanny.meta" ) ) == NULL ) \
+   if( ( (state) = *(SOCKET_STATE **)luaL_checkudata( (L), 1, "State.meta" ) ) == NULL ) \
    {                                                                    \
       bug( "%s: bad meta table.", __FUNCTION__ );                       \
       lua_pushnil( (L) );                                               \
@@ -134,10 +134,10 @@ do                                                                      \
    }                                                                    \
 } while(0)
 
-#define DAVLUACM_NANNY_BOOL( nanny, L )                             \
+#define DAVLUACM_STATE_BOOL( state, L )                             \
 do                                                                      \
 {                                                                       \
-   if( ( (nanny) = *(NANNY_DATA **)luaL_checkudata( (L), 1, "Nanny.meta" ) ) == NULL ) \
+   if( ( (state) = *(SOCKET_STATE **)luaL_checkudata( (L), 1, "State.meta" ) ) == NULL ) \
    {                                                                    \
       bug( "%s: bad meta table.", __FUNCTION__ );                       \
       lua_pushboolean( (L), 0 );                                        \
@@ -145,10 +145,10 @@ do                                                                      \
    }                                                                    \
 } while(0)
 
-#define DAVLUACM_NANNY_NONE( nanny, L )                             \
+#define DAVLUACM_STATE_NONE( state, L )                             \
 do                                                                      \
 {                                                                       \
-   if( ( (nanny) = *(NANNY_DATA **)luaL_checkudata( (L), 1, "Nanny.meta" ) ) == NULL ) \
+   if( ( (state) = *(SOCKET_STATE **)luaL_checkudata( (L), 1, "State.meta" ) ) == NULL ) \
    {                                                                    \
       bug( "%s: bad meta table.", __FUNCTION__ );                       \
       return 0;                                                         \
