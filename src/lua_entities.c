@@ -19,7 +19,6 @@ const struct luaL_Reg EntityLib_m[] = {
    { "to", entity_toEntity },
    { "toggleType", entity_toggleType },
    { "toggleSubType", entity_toggleSubType },
-   { "msg", entity_message },
    { NULL, NULL }
 };
 
@@ -507,42 +506,3 @@ int entity_toggleSubType( lua_State *L )
    return 1;
 }
 
-int entity_message( lua_State *L )
-{
-   ENTITY_DATA *entity;
-   D_SOCKET *socket;
-   int top, buffer_id = 0;
-
-   DAVLUACM_ENTITY_NONE( entity, L );
-
-   if( ( top = lua_gettop( L ) ) < 2 )
-   {
-      bug( "%s: bad number of arguments have been passed: msg( message, buffer_id )", __FUNCTION__ );
-      return 0;
-   }
-
-   if( lua_type( L, 2 ) != LUA_TSTRING )
-   {
-      bug( "%s: message mud be of type string.", __FUNCTION__ );
-      return 0;
-   }
-
-   if( top == 3 )
-   {
-      if( lua_type( L, 3 ) != LUA_TNUMBER )
-      {
-         bug( "%s: buffer_id must be of type number.", __FUNCTION__ );
-         return 0;
-      }
-      buffer_id = lua_tonumber( L, 3 );
-   }
-
-   if( !entity->managing_state || ( socket = entity->managing_state->socket ) == NULL )
-   {
-      bug( "%s: cannot send message, entity has no socket.", __FUNCTION__ );
-      return 0;
-   }
-
-   __text_to_buffer( socket, lua_tostring( L, 2 ), buffer_id );
-   return 0;
-}

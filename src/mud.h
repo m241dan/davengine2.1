@@ -147,7 +147,7 @@ typedef struct  entity_look	ENTITY_LOOK;
 struct dSocket
 {
    ID_TAG	*tag;
-   ACCOUNT_DATA *account;
+   ACCOUNT_DATA *account; /* perhaps keep as a quicklink but may end up not using */
    D_MOBILE     *player;
 
    SOCKET_STATE *states[MAX_STATE];

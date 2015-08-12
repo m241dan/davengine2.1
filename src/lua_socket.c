@@ -6,7 +6,6 @@ const struct luaL_Reg SocketLib_m[] = {
    { "getOutBufWidth", socket_getOutBufWidth },
    { "getState", socket_getState },
    { "control", socket_Control },
-   { "msg", socket_Message },
    { "prev", socket_PrevState },
    { NULL, NULL }
 };
@@ -241,39 +240,6 @@ int socket_Control( lua_State *L )
    }
    lua_pushnumber( L, control_index );
    return 1;
-}
-
-int socket_Message( lua_State *L )
-{
-   D_SOCKET *socket;
-   int top, buffer_id = 0;
-
-   DAVLUACM_SOCKET_NONE( socket, L );
-
-   if( ( top = lua_gettop( L ) ) < 2 )
-   {
-      bug( "%s: bad number of arguments passed: msg( message, buffer_id )", __FUNCTION__ );
-      return 0;
-   }
-
-   if( lua_type( L, 2 ) != LUA_TSTRING )
-   {
-      bug( "%s: message must be of type string.", __FUNCTION__ );
-      return 0;
-   }
-
-   if( top == 3 )
-   {
-      if( lua_type( L, 3 ) != LUA_TNUMBER )
-      {
-         bug( "%s: buffer_id must be of type number.", __FUNCTION__ );
-         return 0;
-      }
-      buffer_id = lua_tonumber( L, 3 );
-   }
-
-   __text_to_buffer( socket, lua_tostring( L, 2 ), buffer_id );
-   return 0;
 }
 
 int socket_PrevState( lua_State *L )

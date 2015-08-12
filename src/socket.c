@@ -387,9 +387,8 @@ bool new_socket(int sock)
     else sock_new->lookup_status++;
   }
 
-  /* send the greeting */
-  text_to_buffer(sock_new, greeting);
-  lua_onConnect( sock_new );
+   /* send the greeting */
+   lua_onConnect( sock_new );
 
   /* initialize socket events */
   init_events_socket(sock_new);
