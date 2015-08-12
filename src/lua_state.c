@@ -140,7 +140,7 @@ inline int state_message( lua_State *L )
       return 0;
    }
 
-   __text_to_buffer( socket, lua_tostring( L, 2 ), buffer_id );
+   __text_to_buffer( state, lua_tostring( L, 2 ), buffer_id );
    return 0;
 
 }

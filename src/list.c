@@ -340,6 +340,22 @@ void *PrevInList( ITERATOR *pIter )
    }
    return pContent;
 }
+/* first cell is index 1, lua style */
+void *GetFromListIndex( LLIST *pList, int index )
+{
+   void *content;
+   ITERATOR Iter;
+   int counter = 0;
+
+   AttachIterator( &Iter, pList );
+   while( ( content = NextInList( &Iter ) ) != NULL )
+   {
+      if( ++counter == index )
+         break;
+   }
+   DetachIterator( &Iter );
+   return content;
+}
 
 int SizeOfList(LLIST *pList)
 {

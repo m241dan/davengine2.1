@@ -4,6 +4,7 @@ const struct luaL_Reg SocketLib_m[] = {
    { "setOutBufWidth", socket_setOutBufWidth },
    { "setState", socket_lsetState },
    { "getOutBufWidth", socket_getOutBufWidth },
+   { "getCurrentState", socket_getCurrentState },
    { "getState", socket_getState },
    { "addState", socket_addState },
    { "prev", socket_PrevState },
@@ -156,7 +157,7 @@ inline int socket_lsetState( lua_State *L )
 
 inline int socket_getOutBufWidth( lua_State *L )
 {
-   D_SOCKET *socket;
+/*   D_SOCKET *socket;
    int buf_index;
 
    DAVLUACM_SOCKET_NIL( socket, L );
@@ -175,11 +176,11 @@ inline int socket_getOutBufWidth( lua_State *L )
       lua_pushnil( L );
       return 1;
    }
-   lua_pushnumber( L, socket->outbuf[buf_index]->width );
-   return 1;
+   lua_pushnumber( L, socket->outbuf[buf_index]->width ); */
+   return 0;
 }
 
-inline int socket_getState( lua_State *L )
+inline int socket_getCurrentState( lua_State *L )
 {
    D_SOCKET *socket;
 
@@ -188,9 +189,58 @@ inline int socket_getState( lua_State *L )
    return 1;
 }
 
+inline int socket_getState( lua_State *L )
+{
+   D_SOCKET *socket;
+   SOCKET_STATE *state;
+   ITERATOR Iter;
+   int index;
+
+   DAVLUACM_SOCKET_NIL( socket, L );
+   if( lua_gettop( L ) != 2 )
+   {
+      bug( "%s: bad number of arguments passed.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   if( lua_type( L, 2 ) != LUA_TNUMBER )
+   {
+      bug( "%s: bad argument passed.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+
+   index = lua_tonumber( L, 2 );
+   if( index < 1 || index > SizeOfList( socket->states ) )
+   {
+      bug( "%s: index passed, out of range." , __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   if( ( state = (SOCKET_STATE *)GetFromListIndex( socket->states, index ) ) == NULL )
+   {
+      lua_pushnil( L );
+      return 1;
+   }
+   lua_pushobj( L, state, SOCKET_STATE );
+   return 1;
+}
+
 inline int socket_addState( lua_State *L )
 {
+   D_SOCKET *socket;
+   SOCKET_STATE *state;
 
+   DAVLUACM_SOCKET_NIL( socket, L );
+   if( ( state = (SOCKET_STATE *)check_meta( L, 2, "State.meta" ) ) == NULL )
+   {
+      bug( "%s: cannot add non-State.meta to socket states.", __FUNCTION__ );
+      lua_pushnil( L );
+      return 1;
+   }
+   AttachToList( socket->states );
+   lua_pushnumber( L, SizeOfList( socket->states ) );
+   return 1;
 }
 
 inline int socket_PrevState( lua_State *L )

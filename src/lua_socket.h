@@ -10,6 +10,7 @@ int socket_setOutBufWidth( lua_State *L );
 
 /* getters */
 int socket_getOutBufWidth( lua_State *L );
+int socket_getCurrentState( lua_State *L );
 int socket_getState( lua_State *L );
 
 /* utility */
